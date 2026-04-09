@@ -1889,7 +1889,6 @@ export function ReportView({ report }: ReportViewProps) {
                       </div>
                     </div>
                   </div>
-                </div>
                 </motion.div>
               )}
             </div>
