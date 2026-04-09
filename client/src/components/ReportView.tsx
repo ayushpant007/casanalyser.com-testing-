@@ -2322,6 +2322,30 @@ export function ReportView({ report }: ReportViewProps) {
 
               let filteredItems = items;
 
+              if (isSTP && items.length > 0) {
+                const grouped: Record<string, any> = {};
+                items.forEach((tx: any) => {
+                  const sourceScheme = tx.scheme_name || "unknown";
+                  const switchTo = tx.switch_to || tx.to_scheme_name || tx.destination_scheme_name || tx.target_scheme_name || "";
+                  const amount = Number(tx.stp_amount ?? tx.amount ?? 0);
+                  const dateKey = tx.date_range || tx.date || "N/A";
+                  const key = `${sourceScheme}||${switchTo}||${amount}||${dateKey}`;
+                  if (!grouped[key]) {
+                    grouped[key] = {
+                      ...tx,
+                      source_scheme: sourceScheme,
+                      switch_to: switchTo,
+                      stp_amount: amount,
+                      total_amount: amount,
+                      date_display: dateKey
+                    };
+                  } else {
+                    grouped[key].total_amount += amount;
+                  }
+                });
+                filteredItems = Object.values(grouped).sort((a: any, b: any) => parseDate(b.date_display || b.date) - parseDate(a.date_display || a.date));
+              }
+
               if (isSIP && items.length > 0) {
                 // Keep only the single most-recent entry per scheme
                 const latestByScheme: Record<string, any> = {};
@@ -2336,6 +2360,7 @@ export function ReportView({ report }: ReportViewProps) {
               }
               
               const totalAmount = filteredItems.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
+              const stpTotalAmount = filteredItems.reduce((sum: number, tx: any) => sum + Number(tx.total_amount || tx.amount || 0), 0);
 
               return (
                 <div key={title} className="space-y-4">
@@ -2355,15 +2380,16 @@ export function ReportView({ report }: ReportViewProps) {
                         {filteredItems.length > 0 ? (
                           filteredItems.map((item: any, idx: number) => {
                             const switchTo = item.switch_to || item.to_scheme_name || item.destination_scheme_name || item.target_scheme_name || "—";
+                            const sourceScheme = item.source_scheme || item.scheme_name || "N/A";
                             const stpAmount = item.stp_amount ?? item.amount ?? 0;
-                            const totalDisplay = item.total_amount ?? item.amount ?? stpAmount;
-                            const dateDisplay = item.date_range || item.date || "N/A";
+                            const totalDisplay = isSTP ? (item.total_amount ?? item.amount ?? stpAmount) : (item.amount ?? 0);
+                            const dateDisplay = item.date_display || item.date_range || item.date || "N/A";
                             return (
                               <tr key={idx} className="hover:bg-slate-50/50">
                                 <td className="px-6 py-3 text-slate-500 font-medium whitespace-nowrap">
                                   {dateDisplay}
                                 </td>
-                                <td className="px-6 py-3 text-slate-700">{item.scheme_name || "N/A"}</td>
+                                <td className="px-6 py-3 text-slate-700">{sourceScheme}</td>
                                 {isSTP && <td className="px-6 py-3 text-slate-700">{switchTo}</td>}
                                 {isSTP && (
                                   <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
@@ -2391,7 +2417,7 @@ export function ReportView({ report }: ReportViewProps) {
                               {isSTP ? "STP Total" : `Total ${title.split(' ')[0]} Amount`}
                             </td>
                             <td className="px-6 py-3 text-right font-mono text-slate-900">
-                              ₹{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ₹{(isSTP ? stpTotalAmount : totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
                           </tr>
                         </tfoot>
