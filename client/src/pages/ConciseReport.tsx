@@ -108,6 +108,11 @@ export default function ConciseReport() {
     try { return JSON.parse(localStorage.getItem(`fin_target_cat_${reportId}`) || "{}"); } catch { return {}; }
   });
 
+  const [targetSubCategory, setTargetSubCategory] = useState<Record<string, string>>(() => {
+    if (!reportId) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_target_subcat_${reportId}`) || "{}"); } catch { return {}; }
+  });
+
   const [targetFund, setTargetFund] = useState<Record<string, string>>(() => {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_target_fund_${reportId}`) || "{}"); } catch { return {}; }
@@ -117,6 +122,31 @@ export default function ConciseReport() {
     setTargetCategory(prev => {
       const next = { ...prev, [schemeName]: value };
       if (reportId) localStorage.setItem(`fin_target_cat_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+    // Reset sub-category and fund when category changes
+    setTargetSubCategory(prev => {
+      const next = { ...prev, [schemeName]: "" };
+      if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+    setTargetFund(prev => {
+      const next = { ...prev, [schemeName]: "" };
+      if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  }, [reportId]);
+
+  const updateTargetSubCategory = useCallback((schemeName: string, value: string) => {
+    setTargetSubCategory(prev => {
+      const next = { ...prev, [schemeName]: value };
+      if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+    // Reset fund when sub-category changes
+    setTargetFund(prev => {
+      const next = { ...prev, [schemeName]: "" };
+      if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
       return next;
     });
   }, [reportId]);
@@ -1412,12 +1442,10 @@ export default function ConciseReport() {
                                 const action = actionSelections[sn] || "hold";
                                 const cls = ACTION_STYLES[action] ?? ACTION_STYLES.hold;
                                 const tCat = targetCategory[sn] || "";
+                                const tSubCat = targetSubCategory[sn] || "";
                                 const tFund = targetFund[sn] || "";
-                                const query = fundSearchQuery[sn] || "";
-                                const isOpen = openFundDropdown === sn;
-                                const filtered = query.length >= 2
-                                  ? fundSchemes.filter(s => s.toLowerCase().includes(query.toLowerCase())).slice(0, 60)
-                                  : [];
+                                const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
+                                const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
                                 return (
                                   <div className="flex flex-col gap-1.5 min-w-[180px]">
                                     <select
@@ -1440,48 +1468,34 @@ export default function ConciseReport() {
                                           data-testid={`target-cat-${idx}`}
                                         >
                                           <option value="">Category…</option>
-                                          <option value="Equity">Equity</option>
-                                          <option value="Debt">Debt</option>
-                                          <option value="Hybrid">Hybrid</option>
-                                          <option value="Others">Others</option>
+                                          {recommendedOptions.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                          ))}
                                         </select>
-                                        <div className="relative">
-                                          <input
-                                            type="text"
-                                            placeholder="Search fund…"
-                                            value={isOpen ? query : (tFund || query)}
-                                            onFocus={() => {
-                                              setOpenFundDropdown(sn);
-                                              setFundSearchQuery(prev => ({ ...prev, [sn]: tFund || "" }));
-                                            }}
-                                            onChange={(e) => setFundSearchQuery(prev => ({ ...prev, [sn]: e.target.value }))}
-                                            onBlur={() => setTimeout(() => setOpenFundDropdown(null), 200)}
-                                            className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full"
-                                            data-testid={`target-fund-search-${idx}`}
-                                          />
-                                          {isOpen && filtered.length > 0 && (
-                                            <div className="absolute z-50 left-0 right-0 top-full mt-0.5 bg-white border border-slate-200 rounded shadow-lg max-h-40 overflow-y-auto text-[9px]">
-                                              {filtered.map((s, fi) => (
-                                                <div
-                                                  key={fi}
-                                                  className="px-2 py-1.5 hover:bg-blue-50 cursor-pointer text-slate-700 border-b border-slate-50 last:border-0"
-                                                  onMouseDown={() => {
-                                                    updateTargetFund(sn, s);
-                                                    setFundSearchQuery(prev => ({ ...prev, [sn]: s }));
-                                                    setOpenFundDropdown(null);
-                                                  }}
-                                                >
-                                                  {s}
-                                                </div>
-                                              ))}
-                                            </div>
-                                          )}
-                                          {isOpen && query.length >= 2 && filtered.length === 0 && (
-                                            <div className="absolute z-50 left-0 right-0 top-full mt-0.5 bg-white border border-slate-200 rounded shadow-lg px-2 py-2 text-[9px] text-slate-400">
-                                              No matching funds
-                                            </div>
-                                          )}
-                                        </div>
+                                        <select
+                                          value={tSubCat}
+                                          onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
+                                          disabled={!tCat}
+                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full disabled:opacity-50"
+                                          data-testid={`target-subcat-${idx}`}
+                                        >
+                                          <option value="">Sub category…</option>
+                                          {subCatOptions.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                          ))}
+                                        </select>
+                                        <select
+                                          value={tFund}
+                                          onChange={(e) => updateTargetFund(sn, e.target.value)}
+                                          disabled={!tSubCat}
+                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full disabled:opacity-50"
+                                          data-testid={`target-fund-${idx}`}
+                                        >
+                                          <option value="">Fund name…</option>
+                                          {fundOptions.map(opt => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                          ))}
+                                        </select>
                                       </div>
                                     )}
                                     <textarea
