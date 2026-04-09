@@ -332,29 +332,64 @@ export default function ConciseReport() {
             }
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
-          el.querySelectorAll<HTMLElement>("[data-action-block='true']").forEach(actionBlock => {
-            actionBlock.style.setProperty("display", "block", "important");
-            actionBlock.style.setProperty("min-width", "220px", "important");
-            actionBlock.style.setProperty("width", "220px", "important");
-          });
 
           el.querySelectorAll<HTMLTableCellElement>("td").forEach(cell => {
             const actionBlock = cell.querySelector<HTMLElement>("[data-action-block='true']");
             if (!actionBlock) return;
             const sn = actionBlock.getAttribute("data-scheme-name") || "";
-            const action = (actionSelections[sn] || "hold").trim();
+            const action = actionSelections[sn] || "hold";
             const tCat = targetCategory[sn] || "";
             const tFund = targetFund[sn] || "";
             const remarksText = remarks[sn] || "";
-            const actionLabel = action ? action.toUpperCase() : "HOLD";
-            const displayText = `${actionLabel}\n${[tCat, tFund].filter(Boolean).join(" • ") || "—"}\n${remarksText || "Add remarks..."}`;
-            cell.textContent = displayText;
-            cell.style.setProperty("white-space", "pre-wrap", "important");
-            cell.style.setProperty("font-size", "9px", "important");
-            cell.style.setProperty("line-height", "1.35", "important");
-            cell.style.setProperty("color", "#0f172a", "important");
-            cell.style.setProperty("vertical-align", "top", "important");
-            cell.style.setProperty("min-width", "220px", "important");
+            const actionLabel = action.toUpperCase();
+            const isHold = action === "hold";
+
+            const wrap = doc.createElement("div");
+            wrap.style.cssText = actionBlock.style.cssText;
+            wrap.style.setProperty("display", "flex", "important");
+            wrap.style.setProperty("flex-direction", "column", "important");
+            wrap.style.setProperty("gap", "4px", "important");
+            wrap.style.setProperty("min-width", "180px", "important");
+
+            const actionLine = doc.createElement("div");
+            actionLine.textContent = actionLabel;
+            actionLine.style.setProperty("font-size", "9px", "important");
+            actionLine.style.setProperty("font-weight", "700", "important");
+            actionLine.style.setProperty("text-transform", "uppercase", "important");
+            actionLine.style.setProperty("letter-spacing", "0.05em", "important");
+            actionLine.style.setProperty("padding", "3px 6px", "important");
+            actionLine.style.setProperty("border-radius", "4px", "important");
+            actionLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            actionLine.style.setProperty("width", "100%", "important");
+            actionLine.style.setProperty("box-sizing", "border-box", "important");
+
+            const targetLine = doc.createElement("div");
+            targetLine.textContent = isHold ? "—" : [tCat, tFund].filter(Boolean).join(" • ");
+            targetLine.style.setProperty("font-size", "9px", "important");
+            targetLine.style.setProperty("font-weight", "700", "important");
+            targetLine.style.setProperty("padding", "3px 6px", "important");
+            targetLine.style.setProperty("border-radius", "4px", "important");
+            targetLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            targetLine.style.setProperty("width", "100%", "important");
+            targetLine.style.setProperty("box-sizing", "border-box", "important");
+            targetLine.style.setProperty("white-space", "pre-wrap", "important");
+
+            const remarksLine = doc.createElement("div");
+            remarksLine.textContent = remarksText || "Add remarks...";
+            remarksLine.style.setProperty("font-size", "9px", "important");
+            remarksLine.style.setProperty("padding", "3px 6px", "important");
+            remarksLine.style.setProperty("border-radius", "4px", "important");
+            remarksLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            remarksLine.style.setProperty("min-height", "44px", "important");
+            remarksLine.style.setProperty("width", "100%", "important");
+            remarksLine.style.setProperty("box-sizing", "border-box", "important");
+            remarksLine.style.setProperty("white-space", "pre-wrap", "important");
+            remarksLine.style.setProperty("color", remarksText ? "#334155" : "#94a3b8", "important");
+
+            wrap.appendChild(actionLine);
+            if (!isHold) wrap.appendChild(targetLine);
+            wrap.appendChild(remarksLine);
+            cell.replaceChildren(wrap);
           });
         },
       } as any);
