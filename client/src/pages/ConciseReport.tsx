@@ -146,18 +146,18 @@ export default function ConciseReport() {
   }, []);
 
   useEffect(() => {
-    fetch("/assets/All_Scheme_-_All_scheme__1775468244476_1775715812600.csv")
+    fetch("/api/recommended-funds")
       .then(r => r.text())
       .then(text => {
         const rows = text.split("\n").map(l => l.trim()).filter(Boolean);
-        const parsed = rows.slice(1).map(row => {
+        const parsed = rows.slice(1).map((row: string) => {
           const parts = row.split(",");
           return {
             category: parts[0]?.trim() || "",
             subCategory: parts[1]?.trim() || "",
             fundName: parts.slice(2).join(",").trim() || "",
           };
-        }).filter(r => r.category && r.subCategory && r.fundName);
+        }).filter((r: { category: string; subCategory: string; fundName: string }) => r.category && r.subCategory && r.fundName);
         setFundMasterRows(parsed);
       })
       .catch(() => {});
@@ -215,11 +215,19 @@ export default function ConciseReport() {
     const categories = Array.from(new Set(fundMasterRows.map((r: { category: string }) => r.category))).sort();
     return categories;
   }, [fundMasterRows]);
-  const recommendedRowsByCategory = (category: string) => Array.from(new Set(fundMasterRows.filter((r: { category: string }) => r.category === category).map((r: { subCategory: string }) => r.subCategory))).sort();
-  const recommendedFundsBySelection = (category: string, subCategory: string) => fundMasterRows
-    .filter((r: { category: string; subCategory: string }) => r.category === category && r.subCategory === subCategory)
-    .map((r: { fundName: string }) => r.fundName)
-    .sort();
+  const recommendedRowsByCategory = (category: string) =>
+    Array.from(
+      new Set(
+        fundMasterRows
+          .filter((r: { category: string }) => r.category === category)
+          .map((r: { subCategory: string }) => r.subCategory)
+      )
+    ).sort();
+  const recommendedFundsBySelection = (category: string, subCategory: string) =>
+    fundMasterRows
+      .filter((r: { category: string; subCategory: string }) => r.category === category && r.subCategory === subCategory)
+      .map((r: { fundName: string }) => r.fundName)
+      .sort();
 
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];

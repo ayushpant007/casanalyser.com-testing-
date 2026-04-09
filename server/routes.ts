@@ -16,6 +16,7 @@ import { extractMetricsFromFactsheet } from "./factsheet";
 import { getMetricsFromJson } from "./json_factsheet";
 import { getBenchmarkReturns } from "./benchmarks";
 import { lookupByIsinOrName } from "./scoring";
+import { createReadStream } from "fs";
 
 const execAsync = promisify(exec);
 const upload = multer({ storage: multer.memoryStorage() });
@@ -213,6 +214,12 @@ ${text}`;
       console.error("Scheme code search error:", error);
       res.status(500).json({ message: "Search failed" });
     }
+  });
+
+  app.get("/api/recommended-funds", async (_req, res) => {
+    const filePath = path.join(process.cwd(), "attached_assets", "All_Scheme_-_All_scheme__1775468244476_1775715812600.csv");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    createReadStream(filePath).on("error", () => res.status(500).send("Failed to load recommended funds CSV")).pipe(res);
   });
 
   app.get("/api/scrape-performance/:isin", async (req, res) => {
