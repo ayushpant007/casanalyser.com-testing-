@@ -75,11 +75,23 @@ export default function ConciseReport() {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_actions_${reportId}`) || "{}"); } catch { return {}; }
   });
+  const [remarks, setRemarks] = useState<Record<string, string>>(() => {
+    if (!reportId) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_remarks_${reportId}`) || "{}"); } catch { return {}; }
+  });
 
   const updateAction = (schemeName: string, value: string) => {
     setActionSelections(prev => {
       const next = { ...prev, [schemeName]: value };
       if (reportId) localStorage.setItem(`fin_actions_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const updateRemark = (schemeName: string, value: string) => {
+    setRemarks(prev => {
+      const next = { ...prev, [schemeName]: value };
+      if (reportId) localStorage.setItem(`fin_remarks_${reportId}`, JSON.stringify(next));
       return next;
     });
   };
@@ -541,7 +553,7 @@ export default function ConciseReport() {
       const perfFunds = snap.filter((mf: any) => storedPerformances[mf.isin]);
       const perfHdrs = ["#", "Fund Name", "ISIN", "Category", "Risk Type", "SIP Amt (₹)",
         "1Y CAGR%", "BM 1Y%", "3Y CAGR%", "BM 3Y%", "5Y CAGR%", "BM 5Y%",
-        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Fund"];
+        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Fund", "Remarks"];
       const cagrColor = (val: number, bm: number) => isNaN(val) ? "1E293B" : val >= bm ? C.GREEN : C.RED;
 
       const perf: any[][] = [
@@ -626,11 +638,12 @@ export default function ConciseReport() {
             actionStyle(action),
             txt(targetCategory[mf.scheme_name] || "—", i),
             txt(targetFund[mf.scheme_name] || "—", i, true),
+            txt(remarks[mf.scheme_name] || "—", i, true),
           ];
         }),
       ];
       const ws4 = XLSX.utils.aoa_to_sheet(perf);
-      setColWidths(ws4, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 38]);
+      setColWidths(ws4, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 38, 42]);
       setRowHeights(ws4, { 0: 28, 2: 32 });
       ws4["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: perfHdrs.length - 1 } }];
       XLSX.utils.book_append_sheet(wb, ws4, "Performance Check");
