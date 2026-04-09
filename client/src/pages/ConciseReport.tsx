@@ -846,9 +846,9 @@ export default function ConciseReport() {
       XLSX.utils.book_append_sheet(wb, ws5, "Portfolio Snapshot");
 
       // ── Sheet 6: New Allocation ────────────────────────────────────────
-      // Columns: #, Fund Name, Category, Sub Category, Allocation Type, Invested, Value
-      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type", "Invested (₹)", "Value (₹)"];
-      const naColW = [4, 44, 20, 28, 16, 16, 16];
+      // Columns: #, Fund Name, Category, Sub Category, Allocation Type
+      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type"];
+      const naColW = [4, 50, 22, 30, 16];
 
       const allocTypeCell = (label: string, row: number) => {
         const isNew = label === "New Fund";
@@ -872,8 +872,6 @@ export default function ConciseReport() {
           txt(cat, i),
           txt(subCat, i),
           allocTypeCell(label, i),
-          num(mf.invested_amount ?? 0, '"₹"#,##0.00', i),
-          num(mf.valuation || 0, '"₹"#,##0.00', i),
         ];
       });
 
@@ -884,8 +882,6 @@ export default function ConciseReport() {
         txt(rf.category || "—", i),
         txt(rf.subCategory || "—", i),
         allocTypeCell("Recommended", i),
-        txt("—", i),
-        txt("—", i),
       ]);
 
       // Allocation summary: group by category + sub-category
