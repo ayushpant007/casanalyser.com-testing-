@@ -1258,7 +1258,7 @@ export default function ConciseReport() {
                 const bm1y = perf?.benchmark_returns?.["1y"] ?? null;
                 const bm3y = perf?.benchmark_returns?.["3y"] ?? null;
                 const bm5y = perf?.benchmark_returns?.["5y"] ?? null;
-                return { mf, perf, sc, perfScore, combined, maxScore, rating, pct, cagr1y, cagr3y, cagr5y, bm1y, bm3y, bm5y };
+                return { mf, perf, sc, perfScore, scoringTotal, combined, maxScore, rating, pct, cagr1y, cagr3y, cagr5y, bm1y, bm3y, bm5y };
               });
 
             return (
@@ -1274,17 +1274,11 @@ export default function ConciseReport() {
                         <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 w-8">#</th>
                         <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400">Fund Name</th>
                         <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Risk Type</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">SIP Amount</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">1Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">3Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">5Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Score</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Rating</th>
                         <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {rows.map((r, idx) => {
+                      {rows.map((r: any, idx: number) => {
                         const style = RATING_STYLE[r.rating] ?? { pill: "bg-slate-100 text-slate-500 border-slate-200", bar: "#94a3b8" };
                         const fmtCagr = (v: string, bm: string | null) => {
                           const val = parseFloat(v?.replace(/[^\d.-]/g, "") || "");
@@ -1310,42 +1304,29 @@ export default function ConciseReport() {
                                   <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide bg-blue-50 text-blue-600 border border-blue-100">{r.mf.fund_category || "—"}</span>
                                   <span className="text-[9px] text-slate-400">{r.mf.isin}</span>
                                 </div>
+                                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border ${style.pill}`}>
+                                    {r.rating}
+                                  </span>
+                                  <span className="text-[10px] font-bold text-slate-800">
+                                    {r.combined}<span className="text-[9px] font-normal text-slate-400">/{r.maxScore}</span>
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">
+                                    Fin: {r.sc?.totalScore ?? 0}/40
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">
+                                    Perf: {r.perfScore.total}/40
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">
+                                    {r.perf?.risk_ratios?.beta?.fund && r.perf?.risk_ratios?.sharpe?.fund ? "Risk: Moderate" : "Risk: —"}
+                                  </span>
+                                </div>
                               </div>
                             </td>
                             <td className="px-4 py-3 text-center">
                               <span className="px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
                                 {r.mf.fund_type || "—"}
                               </span>
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {(() => {
-                                const sipAmt = sipAmounts[r.mf.scheme_name];
-                                return sipAmt != null ? (
-                                  <span className="font-mono text-[11px] font-semibold text-slate-700">
-                                    ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-300 text-[11px]">—</span>
-                                );
-                              })()}
-                            </td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr1y, r.bm1y)}</td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr3y, r.bm3y)}</td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr5y, r.bm5y)}</td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex flex-col items-center gap-1">
-                                <span className="text-[13px] font-black text-slate-800">{r.combined}<span className="text-[9px] font-normal text-slate-400">/{r.maxScore}</span></span>
-                                <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                  <div className="h-full rounded-full" style={{ width: `${r.pct}%`, backgroundColor: style.bar }} />
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {r.rating ? (
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border ${style.pill}`}>
-                                  {r.rating}
-                                </span>
-                              ) : <span className="text-slate-300 text-[10px]">—</span>}
                             </td>
                             <td className="px-4 py-3">
                               {(() => {
