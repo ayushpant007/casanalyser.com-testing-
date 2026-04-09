@@ -274,7 +274,7 @@ export default function ConciseReport() {
   };
 
   const updateRecommendedFund = (id: string, patch: Partial<RecommendedFundRow>) => {
-    setRecommendedFunds(prev => prev.map(row => row.id === id ? { ...row, ...patch, subCategory: patch.category ? "" : row.subCategory, fundName: patch.category || patch.subCategory ? "" : row.fundName } : row));
+    setRecommendedFunds(prev => prev.map(row => row.id === id ? { ...row, ...patch } : row));
   };
 
   const removeRecommendedFund = (id: string) => setRecommendedFunds(prev => prev.filter(row => row.id !== id));
