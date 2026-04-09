@@ -89,16 +89,7 @@ export default function Home() {
                   className="text-4xl md:text-6xl font-bold font-display tracking-tight leading-tight"
                   style={{ color: "#f1f5f9" }}
                 >
-                  Unlock hidden insights in your{" "}
-                  <span
-                    style={{
-                      background: "linear-gradient(90deg, #60a5fa, #c084fc, #34d399)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    Investment Portfolio
-                  </span>
+                  Upload your CDSL & NSDL report
                 </motion.h1>
 
                 <motion.p
