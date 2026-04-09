@@ -159,21 +159,8 @@ export default function ConciseReport() {
     });
   }, [reportId]);
 
-  const [fundSchemes, setFundSchemes] = useState<string[]>([]);
   const [fundMasterRows, setFundMasterRows] = useState<Array<{ category: string; subCategory: string; fundName: string }>>([]);
   const [recommendedFunds, setRecommendedFunds] = useState<RecommendedFundRow[]>([]);
-  const [fundSearchQuery, setFundSearchQuery] = useState<Record<string, string>>({});
-  const [openFundDropdown, setOpenFundDropdown] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/fund-schemes.csv")
-      .then(r => r.text())
-      .then(text => {
-        const lines = text.split("\n").map(l => l.trim()).filter(l => l && l !== "Scheme Name");
-        setFundSchemes(lines);
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     fetch("/api/recommended-funds")
@@ -698,7 +685,7 @@ export default function ConciseReport() {
       const perfFunds = snap.filter((mf: any) => storedPerformances[mf.isin]);
       const perfHdrs = ["#", "Fund Name", "ISIN", "Category", "Risk Type", "SIP Amt (₹)",
         "1Y CAGR%", "BM 1Y%", "3Y CAGR%", "BM 3Y%", "5Y CAGR%", "BM 5Y%",
-        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Fund", "Remarks"];
+        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Sub Category", "Target Fund", "Remarks"];
       const cagrColor = (val: number, bm: number) => isNaN(val) ? "1E293B" : val >= bm ? C.GREEN : C.RED;
 
       const perf: any[][] = [
@@ -782,13 +769,14 @@ export default function ConciseReport() {
             ratingStyle(total),
             actionStyle(action),
             txt(targetCategory[mf.scheme_name] || "—", i),
+            txt(targetSubCategory[mf.scheme_name] || "—", i),
             txt(targetFund[mf.scheme_name] || "—", i, true),
             txt(remarks[mf.scheme_name] || "—", i, true),
           ];
         }),
       ];
       const ws4 = XLSX.utils.aoa_to_sheet(perf);
-      setColWidths(ws4, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 38, 42]);
+      setColWidths(ws4, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 22, 38, 42]);
       setRowHeights(ws4, { 0: 28, 2: 32 });
       ws4["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: perfHdrs.length - 1 } }];
       XLSX.utils.book_append_sheet(wb, ws4, "Performance Check");
@@ -823,84 +811,115 @@ export default function ConciseReport() {
       XLSX.utils.book_append_sheet(wb, ws5, "Portfolio Snapshot");
 
       // ── Sheet 6: New Allocation ────────────────────────────────────────
-      const actionableFunds = snap.filter((mf: any) => (actionSelections[mf.scheme_name] || "hold") !== "hold");
-      const naHdrs = ["#", "Current Fund Name", "Category", "Action", "Target Category", "Target Fund Name", "Invested (₹)", "Valuation (₹)"];
-      const na: any[][] = [
-        [title("New Allocation – Recommended Changes"), ...Array(naHdrs.length - 1).fill(empty())],
-        [lbl("Generated on"), meta(dateStr), ...Array(naHdrs.length - 2).fill(empty())],
-        [empty(), ...Array(naHdrs.length - 1).fill(empty())],
-        naHdrs.map(h => hdr(h)),
-        ...(actionableFunds.length === 0
-          ? [[{ v: "No funds marked for Switch / Merge / Sell", t: "s", s: { font: { italic: true, sz: 10, color: { rgb: C.SLATE } }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, ...Array(naHdrs.length - 1).fill(empty())]
-          ]
-          : actionableFunds.map((mf: any, i: number) => {
-              const act = (actionSelections[mf.scheme_name] || "hold").toUpperCase();
-              const actionStyle = (a: string) => {
-                const map: Record<string, [string, string]> = {
-                  "SWITCH": [C.AMBER, C.AMBERL], "MERGE": ["4C1D95", "EDE9FE"], "SELL": [C.RED, C.REDL],
-                };
-                const [fg, bg] = map[a] || [C.SLATE, C.SLATEL];
-                return { v: a, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center" }, border } };
-              };
-              return [
-                num(i + 1, "0", i),
-                txt(mf.scheme_name || "—", i, true),
-                txt(mf.fund_category || "—", i),
-                actionStyle(act),
-                txt(targetCategory[mf.scheme_name] || "—", i),
-                txt(targetFund[mf.scheme_name] || "—", i, true),
-                num(mf.invested_amount ?? 0, '"₹"#,##0.00', i),
-                num(mf.valuation || 0, '"₹"#,##0.00', i),
-              ];
-            })
-        ),
+      // Columns: #, Fund Name, Category, Sub Category, Allocation Type, Invested, Value
+      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type", "Invested (₹)", "Value (₹)"];
+      const naColW = [4, 44, 20, 28, 16, 16, 16];
+
+      const allocTypeCell = (label: string, row: number) => {
+        const isNew = label === "New Fund";
+        const isRec = label === "Recommended";
+        const fg = isNew ? C.BLUE : isRec ? "065F46" : C.NAVY;
+        const bg = isNew ? C.LTBLUE : isRec ? C.GREENL : C.SLATEL;
+        return { v: label, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: row % 2 === 0 ? bg : bg } }, alignment: { horizontal: "center" }, border } };
+      };
+
+      // Build portfolio rows: hold = "Existing Fund", switch/merge/sell = "New Fund"
+      const naPortfolioRows = snap.map((mf: any, i: number) => {
+        const action = (actionSelections[mf.scheme_name] || "hold");
+        const isHold = action === "hold";
+        const fundName = isHold ? (mf.scheme_name || "—") : (targetFund[mf.scheme_name] || "—");
+        const cat = isHold ? (mf.fund_category || "—") : (targetCategory[mf.scheme_name] || "—");
+        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mf.scheme_name] || "—");
+        const label = isHold ? "Existing Fund" : "New Fund";
+        return [
+          num(i + 1, "0", i),
+          txt(fundName, i, true),
+          txt(cat, i),
+          txt(subCat, i),
+          allocTypeCell(label, i),
+          num(mf.invested_amount ?? 0, '"₹"#,##0.00', i),
+          num(mf.valuation || 0, '"₹"#,##0.00', i),
+        ];
+      });
+
+      // Recommended funds section rows
+      const naRecRows = recommendedFunds.map((rf, i) => [
+        num(i + 1, "0", i),
+        txt(rf.fundName || "—", i, true),
+        txt(rf.category || "—", i),
+        txt(rf.subCategory || "—", i),
+        allocTypeCell("Recommended", i),
+        txt("—", i),
+        txt("—", i),
+      ]);
+
+      // Allocation summary: group by category + sub-category
+      const summaryMap: Record<string, { cat: string; subCat: string; val: number }> = {};
+      snap.forEach((mf: any) => {
+        const action = (actionSelections[mf.scheme_name] || "hold");
+        const isHold = action === "hold";
+        const cat = isHold ? (mf.fund_category || "Others") : (targetCategory[mf.scheme_name] || "—");
+        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mf.scheme_name] || "—");
+        const key = `${cat}||${subCat}`;
+        if (!summaryMap[key]) summaryMap[key] = { cat, subCat, val: 0 };
+        summaryMap[key].val += (mf.valuation || 0);
+      });
+      const summaryTotal = Object.values(summaryMap).reduce((s, v) => s + v.val, 0);
+      const summaryRows = Object.values(summaryMap).sort((a, b) => b.val - a.val).map((row, i) => {
+        const pct = summaryTotal > 0 ? (row.val / summaryTotal) * 100 : 0;
+        return [txt(row.cat, i), txt(row.subCat, i), pctCell(pct, i)];
+      });
+
+      // Blank rows / section dividers
+      const blankRow7 = Array(naHdrs.length).fill(empty());
+      const sectionHdr = (label: string) => [
+        sec(label), ...Array(naHdrs.length - 1).fill({ v: "", t: "s", s: { fill: { fgColor: { rgb: C.MIDBLUE } }, border } }),
       ];
+
+      const na: any[][] = [
+        [title("New Allocation – Portfolio Plan"), ...Array(naHdrs.length - 1).fill(empty())],
+        [lbl("Generated on"), meta(dateStr), ...Array(naHdrs.length - 2).fill(empty())],
+        blankRow7,
+        sectionHdr("PORTFOLIO ALLOCATION (EXISTING & NEW FUNDS)"),
+        naHdrs.map(h => hdr(h)),
+        ...(naPortfolioRows.length === 0
+          ? [[{ v: "No funds found", t: "s", s: { font: { italic: true, sz: 9, color: { rgb: C.SLATE } }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, ...Array(naHdrs.length - 1).fill(empty())]
+          ]
+          : naPortfolioRows),
+        blankRow7,
+        sectionHdr("RECOMMENDED FUNDS"),
+        naHdrs.map(h => hdr(h)),
+        ...(naRecRows.length === 0
+          ? [[{ v: "No recommended funds added", t: "s", s: { font: { italic: true, sz: 9, color: { rgb: C.SLATE } }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, ...Array(naHdrs.length - 1).fill(empty())]
+          ]
+          : naRecRows),
+        blankRow7,
+        sectionHdr("ALLOCATION SUMMARY"),
+        [hdr("Category"), hdr("Sub Category"), hdr("Allocation (%)"), ...Array(naHdrs.length - 3).fill(empty())],
+        ...summaryRows,
+        [tot("TOTAL"), tot(""), tot(100, "0.00"), ...Array(naHdrs.length - 3).fill(tot(""))],
+      ];
+
       const ws6 = XLSX.utils.aoa_to_sheet(na);
-      setColWidths(ws6, [4, 42, 16, 12, 18, 42, 16, 16]);
-      setRowHeights(ws6, { 0: 28, 3: 28 });
+      setColWidths(ws6, naColW);
+      setRowHeights(ws6, { 0: 28 });
+      // Row layout (0-based):
+      // 0: title, 1: gen on, 2: blank, 3: section hdr "PORTFOLIO…", 4: col hdrs,
+      // 5...(4+portCount): portfolio rows, 5+portCount: blank,
+      // 6+portCount: "RECOMMENDED FUNDS", 7+portCount: col hdrs,
+      // 8+portCount...(7+portCount+recCount): rec rows, 8+portCount+recCount: blank,
+      // 9+portCount+recCount: "ALLOCATION SUMMARY"
+      const portCount = naPortfolioRows.length === 0 ? 1 : naPortfolioRows.length;
+      const recCount = naRecRows.length === 0 ? 1 : naRecRows.length;
+      const recSecRow = 6 + portCount;
+      const sumSecRow = recSecRow + 3 + recCount;
       ws6["!merges"] = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: naHdrs.length - 1 } },
-        { s: { r: 2, c: 0 }, e: { r: 2, c: naHdrs.length - 1 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: naHdrs.length - 1 } },
+        { s: { r: recSecRow, c: 0 }, e: { r: recSecRow, c: naHdrs.length - 1 } },
+        { s: { r: sumSecRow, c: 0 }, e: { r: sumSecRow, c: naHdrs.length - 1 } },
       ];
       XLSX.utils.book_append_sheet(wb, ws6, "New Allocation");
-
-      // ── Sheet 7: MF Transactions ─────────────────────────────────────────
-      const transactions = (analysis.transactions || []).filter((tx: any) => 
-        tx.type && ["SIP", "STP", "SWP", "PURCHASE", "REDEMPTION", "SWITCH"].some(t => (tx.type || "").toUpperCase().includes(t))
-      );
-      const txnHdrs = ["#", "Date", "Scheme Name", "Folio No.", "Transaction Type", "Amount (₹)", "Stamp Duty (₹)", "NAV (₹)", "Units"];
-      const txn: any[][] = [
-        [title("MF Transactions"), ...Array(txnHdrs.length - 1).fill(empty())],
-        [empty(), ...Array(txnHdrs.length - 1).fill(empty())],
-        txnHdrs.map(h => hdr(h)),
-        ...transactions.map((t: any, i: number) => [
-          num(i + 1, "0", i),
-          txt(t.date || "—", i),
-          txt(t.scheme_name || "—", i, true),
-          txt(t.folio_no || "—", i),
-          txt(t.type || "—", i),
-          num(t.amount ?? 0, '"₹"#,##0.00', i),
-          num(t.stamp_duty ?? 0, '"₹"#,##0.00', i),
-          num(t.nav ?? 0, '"₹"#,##0.0000', i),
-          num(t.units ?? 0, "0.0000", i),
-        ]),
-        transactions.length > 0 && [
-          tot("TOTAL"),
-          tot(""),
-          tot(""),
-          tot(""),
-          tot(""),
-          tot(transactions.reduce((s: number, t: any) => s + (t.amount || 0), 0), '"₹"#,##0.00'),
-          tot(transactions.reduce((s: number, t: any) => s + (t.stamp_duty || 0), 0), '"₹"#,##0.00'),
-          tot(""),
-          tot(transactions.reduce((s: number, t: any) => s + (t.units || 0), 0), "0.0000"),
-        ]
-      ].filter(Boolean);
-      const ws7 = XLSX.utils.aoa_to_sheet(txn);
-      setColWidths(ws7, [4, 12, 42, 14, 18, 14, 14, 12, 12]);
-      setRowHeights(ws7, { 0: 28, 2: 24 });
-      ws7["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: txnHdrs.length - 1 } }];
-      XLSX.utils.book_append_sheet(wb, ws7, "MF Transactions");
 
       // ── Sheet 8: Monthly Portfolio Value Trend ──────────────────────────
       const monthlyData = (analysis.monthly_portfolio_trend || []).map((m: any) => [
