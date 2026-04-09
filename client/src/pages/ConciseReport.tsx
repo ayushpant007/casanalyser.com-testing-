@@ -558,40 +558,7 @@ export default function ConciseReport() {
       const absReturnPct = totalInvested > 0 ? (absReturn / totalInvested) * 100 : 0;
       const approxCagr = totalInvested > 0 ? (Math.pow(totalValuation / totalInvested, 1 / 2) - 1) * 100 : 0;
 
-      // ── Sheet 1: Portfolio Overview ──────────────────────────────────
-      const ov: any[][] = [
-        [title("Portfolio Report – " + (investorName || "Portfolio")), empty(), empty(), empty()],
-        [lbl("Analyzed on"), meta(report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : ""), empty(), empty()],
-        [lbl("Investor Type"), meta(report.investorType || "—"), lbl("Age Group"), meta(report.ageGroup || "—")],
-        [empty(), empty(), empty(), empty()],
-        [sec("PORTFOLIO SUMMARY"), empty(), empty(), empty()],
-        [lbl("Total Portfolio Value"), num(totalValuation, '"₹"#,##0.00'), empty(), empty()],
-        [lbl("Total Invested"), num(totalInvested, '"₹"#,##0.00'), empty(), empty()],
-        [lbl("Absolute Gain / Loss"), plCell(absReturn), empty(), empty()],
-        [lbl("Overall Return (%)"), pctCell(absReturnPct), empty(), empty()],
-        [lbl("Approx 2-Yr CAGR (%)"), pctCell(approxCagr), empty(), empty()],
-        [lbl("Total Schemes"), num(snap.length, "0"), empty(), empty()],
-        [lbl("Total Accounts"), num(accounts.length, "0"), empty(), empty()],
-        [empty(), empty(), empty(), empty()],
-        [sec("ACCOUNT BREAKDOWN"), empty(), empty(), empty()],
-        [hdr("Account Type"), hdr("Schemes / Count"), hdr("Value (₹)"), hdr("% of Total")],
-        ...accounts.map((a: any, i: number) => {
-          const pct = totalValuation > 0 ? (a.value / totalValuation) * 100 : 0;
-          return [txt(a.type, i), num(a.count, "0", i), num(a.value, '"₹"#,##0.00', i), pctCell(pct, i)];
-        }),
-      ];
-      const ws1 = XLSX.utils.aoa_to_sheet(ov);
-      setColWidths(ws1, [32, 22, 18, 14]);
-      setRowHeights(ws1, { 0: 28, 4: 22, 13: 22 });
-      ws1["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
-        { s: { r: 4, c: 0 }, e: { r: 4, c: 3 } },
-        { s: { r: 13, c: 0 }, e: { r: 13, c: 3 } },
-        ...([5,6,7,8,9,10,11].map(r => ({ s: { r, c: 2 }, e: { r, c: 3 } }))),
-      ];
-      XLSX.utils.book_append_sheet(wb, ws1, "Portfolio Overview");
-
-      // ── Sheet 2: Asset Allocation ─────────────────────────────────────
+      // ── Sheet 1: Portfolio Overview + Asset Allocation + Category Distribution (combined) ──
       const allCats = ["Equity", "Debt", "Hybrid", "Gold/Silver", "Others"];
       const parseIdealPct = (v: string) => parseFloat(v?.replace("%", "") || "0");
       const idealMap2 = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
@@ -620,32 +587,6 @@ export default function ConciseReport() {
         }};
       };
 
-      const al: any[][] = [
-        [title("Asset Allocation Check"), empty(), empty(), empty(), empty()],
-        [lbl("Investor Type"), meta(report.investorType || "—"), empty(), lbl("Age Group"), meta(report.ageGroup || "—")],
-        [lbl("Health Score"), { v: healthScore2 + " / 100", t: "s", s: { font: { bold: true, sz: 12, color: { rgb: healthScore2 >= 70 ? C.GREEN : healthScore2 >= 50 ? C.AMBER : C.RED }, name: "Calibri" }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, empty(), empty(), empty()],
-        [empty(), empty(), empty(), empty(), empty()],
-        [hdr("Category"), hdr("Actual (%)"), hdr("Ideal (%)"), hdr("Difference (%)"), hdr("Status")],
-        ...allCats.map((cat, i) => {
-          const actual = actMap2[cat] || 0;
-          const ideal = parseIdealPct(idealMap2[cat] || "0");
-          const diff = actual - ideal;
-          const status = Math.abs(diff) < 1 ? "On target" : diff > 0 ? "Over" : "Under";
-          return [txt(cat, i), pctCell(actual, i), pctCell(ideal, i), pctCell(diff, i), statusCell(status, i)];
-        }),
-      ];
-      const ws2 = XLSX.utils.aoa_to_sheet(al);
-      setColWidths(ws2, [20, 14, 14, 16, 14]);
-      setRowHeights(ws2, { 0: 28, 4: 20 });
-      ws2["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
-        { s: { r: 1, c: 2 }, e: { r: 1, c: 2 } },
-        { s: { r: 2, c: 1 }, e: { r: 2, c: 4 } },
-        { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },
-      ];
-      XLSX.utils.book_append_sheet(wb, ws2, "Asset Allocation");
-
-      // ── Sheet 3: Category Distribution ───────────────────────────────
       const typeMap2: Record<string, Record<string, number>> = {};
       snap.forEach((mf: any) => {
         const cat = (mf.fund_category || "").toLowerCase();
@@ -664,21 +605,115 @@ export default function ConciseReport() {
         if (subs.length === 0) return [[cat, "—", 0]];
         return subs.map(([type, pct], i) => [i === 0 ? cat : "", type, pct]);
       });
-      const di: any[][] = [
-        [title("Category Wise Distribution"), empty(), empty()],
-        [empty(), empty(), empty()],
-        [hdr("Main Category"), hdr("Sub-Category / Type"), hdr("Allocation (%)")],
+
+      // ── 5 columns throughout: [Label/Cat, Val1, Val2, Val3, Val4] ──
+      const NC = 5; // number of columns
+      const e5 = () => Array(NC).fill(empty());
+      const sec5 = (v: string) => [sec(v), ...Array(NC - 1).fill({ v: "", t: "s", s: { fill: { fgColor: { rgb: C.MIDBLUE } }, border } })];
+      const lv = (l: string, v: any) => [lbl(l), v, empty(), empty(), empty()]; // label + value, rest empty
+
+      // ─── SECTION A: Portfolio Summary ───
+      const ovRows: any[][] = [
+        [title("Portfolio Report – " + (investorName || "Portfolio")), empty(), empty(), empty(), empty()],
+        [lbl("Analyzed on"), meta(report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : ""), empty(), empty(), empty()],
+        [lbl("Investor Type"), meta(report.investorType || "—"), empty(), lbl("Age Group"), meta(report.ageGroup || "—")],
+        e5(),
+        sec5("PORTFOLIO SUMMARY"),
+        lv("Total Portfolio Value", num(totalValuation, '"₹"#,##0.00')),
+        lv("Total Invested", num(totalInvested, '"₹"#,##0.00')),
+        lv("Absolute Gain / Loss", plCell(absReturn)),
+        lv("Overall Return (%)", pctCell(absReturnPct)),
+        lv("Approx 2-Yr CAGR (%)", pctCell(approxCagr)),
+        lv("Total Schemes", num(snap.length, "0")),
+        lv("Total Accounts", num(accounts.length, "0")),
+        e5(),
+        sec5("ACCOUNT BREAKDOWN"),
+        [hdr("Account Type"), hdr("Schemes / Count"), hdr("Value (₹)"), hdr("% of Total"), empty()],
+        ...accounts.map((a: any, i: number) => {
+          const pct = totalValuation > 0 ? (a.value / totalValuation) * 100 : 0;
+          return [txt(a.type, i), num(a.count, "0", i), num(a.value, '"₹"#,##0.00', i), pctCell(pct, i), empty()];
+        }),
+      ];
+
+      // ─── SECTION B: Asset Allocation ───
+      const aaStartRow = ovRows.length;
+      const aaRows: any[][] = [
+        e5(),
+        sec5("ASSET ALLOCATION CHECK"),
+        [lbl("Health Score"), { v: healthScore2 + " / 100", t: "s", s: { font: { bold: true, sz: 11, color: { rgb: healthScore2 >= 70 ? C.GREEN : healthScore2 >= 50 ? C.AMBER : C.RED }, name: "Calibri" }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, empty(), empty(), empty()],
+        [hdr("Category"), hdr("Actual (%)"), hdr("Ideal (%)"), hdr("Difference (%)"), hdr("Status")],
+        ...allCats.map((cat, i) => {
+          const actual = actMap2[cat] || 0;
+          const ideal = parseIdealPct(idealMap2[cat] || "0");
+          const diff = actual - ideal;
+          const status = Math.abs(diff) < 1 ? "On target" : diff > 0 ? "Over" : "Under";
+          return [txt(cat, i), pctCell(actual, i), pctCell(ideal, i), pctCell(diff, i), statusCell(status, i)];
+        }),
+      ];
+
+      // ─── SECTION C: Category Distribution ───
+      const cdRows: any[][] = [
+        e5(),
+        sec5("CATEGORY WISE DISTRIBUTION"),
+        [hdr("Main Category"), hdr("Sub-Category / Type"), hdr("Allocation (%)"), empty(), empty()],
         ...distData.map(([cat, type, pct], i) => [
           cat ? txt(String(cat), i) : empty(),
           txt(String(type), i),
           pctCell(Number(pct), i),
+          empty(),
+          empty(),
         ]),
       ];
-      const ws3 = XLSX.utils.aoa_to_sheet(di);
-      setColWidths(ws3, [20, 30, 16]);
-      setRowHeights(ws3, { 0: 28, 2: 20 });
-      ws3["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
-      XLSX.utils.book_append_sheet(wb, ws3, "Category Distribution");
+
+      const combined: any[][] = [...ovRows, ...aaRows, ...cdRows];
+      const ws1 = XLSX.utils.aoa_to_sheet(combined);
+      setColWidths(ws1, [30, 20, 16, 18, 14]);
+
+      // Build merges
+      const totalRows = combined.length;
+      const ws1Merges: any[] = [];
+      const span5 = (r: number) => ({ s: { r, c: 0 }, e: { r, c: NC - 1 } });
+      const span3 = (r: number) => ({ s: { r, c: 1 }, e: { r, c: 4 } }); // value spans cols 1-4
+      const span2last = (r: number) => ({ s: { r, c: 3 }, e: { r, c: 4 } }); // last two cols merged for Age Group
+      // Row 0: title span all
+      ws1Merges.push(span5(0));
+      // Row 1: analyzed on — merge cols 1-4
+      ws1Merges.push(span3(1));
+      // Row 3: blank
+      ws1Merges.push(span5(3));
+      // Row 4: PORTFOLIO SUMMARY header
+      ws1Merges.push(span5(4));
+      // Rows 5-11: lbl+value, merge cols 2-4
+      for (let r = 5; r <= 11; r++) ws1Merges.push({ s: { r, c: 2 }, e: { r, c: 4 } });
+      // Row 12: blank
+      ws1Merges.push(span5(12));
+      // Row 13: ACCOUNT BREAKDOWN header
+      ws1Merges.push(span5(13));
+      // Account rows: col 4 empty for each
+      const accHdrRow = 14;
+      const accDataStart = 15;
+      const accCount = accounts.length;
+      // Asset Allocation section
+      const aaBlankRow = aaStartRow;
+      ws1Merges.push(span5(aaBlankRow));
+      const aaSecRow = aaStartRow + 1;
+      ws1Merges.push(span5(aaSecRow));
+      // healthScore row: merge cols 1-4
+      const aaHealthRow = aaStartRow + 2;
+      ws1Merges.push(span3(aaHealthRow));
+      // Category Distribution section
+      const cdStart = aaStartRow + aaRows.length;
+      ws1Merges.push(span5(cdStart));           // blank
+      ws1Merges.push(span5(cdStart + 1));       // section header
+      // cd hdr: cols 3-4 merged for blank
+      ws1Merges.push({ s: { r: cdStart + 2, c: 3 }, e: { r: cdStart + 2, c: 4 } });
+      // cd data rows: cols 3-4 merged
+      for (let r = cdStart + 3; r < totalRows; r++) {
+        ws1Merges.push({ s: { r, c: 3 }, e: { r, c: 4 } });
+      }
+      ws1["!merges"] = ws1Merges;
+      setRowHeights(ws1, { 0: 28, 4: 22, 13: 22 });
+      XLSX.utils.book_append_sheet(wb, ws1, "Portfolio Overview");
 
       // ── Sheet 4: Performance Check ────────────────────────────────────
       const pv = (v: string) => parseFloat(v?.replace(/[^\d.-]/g, "") || "0");
