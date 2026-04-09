@@ -1006,6 +1006,145 @@ export function ReportView({ report }: ReportViewProps) {
                     <p className="text-xs text-slate-400 mt-0.5">across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
+
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 6-Month Growth */}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">6-Month Growth</p>
+                    {(analysis.historical_valuations || []).length > 0 ? (
+                      <ResponsiveContainer width="100%" height={150}>
+                        <AreaChart data={analysis.historical_valuations} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <XAxis dataKey="month_year" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                          <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} width={36} />
+                          <RechartsTooltip
+                            contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                            formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, 'Value']}
+                          />
+                          <Area type="monotone" dataKey="valuation" stroke="#3b82f6" strokeWidth={2} fill="url(#growthGrad)" dot={false} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No historical data</div>
+                    )}
+                  </div>
+
+                  {/* Allocation Donut */}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Allocation</p>
+                    {accounts.length > 0 ? (() => {
+                      const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
+                      const total = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
+                      const pieData = accounts.map((a: any) => ({ name: a.type, value: a.value || 0 }));
+                      return (
+                        <div className="flex items-center gap-4">
+                          <PieChart width={130} height={130}>
+                            <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={3} dataKey="value">
+                              {pieData.map((_: any, idx: number) => (
+                                <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, '']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+                          </PieChart>
+                          <div className="flex flex-col gap-2 flex-1">
+                            {accounts.map((a: any, idx: number) => {
+                              const pct = total > 0 ? ((a.value / total) * 100).toFixed(1) : '0.0';
+                              return (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                                  <span className="text-xs text-slate-600 flex-1 leading-tight">{a.type}</span>
+                                  <span className="text-xs font-bold text-slate-700">{pct}%</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No allocation data</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bottom Row: Accounts + Top Funds */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Accounts */}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Accounts</p>
+                    <div className="space-y-2">
+                      {(() => {
+                        const COLORS_ACC = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
+                        const total = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
+                        return accounts.map((acc: any, idx: number) => {
+                          const initials = (acc.type || '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+                          const pct = total > 0 ? ((acc.value / total) * 100).toFixed(1) : '0.0';
+                          const bg = COLORS_ACC[idx % COLORS_ACC.length];
+                          return (
+                            <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: bg }}>
+                                {initials}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-800 leading-tight truncate">{acc.type}</p>
+                                <p className="text-[10px] text-slate-400 leading-tight truncate">{acc.count} scheme{acc.count !== 1 ? 's' : ''}{acc.details ? ` · ${acc.details}` : ''}</p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-xs font-bold text-slate-800">{formatLakh(acc.value || 0)}</p>
+                                <p className="text-[10px] text-slate-400">{pct}%</p>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Top 3 Mutual Funds */}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Top 3 Mutual Funds</p>
+                    <div className="space-y-2">
+                      {(() => {
+                        const RANK_COLORS = ['#3b82f6', '#10b981', '#f59e0b'];
+                        const sorted = [...(analysis.mf_snapshot || [])]
+                          .filter((m: any) => m.invested_amount > 0)
+                          .sort((a: any, b: any) => {
+                            const rA = a.invested_amount > 0 ? (a.unrealised_profit_loss / a.invested_amount) : 0;
+                            const rB = b.invested_amount > 0 ? (b.unrealised_profit_loss / b.invested_amount) : 0;
+                            return rB - rA;
+                          })
+                          .slice(0, 3);
+                        return sorted.map((mf: any, idx: number) => {
+                          const retPct = mf.invested_amount > 0 ? ((mf.unrealised_profit_loss / mf.invested_amount) * 100).toFixed(1) : '0.0';
+                          const isPos = mf.unrealised_profit_loss >= 0;
+                          const shortName = mf.scheme_name?.replace(/\s*-\s*(Direct|Regular)\s*(Growth|Plan)?/i, '').trim() ?? mf.scheme_name;
+                          return (
+                            <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0" style={{ backgroundColor: RANK_COLORS[idx] }}>
+                                {idx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-800 leading-tight line-clamp-1">{shortName}</p>
+                                <p className="text-[10px] text-slate-400 leading-tight">{mf.fund_category}</p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className={`text-xs font-bold ${isPos ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                  {isPos ? '+' : ''}{retPct}% return
+                                </p>
+                                <p className="text-[10px] text-slate-400">{formatLakh(mf.valuation || 0)}</p>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                </div>
               </>
             );
           })()}
@@ -2116,9 +2255,9 @@ export function ReportView({ report }: ReportViewProps) {
             const categorize = (type: string, tx: any) => {
               const t = type.toLowerCase().trim();
               // Genuine SIP: explicitly tagged as SIP by AI, OR repeating same amount for same scheme
-              if (t === "sip" || (t.includes("purchase") && isRepeatingSip(tx))) return "SIP";
+              if (t === "sip" || (t === "purchase" && isRepeatingSip(tx))) return "SIP";
               // Lumpsum: one-time purchase → exclude from SIP section
-              if (t.includes("purchase")) return null;
+              if (t === "purchase") return null;
               if (t === "swp" || ["systematic withdrawal", "redemption"].some(k => t.includes(k))) return "SWP";
               // STP: switch-out / transfer-out (STP-IN is NOT a SIP)
               if (["stp-out", "stp", "switch out", "systematic transfer"].some(k => t.includes(k)) || t === "stp-in") return "STP";
@@ -2174,115 +2313,20 @@ export function ReportView({ report }: ReportViewProps) {
 
               let filteredItems = items;
 
-              if (isSTP && items.length > 0) {
-                // Group STP transactions by scheme name with date range and totals
-                const groupedByScheme: Record<string, { dates: string[], amounts: number[], firstAmount: number, destinationMap: Record<string, string> }> = {};
-                items.forEach((tx: any) => {
-                  const key = tx.scheme_name || "unknown";
-                  if (!groupedByScheme[key]) {
-                    groupedByScheme[key] = { dates: [], amounts: [], firstAmount: tx.amount || 0, destinationMap: {} };
-                  }
-                  groupedByScheme[key].dates.push(tx.date);
-                  groupedByScheme[key].amounts.push(tx.amount || 0);
-                });
-                
-                // Match STP-OUT with STP-IN to find destination funds
-                const stpInTransactions = transactions.filter((tx: any) => {
-                  const rawType = (tx.type || "").toLowerCase().trim();
-                  return rawType === "stp-in" || (rawType === "stp" && fundCategoryMap[tx.scheme_name] && fundCategoryMap[tx.scheme_name] === "equity");
-                });
-                
-                // For each STP-OUT transaction, find the best matching STP-IN
-                Object.entries(groupedByScheme).forEach(([schemeName, data]) => {
-                  data.amounts.forEach((outAmount: number, idx: number) => {
-                    const outDate = data.dates[idx];
-                    const outTime = parseDate(outDate);
-                    
-                    // Find best matching STP-IN: closest date and closest amount within 10 days
-                    let bestMatch: any = null;
-                    let bestDiff = Infinity;
-                    
-                    stpInTransactions.forEach((inTx: any) => {
-                      const inTime = parseDate(inTx.date);
-                      const timeDiff = Math.abs(inTime - outTime);
-                      
-                      // Only consider STPs within 10 days and closest to the STP-OUT
-                      if (inTime >= outTime && inTime <= outTime + 10 * 86400000 && timeDiff < bestDiff) {
-                        bestMatch = inTx;
-                        bestDiff = timeDiff;
-                      }
-                    });
-                    
-                    if (bestMatch) {
-                      data.destinationMap[outDate] = bestMatch.scheme_name || "Unknown";
-                    }
-                  });
-                });
-                
-                filteredItems = Object.entries(groupedByScheme).map(([schemeName, data]) => {
-                  const sortedDates = data.dates.sort((a, b) => parseDate(a) - parseDate(b));
-                  const dateRange = sortedDates.length > 0 
-                    ? sortedDates.length > 1 
-                      ? `${sortedDates[0]} to ${sortedDates[sortedDates.length - 1]}`
-                      : sortedDates[0]
-                    : "N/A";
-                  const totalAmount = data.amounts.reduce((sum, amt) => sum + amt, 0);
-                  
-                  // Get the most common destination from this scheme's STP-OUTs
-                  const destCounts: Record<string, number> = {};
-                  Object.values(data.destinationMap).forEach((dest: string) => {
-                    destCounts[dest] = (destCounts[dest] || 0) + 1;
-                  });
-                  const mainDestination = Object.keys(destCounts).length > 0 
-                    ? Object.keys(destCounts).reduce((a, b) => destCounts[a] > destCounts[b] ? a : b)
-                    : "N/A";
-                  
-                  return {
-                    scheme_name: schemeName,
-                    date: dateRange,
-                    amount: data.firstAmount,
-                    total_amount: totalAmount,
-                    transaction_count: data.dates.length,
-                    destination: mainDestination
-                  };
-                });
-              } else if (isSIP && items.length > 0) {
-                // Find the latest overall transaction (any type) for each scheme
-                const latestOverallByScheme: Record<string, any> = {};
-                transactions.forEach((tx: any) => {
-                  const key = tx.scheme_name || "unknown";
-                  const ts = parseDate(tx.date);
-                  if (!latestOverallByScheme[key] || ts > parseDate(latestOverallByScheme[key].date)) {
-                    latestOverallByScheme[key] = tx;
-                  }
-                });
-                
-                // Find the latest SIP transaction for each scheme
-                const latestSipByScheme: Record<string, any> = {};
+              if (isSIP && items.length > 0) {
+                // Keep only the single most-recent entry per scheme
+                const latestByScheme: Record<string, any> = {};
                 items.forEach((tx: any) => {
                   const key = tx.scheme_name || "unknown";
                   const ts = parseDate(tx.date);
-                  if (!latestSipByScheme[key] || ts > parseDate(latestSipByScheme[key].date)) {
-                    latestSipByScheme[key] = tx;
+                  if (!latestByScheme[key] || ts > parseDate(latestByScheme[key].date)) {
+                    latestByScheme[key] = tx;
                   }
                 });
-                
-                // Only show schemes where the latest transaction is SIP (and not status change)
-                filteredItems = Object.entries(latestSipByScheme)
-                  .filter(([schemeName, sipTx]) => {
-                    const overallLatest = latestOverallByScheme[schemeName];
-                    if (!overallLatest) return false;
-                    const rawType = (overallLatest.type || "").toLowerCase().trim();
-                    // Exclude status changes and admin transactions
-                    if (["status", "change", "updated from", "address", "bank", "tax", "rejected", "pending"].some(k => rawType.includes(k))) {
-                      return false;
-                    }
-                    return rawType === "sip" || rawType === "recurring";
-                  })
-                  .map(([_, sipTx]) => sipTx);
+                filteredItems = Object.values(latestByScheme);
               }
               
-              const totalAmount = filteredItems.reduce((sum: number, tx: any) => sum + (tx.total_amount || tx.amount || 0), 0);
+              const totalAmount = filteredItems.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
 
               return (
                 <div key={title} className="space-y-4">
@@ -2293,9 +2337,7 @@ export function ReportView({ report }: ReportViewProps) {
                         <tr>
                           <th className="px-6 py-3">Date</th>
                           <th className="px-6 py-3">Scheme Name</th>
-                          {isSTP && <th className="px-6 py-3">Switch To</th>}
-                          {isSTP && <th className="px-6 py-3 text-right">STP Amount</th>}
-                          <th className="px-6 py-3 text-right">Total Amount in ₹</th>
+                          <th className="px-6 py-3 text-right">Amount in ₹</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -2303,32 +2345,19 @@ export function ReportView({ report }: ReportViewProps) {
                           filteredItems.map((item: any, idx: number) => {
                             return (
                               <tr key={idx} className="hover:bg-slate-50/50">
-                                <td className="px-6 py-3 text-slate-500 font-medium whitespace-nowrap text-xs">
+                                <td className="px-6 py-3 text-slate-500 font-medium whitespace-nowrap">
                                   {item.date || "N/A"}
                                 </td>
-                                <td className="px-6 py-3 text-slate-700 text-sm">{item.scheme_name || "N/A"}</td>
-                                {isSTP && (
-                                  <td className="px-6 py-3 text-slate-600 text-sm">
-                                    {item.destination && item.destination !== "N/A" 
-                                      ? `${item.destination.replace(/\s*-\s*(Direct|Regular)\s*(Growth|Plan)?/i, '').trim()}`
-                                      : "—"
-                                    }
-                                  </td>
-                                )}
-                                {isSTP && (
-                                  <td className="px-6 py-3 text-right font-mono font-semibold text-slate-800">
-                                    ₹{item.amount?.toLocaleString() || "0.00"}
-                                  </td>
-                                )}
+                                <td className="px-6 py-3 text-slate-700">{item.scheme_name || "N/A"}</td>
                                 <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
-                                  ₹{(item.total_amount || item.amount || 0).toLocaleString()}
+                                  ₹{item.amount?.toLocaleString() || "0.00"}
                                 </td>
                               </tr>
                             );
                           })
                         ) : (
                           <tr>
-                            <td colSpan={isSTP ? 5 : 3} className="px-6 py-8 text-center text-slate-400 italic">
+                            <td colSpan={3} className="px-6 py-8 text-center text-slate-400 italic">
                               No entries found for this category
                             </td>
                           </tr>
@@ -2337,10 +2366,9 @@ export function ReportView({ report }: ReportViewProps) {
                       {filteredItems.length > 0 && (
                         <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
                           <tr>
-                            <td colSpan={isSTP ? 3 : 1} className="px-6 py-3 text-right text-slate-600 uppercase tracking-wider text-[10px]">
+                            <td colSpan={2} className="px-6 py-3 text-right text-slate-600 uppercase tracking-wider text-[10px]">
                               {isSTP ? "STP Total" : `Total ${title.split(' ')[0]} Amount`}
                             </td>
-                            {isSTP && <td className="px-6 py-3"></td>}
                             <td className="px-6 py-3 text-right font-mono text-slate-900">
                               ₹{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </td>
