@@ -1727,14 +1727,14 @@ export function ReportView({ report }: ReportViewProps) {
                     })()}
 
                     <div className="grid grid-cols-1 gap-3">
-                    {/* Returns & Basic Stats */}
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-1 gap-2">
+                      {/* Returns & Basic Stats */}
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 gap-2">
 
-                      {/* Financial Metrics Section — from Scoring files */}
-                      {(() => {
-                        const sc = scoringRecords[mf.isin];
-                        if (!sc) return null;
+                        {/* Financial Metrics Section — from Scoring files */}
+                        {(() => {
+                          const sc = scoringRecords[mf.isin];
+                          if (!sc) return null;
 
                         const fmtNum = (v: any, decimals = 2) => v != null && v !== "" ? Number(v).toFixed(decimals) : "N/A";
                         const fmtVal = (v: any) => v != null && v !== "" ? String(v) : "N/A";
@@ -1885,7 +1885,8 @@ export function ReportView({ report }: ReportViewProps) {
                             })()}
                           </div>
                         );
-                      })()}
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
