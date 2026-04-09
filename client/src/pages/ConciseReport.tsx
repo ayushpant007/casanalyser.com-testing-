@@ -1497,24 +1497,25 @@ export default function ConciseReport() {
                                 const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
                                 const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
                                 return (
-                                  <div className="flex flex-col gap-1.5 min-w-[180px]">
+                                  <div className="flex flex-col gap-1.5 min-w-[180px] max-w-[220px]">
                                     <select
                                       value={action}
                                       onChange={(e) => updateAction(sn, e.target.value)}
                                       className={`text-[9px] font-bold border rounded px-1.5 py-1 cursor-pointer uppercase tracking-wide focus:outline-none w-full ${cls}`}
                                       data-testid={`concise-action-select-${idx}`}
                                     >
+                                      <option value="">Select</option>
                                       <option value="hold">Hold</option>
                                       <option value="switch">Switch</option>
                                       <option value="merge">Merge</option>
                                       <option value="sell">Sell</option>
                                     </select>
                                     {action !== "hold" && (
-                                      <div className="flex flex-col gap-1 mt-0.5">
+                                      <div className="flex flex-col gap-1 mt-0.5 w-full">
                                         <select
                                           value={tCat}
                                           onChange={(e) => updateTargetCategory(sn, e.target.value)}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full"
+                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0"
                                           data-testid={`target-cat-${idx}`}
                                         >
                                           <option value="">Category…</option>
@@ -1526,7 +1527,7 @@ export default function ConciseReport() {
                                           value={tSubCat}
                                           onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
                                           disabled={!tCat}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full disabled:opacity-50"
+                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0 disabled:opacity-50"
                                           data-testid={`target-subcat-${idx}`}
                                         >
                                           <option value="">Sub category…</option>
@@ -1538,7 +1539,7 @@ export default function ConciseReport() {
                                           value={tFund}
                                           onChange={(e) => updateTargetFund(sn, e.target.value)}
                                           disabled={!tSubCat}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full disabled:opacity-50"
+                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0 disabled:opacity-50"
                                           data-testid={`target-fund-${idx}`}
                                         >
                                           <option value="">Fund name…</option>
