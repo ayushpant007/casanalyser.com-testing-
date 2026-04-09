@@ -341,7 +341,7 @@ export default function ConciseReport() {
             const tCat = targetCategory[sn] || "";
             const tFund = targetFund[sn] || "";
             const remarksText = remarks[sn] || "";
-            const actionLabel = action.toUpperCase();
+            const actionLabel = action ? action.toUpperCase() : "HOLD";
             const isHold = action === "hold";
 
             const wrap = doc.createElement("div");
@@ -350,6 +350,7 @@ export default function ConciseReport() {
             wrap.style.setProperty("flex-direction", "column", "important");
             wrap.style.setProperty("gap", "4px", "important");
             wrap.style.setProperty("min-width", "180px", "important");
+            wrap.style.setProperty("width", "100%", "important");
 
             const actionLine = doc.createElement("div");
             actionLine.textContent = actionLabel;
