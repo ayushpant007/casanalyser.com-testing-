@@ -149,15 +149,17 @@ export default function ConciseReport() {
     fetch("/api/recommended-funds")
       .then(r => r.text())
       .then(text => {
-        const rows = text.split("\n").map(l => l.trim()).filter(Boolean);
+        const rows = text.split("\n").map((l: string) => l.trim()).filter(Boolean);
         const parsed = rows.slice(1).map((row: string) => {
-          const parts = row.split(",");
+          const first = row.indexOf(",");
+          const second = row.indexOf(",", first + 1);
+          if (first < 0 || second < 0) return null;
           return {
-            category: parts[0]?.trim() || "",
-            subCategory: parts[1]?.trim() || "",
-            fundName: parts.slice(2).join(",").trim() || "",
+            category: row.slice(0, first).trim(),
+            subCategory: row.slice(first + 1, second).trim(),
+            fundName: row.slice(second + 1).trim(),
           };
-        }).filter((r: { category: string; subCategory: string; fundName: string }) => r.category && r.subCategory && r.fundName);
+        }).filter((r: { category: string; subCategory: string; fundName: string } | null): r is { category: string; subCategory: string; fundName: string } => !!r && !!r.category && !!r.subCategory && !!r.fundName);
         setFundMasterRows(parsed);
       })
       .catch(() => {});
