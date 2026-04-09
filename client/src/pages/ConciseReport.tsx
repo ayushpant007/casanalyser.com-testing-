@@ -568,7 +568,15 @@ export default function ConciseReport() {
           const c1 = pv(cagr["1y"]), c3 = pv(cagr["3y"]), c5 = pv(cagr["5y"]);
           const b1 = pv(bm["1y"]), b3 = pv(bm["3y"]), b5 = pv(bm["5y"]);
 
-          const ratingStyle = (r: string) => {
+          const getRatingLabel = (score: number) => {
+            if (score >= 71) return "Excellent";
+            if (score >= 51) return "Good";
+            if (score >= 26) return "Average";
+            return "Poor";
+          };
+
+          const ratingStyle = (score: number) => {
+            const r = getRatingLabel(score);
             const map: Record<string, [string, string]> = {
               "Excellent": [C.GREEN, C.GREENL], "Good": [C.BLUE, C.LTBLUE],
               "Average": [C.AMBER, C.AMBERL], "Poor": [C.RED, C.REDL], "Very Poor": [C.RED, C.REDL],
@@ -614,7 +622,7 @@ export default function ConciseReport() {
             num(finScore, "0", i),
             num(perfScore, "0", i),
             num(total, "0", i),
-            ratingStyle(rating),
+            ratingStyle(total),
             actionStyle(action),
             txt(targetCategory[mf.scheme_name] || "—", i),
             txt(targetFund[mf.scheme_name] || "—", i, true),
@@ -1213,6 +1221,13 @@ export default function ConciseReport() {
               "Poor":      { pill: "bg-rose-100 text-rose-600 border-rose-200",          bar: "#ef4444" },
               "Very Poor": { pill: "bg-rose-200 text-rose-800 border-rose-300",          bar: "#b91c1c" },
             };
+            const getRatingLabel = (score: number) => {
+              if (score >= 71) return "Excellent";
+              if (score >= 51) return "Good";
+              if (score >= 26) return "Average";
+              return "Poor";
+            };
+
             const rows = mfSnapshot
               .filter((mf: any) => storedPerformances[mf.isin])
               .map((mf: any) => {
@@ -1222,7 +1237,7 @@ export default function ConciseReport() {
                 const scoringTotal = sc?.totalScore ?? 0;
                 const combined = scoringTotal + perfScore.total;
                 const maxScore = perf ? 80 : 40;
-                const rating: string = sc?.fundRating || "";
+                const rating: string = getRatingLabel(combined);
                 const pct = maxScore > 0 ? Math.round((combined / maxScore) * 100) : 0;
                 const cagr1y = perf?.cagr?.["1y"] ?? "—";
                 const cagr3y = perf?.cagr?.["3y"] ?? "—";
