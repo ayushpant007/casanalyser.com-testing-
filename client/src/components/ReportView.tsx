@@ -2346,27 +2346,39 @@ export function ReportView({ report }: ReportViewProps) {
                         <tr>
                           <th className="px-6 py-3">Date</th>
                           <th className="px-6 py-3">Scheme Name</th>
-                          <th className="px-6 py-3 text-right">Amount in ₹</th>
+                          {isSTP && <th className="px-6 py-3">Switch To</th>}
+                          {isSTP && <th className="px-6 py-3 text-right">STP Amount</th>}
+                          <th className="px-6 py-3 text-right">Total Amount in ₹</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {filteredItems.length > 0 ? (
                           filteredItems.map((item: any, idx: number) => {
+                            const switchTo = item.switch_to || item.to_scheme_name || item.destination_scheme_name || item.target_scheme_name || "—";
+                            const stpAmount = item.stp_amount ?? item.amount ?? 0;
+                            const totalDisplay = item.total_amount ?? item.amount ?? stpAmount;
+                            const dateDisplay = item.date_range || item.date || "N/A";
                             return (
                               <tr key={idx} className="hover:bg-slate-50/50">
                                 <td className="px-6 py-3 text-slate-500 font-medium whitespace-nowrap">
-                                  {item.date || "N/A"}
+                                  {dateDisplay}
                                 </td>
                                 <td className="px-6 py-3 text-slate-700">{item.scheme_name || "N/A"}</td>
+                                {isSTP && <td className="px-6 py-3 text-slate-700">{switchTo}</td>}
+                                {isSTP && (
+                                  <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
+                                    ₹{Number(stpAmount || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                  </td>
+                                )}
                                 <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
-                                  ₹{item.amount?.toLocaleString() || "0.00"}
+                                  ₹{Number(totalDisplay || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                 </td>
                               </tr>
                             );
                           })
                         ) : (
                           <tr>
-                            <td colSpan={3} className="px-6 py-8 text-center text-slate-400 italic">
+                            <td colSpan={isSTP ? 5 : 3} className="px-6 py-8 text-center text-slate-400 italic">
                               No entries found for this category
                             </td>
                           </tr>
@@ -2375,7 +2387,7 @@ export function ReportView({ report }: ReportViewProps) {
                       {filteredItems.length > 0 && (
                         <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
                           <tr>
-                            <td colSpan={2} className="px-6 py-3 text-right text-slate-600 uppercase tracking-wider text-[10px]">
+                            <td colSpan={isSTP ? 4 : 2} className="px-6 py-3 text-right text-slate-600 uppercase tracking-wider text-[10px]">
                               {isSTP ? "STP Total" : `Total ${title.split(' ')[0]} Amount`}
                             </td>
                             <td className="px-6 py-3 text-right font-mono text-slate-900">
