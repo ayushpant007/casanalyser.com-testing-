@@ -3,7 +3,7 @@ import { useReport } from "@/hooks/use-reports";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, FileSpreadsheet } from "lucide-react";
+import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, FileSpreadsheet, Plus, Trash2 } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip } from "recharts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2 } from "lucide-react";
@@ -60,6 +60,13 @@ const ACTION_STYLES: Record<string, string> = {
   switch: "bg-amber-50 text-amber-700 border-amber-200",
   merge:  "bg-violet-50 text-violet-700 border-violet-200",
   sell:   "bg-rose-50 text-rose-700 border-rose-200",
+};
+
+type RecommendedFundRow = {
+  id: string;
+  category: string;
+  subCategory: string;
+  fundName: string;
 };
 
 export default function ConciseReport() {
@@ -123,6 +130,8 @@ export default function ConciseReport() {
   }, [reportId]);
 
   const [fundSchemes, setFundSchemes] = useState<string[]>([]);
+  const [fundMasterRows, setFundMasterRows] = useState<Array<{ category: string; subCategory: string; fundName: string }>>([]);
+  const [recommendedFunds, setRecommendedFunds] = useState<RecommendedFundRow[]>([]);
   const [fundSearchQuery, setFundSearchQuery] = useState<Record<string, string>>({});
   const [openFundDropdown, setOpenFundDropdown] = useState<string | null>(null);
 
@@ -132,6 +141,24 @@ export default function ConciseReport() {
       .then(text => {
         const lines = text.split("\n").map(l => l.trim()).filter(l => l && l !== "Scheme Name");
         setFundSchemes(lines);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/assets/All_Scheme_-_All_scheme__1775468244476_1775715812600.csv")
+      .then(r => r.text())
+      .then(text => {
+        const rows = text.split("\n").map(l => l.trim()).filter(Boolean);
+        const parsed = rows.slice(1).map(row => {
+          const parts = row.split(",");
+          return {
+            category: parts[0]?.trim() || "",
+            subCategory: parts[1]?.trim() || "",
+            fundName: parts.slice(2).join(",").trim() || "",
+          };
+        }).filter(r => r.category && r.subCategory && r.fundName);
+        setFundMasterRows(parsed);
       })
       .catch(() => {});
   }, []);
@@ -184,6 +211,15 @@ export default function ConciseReport() {
     return mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
   }, [analysis.account_summaries, mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.unrealised_profit_loss || 0), 0), [mfSnapshot]);
+  const recommendedOptions = useMemo(() => {
+    const categories = Array.from(new Set(fundMasterRows.map((r: { category: string }) => r.category))).sort();
+    return categories;
+  }, [fundMasterRows]);
+  const recommendedRowsByCategory = (category: string) => Array.from(new Set(fundMasterRows.filter((r: { category: string }) => r.category === category).map((r: { subCategory: string }) => r.subCategory))).sort();
+  const recommendedFundsBySelection = (category: string, subCategory: string) => fundMasterRows
+    .filter((r: { category: string; subCategory: string }) => r.category === category && r.subCategory === subCategory)
+    .map((r: { fundName: string }) => r.fundName)
+    .sort();
 
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];
@@ -222,6 +258,16 @@ export default function ConciseReport() {
     name = name.replace(/\b(CDSL|NSDL|BSE|NSE)\b/gi, "").replace(/\s{2,}/g, " ").trim();
     return name;
   })();
+
+  const addRecommendedFund = () => {
+    setRecommendedFunds(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, category: "", subCategory: "", fundName: "" }]);
+  };
+
+  const updateRecommendedFund = (id: string, patch: Partial<RecommendedFundRow>) => {
+    setRecommendedFunds(prev => prev.map(row => row.id === id ? { ...row, ...patch, subCategory: patch.category ? "" : row.subCategory, fundName: patch.category || patch.subCategory ? "" : row.fundName } : row));
+  };
+
+  const removeRecommendedFund = (id: string) => setRecommendedFunds(prev => prev.filter(row => row.id !== id));
 
   const downloadPDF = async () => {
     if (!reportRef.current) return;
@@ -1448,6 +1494,54 @@ export default function ConciseReport() {
               </div>
             );
           })()}
+
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-4 text-white flex items-center justify-between">
+              <h3 className="text-lg font-bold">Recommended Funds</h3>
+              <Button type="button" size="sm" onClick={addRecommendedFund} className="bg-white/15 hover:bg-white/25 text-white" data-testid="button-add-recommended-fund">
+                <Plus className="h-4 w-4 mr-1" />
+                Add Recommended Fund +
+              </Button>
+            </div>
+            <div className="p-4 space-y-3">
+              {recommendedFunds.length === 0 && <div className="text-sm text-slate-500" data-testid="text-no-recommended-funds">No recommended funds added yet.</div>}
+              {recommendedFunds.map((row, idx) => {
+                const subCategories = row.category ? recommendedRowsByCategory(row.category) : [];
+                const fundNames = row.category && row.subCategory ? recommendedFundsBySelection(row.category, row.subCategory) : [];
+                return (
+                  <div key={row.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end border border-slate-200 rounded-xl p-3 bg-slate-50/60" data-testid={`card-recommended-fund-${row.id}`}>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.category} onChange={(e) => updateRecommendedFund(row.id, { category: e.target.value, subCategory: "", fundName: "" })} data-testid={`select-recommended-category-${idx}`}>
+                        <option value="">Select category</option>
+                        {recommendedOptions.map(option => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Sub category</label>
+                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.subCategory} onChange={(e) => updateRecommendedFund(row.id, { subCategory: e.target.value, fundName: "" })} disabled={!row.category} data-testid={`select-recommended-subcategory-${idx}`}>
+                        <option value="">Select sub category</option>
+                        {subCategories.map(option => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Fund name</label>
+                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.fundName} onChange={(e) => updateRecommendedFund(row.id, { fundName: e.target.value })} disabled={!row.subCategory} data-testid={`select-recommended-fund-${idx}`}>
+                        <option value="">Select fund</option>
+                        {fundNames.map(option => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button type="button" variant="outline" size="sm" onClick={() => removeRecommendedFund(row.id)} data-testid={`button-delete-recommended-fund-${idx}`}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
           {/* 5. Portfolio Snapshot - Mutual Fund Units */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
