@@ -762,7 +762,14 @@ export function ReportView({ report }: ReportViewProps) {
   };
 
   const analyzeAll = async () => {
-    const funds = (analysis.mf_snapshot || []).filter((mf: any) => mf.isin);
+    const allFunds = (analysis.mf_snapshot || []).filter((mf: any) => mf.isin);
+    // Deduplicate by ISIN — multiple folios can share the same ISIN
+    const seen = new Set<string>();
+    const funds = allFunds.filter((mf: any) => {
+      if (seen.has(mf.isin)) return false;
+      seen.add(mf.isin);
+      return true;
+    });
     if (!funds.length) return;
     setIsAnalyzingAll(true);
     const BATCH = 3;
@@ -889,7 +896,9 @@ export function ReportView({ report }: ReportViewProps) {
     <div className="space-y-4">
       <div className="flex justify-end gap-3 py-2">
         {(() => {
-          const totalFunds = (analysis.mf_snapshot || []).length;
+          // Count unique ISINs only — duplicate folios share the same ISIN
+          const uniqueIsins = new Set((analysis.mf_snapshot || []).map((mf: any) => mf.isin).filter(Boolean));
+          const totalFunds = uniqueIsins.size;
           const allAnalyzed = totalFunds > 0 && Object.keys(performances).length >= totalFunds;
           const analyzedCount = Object.keys(performances).length;
           return (
