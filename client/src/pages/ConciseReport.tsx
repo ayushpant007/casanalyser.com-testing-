@@ -342,19 +342,19 @@ export default function ConciseReport() {
             const actionBlock = cell.querySelector<HTMLElement>("[data-action-block='true']");
             if (!actionBlock) return;
             const sn = actionBlock.getAttribute("data-scheme-name") || "";
-            const action = actionSelections[sn] || "hold";
+            const action = (actionSelections[sn] || "hold").trim();
             const tCat = targetCategory[sn] || "";
             const tFund = targetFund[sn] || "";
             const remarksText = remarks[sn] || "";
             const actionLabel = action ? action.toUpperCase() : "HOLD";
-            const isHold = action === "hold";
-            const displayText = isHold ? actionLabel : `${actionLabel}\n${[tCat, tFund].filter(Boolean).join(" • ") || "—"}\n${remarksText || "Add remarks..."}`;
+            const displayText = `${actionLabel}\n${[tCat, tFund].filter(Boolean).join(" • ") || "—"}\n${remarksText || "Add remarks..."}`;
             cell.textContent = displayText;
             cell.style.setProperty("white-space", "pre-wrap", "important");
             cell.style.setProperty("font-size", "9px", "important");
             cell.style.setProperty("line-height", "1.35", "important");
             cell.style.setProperty("color", "#0f172a", "important");
             cell.style.setProperty("vertical-align", "top", "important");
+            cell.style.setProperty("min-width", "220px", "important");
           });
         },
       } as any);
