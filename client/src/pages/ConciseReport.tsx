@@ -260,41 +260,63 @@ export default function ConciseReport() {
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
 
-          // Replace <select> elements with static text spans so html2canvas can render them
-          el.querySelectorAll<HTMLSelectElement>("select").forEach(sel => {
-            const selectedText = sel.options[sel.selectedIndex]?.text || sel.value || "—";
-            const span = doc.createElement("div");
-            span.textContent = selectedText;
-            span.style.cssText = sel.style.cssText;
-            span.style.setProperty("font-size", "9px", "important");
-            span.style.setProperty("font-weight", "700", "important");
-            span.style.setProperty("padding", "3px 6px", "important");
-            span.style.setProperty("border-radius", "4px", "important");
-            span.style.setProperty("border", "1px solid #e2e8f0", "important");
-            span.style.setProperty("text-transform", "uppercase", "important");
-            span.style.setProperty("letter-spacing", "0.05em", "important");
-            span.style.setProperty("width", "100%", "important");
-            span.style.setProperty("box-sizing", "border-box", "important");
-            sel.parentNode?.replaceChild(span, sel);
-          });
+          el.querySelectorAll<HTMLTableCellElement>("td").forEach(cell => {
+            const actionBlock = cell.querySelector<HTMLElement>("[data-action-block='true']");
+            if (!actionBlock) return;
+            const sn = actionBlock.getAttribute("data-scheme-name") || "";
+            const action = actionSelections[sn] || "hold";
+            const tCat = targetCategory[sn] || "";
+            const tFund = targetFund[sn] || "";
+            const remarksText = remarks[sn] || "";
+            const actionLabel = action.toUpperCase();
+            const isHold = action === "hold";
 
-          // Replace <textarea> elements with static text divs
-          el.querySelectorAll<HTMLTextAreaElement>("textarea").forEach(ta => {
-            const text = ta.value || ta.textContent || "";
-            const div = doc.createElement("div");
-            div.textContent = text || "";
-            div.style.cssText = ta.style.cssText;
-            div.style.setProperty("font-size", "9px", "important");
-            div.style.setProperty("padding", "3px 6px", "important");
-            div.style.setProperty("border-radius", "4px", "important");
-            div.style.setProperty("border", "1px solid #e2e8f0", "important");
-            div.style.setProperty("min-height", "44px", "important");
-            div.style.setProperty("width", "100%", "important");
-            div.style.setProperty("box-sizing", "border-box", "important");
-            div.style.setProperty("white-space", "pre-wrap", "important");
-            div.style.setProperty("color", text ? "#334155" : "#94a3b8", "important");
-            if (!text) div.textContent = ta.placeholder || "";
-            ta.parentNode?.replaceChild(div, ta);
+            const wrap = doc.createElement("div");
+            wrap.style.cssText = actionBlock.style.cssText;
+            wrap.style.setProperty("display", "flex", "important");
+            wrap.style.setProperty("flex-direction", "column", "important");
+            wrap.style.setProperty("gap", "4px", "important");
+            wrap.style.setProperty("min-width", "180px", "important");
+
+            const actionLine = doc.createElement("div");
+            actionLine.textContent = actionLabel;
+            actionLine.style.setProperty("font-size", "9px", "important");
+            actionLine.style.setProperty("font-weight", "700", "important");
+            actionLine.style.setProperty("text-transform", "uppercase", "important");
+            actionLine.style.setProperty("letter-spacing", "0.05em", "important");
+            actionLine.style.setProperty("padding", "3px 6px", "important");
+            actionLine.style.setProperty("border-radius", "4px", "important");
+            actionLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            actionLine.style.setProperty("width", "100%", "important");
+            actionLine.style.setProperty("box-sizing", "border-box", "important");
+
+            const targetLine = doc.createElement("div");
+            targetLine.textContent = isHold ? "—" : [tCat, tFund].filter(Boolean).join(" • ");
+            targetLine.style.setProperty("font-size", "9px", "important");
+            targetLine.style.setProperty("font-weight", "700", "important");
+            targetLine.style.setProperty("padding", "3px 6px", "important");
+            targetLine.style.setProperty("border-radius", "4px", "important");
+            targetLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            targetLine.style.setProperty("width", "100%", "important");
+            targetLine.style.setProperty("box-sizing", "border-box", "important");
+            targetLine.style.setProperty("white-space", "pre-wrap", "important");
+
+            const remarksLine = doc.createElement("div");
+            remarksLine.textContent = remarksText || "Add remarks...";
+            remarksLine.style.setProperty("font-size", "9px", "important");
+            remarksLine.style.setProperty("padding", "3px 6px", "important");
+            remarksLine.style.setProperty("border-radius", "4px", "important");
+            remarksLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            remarksLine.style.setProperty("min-height", "44px", "important");
+            remarksLine.style.setProperty("width", "100%", "important");
+            remarksLine.style.setProperty("box-sizing", "border-box", "important");
+            remarksLine.style.setProperty("white-space", "pre-wrap", "important");
+            remarksLine.style.setProperty("color", remarksText ? "#334155" : "#94a3b8", "important");
+
+            wrap.appendChild(actionLine);
+            if (!isHold) wrap.appendChild(targetLine);
+            wrap.appendChild(remarksLine);
+            cell.replaceChildren(wrap);
           });
         },
       } as any);
