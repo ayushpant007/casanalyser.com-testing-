@@ -351,6 +351,14 @@ export default function ConciseReport() {
             wrap.style.setProperty("gap", "4px", "important");
             wrap.style.setProperty("min-width", "180px", "important");
 
+            const ACTION_COLOR_MAP: Record<string, { bg: string; color: string; border: string }> = {
+              hold:   { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
+              switch: { bg: "#fffbeb", color: "#b45309", border: "#fde68a" },
+              merge:  { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
+              sell:   { bg: "#fff1f2", color: "#e11d48", border: "#fecdd3" },
+            };
+            const aColor = ACTION_COLOR_MAP[action] ?? ACTION_COLOR_MAP.hold;
+
             const actionLine = doc.createElement("div");
             actionLine.textContent = actionLabel;
             actionLine.style.setProperty("font-size", "9px", "important");
@@ -359,7 +367,9 @@ export default function ConciseReport() {
             actionLine.style.setProperty("letter-spacing", "0.05em", "important");
             actionLine.style.setProperty("padding", "3px 6px", "important");
             actionLine.style.setProperty("border-radius", "4px", "important");
-            actionLine.style.setProperty("border", "1px solid #e2e8f0", "important");
+            actionLine.style.setProperty("background-color", aColor.bg, "important");
+            actionLine.style.setProperty("color", aColor.color, "important");
+            actionLine.style.setProperty("border", `1px solid ${aColor.border}`, "important");
             actionLine.style.setProperty("width", "100%", "important");
             actionLine.style.setProperty("box-sizing", "border-box", "important");
 
@@ -1497,7 +1507,11 @@ export default function ConciseReport() {
                                 const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
                                 const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
                                 return (
-                                  <div className="flex flex-col gap-1.5 min-w-[180px] max-w-[220px]">
+                                  <div
+                                    className="flex flex-col gap-1.5 min-w-[180px] max-w-[220px]"
+                                    data-action-block="true"
+                                    data-scheme-name={sn}
+                                  >
                                     <select
                                       value={action}
                                       onChange={(e) => updateAction(sn, e.target.value)}
