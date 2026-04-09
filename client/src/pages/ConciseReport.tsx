@@ -259,6 +259,43 @@ export default function ConciseReport() {
             }
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
+
+          // Replace <select> elements with static text spans so html2canvas can render them
+          el.querySelectorAll<HTMLSelectElement>("select").forEach(sel => {
+            const selectedText = sel.options[sel.selectedIndex]?.text || sel.value || "—";
+            const span = doc.createElement("div");
+            span.textContent = selectedText;
+            span.style.cssText = sel.style.cssText;
+            span.style.setProperty("font-size", "9px", "important");
+            span.style.setProperty("font-weight", "700", "important");
+            span.style.setProperty("padding", "3px 6px", "important");
+            span.style.setProperty("border-radius", "4px", "important");
+            span.style.setProperty("border", "1px solid #e2e8f0", "important");
+            span.style.setProperty("text-transform", "uppercase", "important");
+            span.style.setProperty("letter-spacing", "0.05em", "important");
+            span.style.setProperty("width", "100%", "important");
+            span.style.setProperty("box-sizing", "border-box", "important");
+            sel.parentNode?.replaceChild(span, sel);
+          });
+
+          // Replace <textarea> elements with static text divs
+          el.querySelectorAll<HTMLTextAreaElement>("textarea").forEach(ta => {
+            const text = ta.value || ta.textContent || "";
+            const div = doc.createElement("div");
+            div.textContent = text || "";
+            div.style.cssText = ta.style.cssText;
+            div.style.setProperty("font-size", "9px", "important");
+            div.style.setProperty("padding", "3px 6px", "important");
+            div.style.setProperty("border-radius", "4px", "important");
+            div.style.setProperty("border", "1px solid #e2e8f0", "important");
+            div.style.setProperty("min-height", "44px", "important");
+            div.style.setProperty("width", "100%", "important");
+            div.style.setProperty("box-sizing", "border-box", "important");
+            div.style.setProperty("white-space", "pre-wrap", "important");
+            div.style.setProperty("color", text ? "#334155" : "#94a3b8", "important");
+            if (!text) div.textContent = ta.placeholder || "";
+            ta.parentNode?.replaceChild(div, ta);
+          });
         },
       } as any);
 
