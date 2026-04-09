@@ -1425,6 +1425,13 @@ export default function ConciseReport() {
                                         </div>
                                       </div>
                                     )}
+                                    <textarea
+                                      value={remarks[sn] || ""}
+                                      onChange={(e) => updateRemark(sn, e.target.value)}
+                                      placeholder="Add remarks..."
+                                      className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-h-[44px]"
+                                      data-testid={`remark-${idx}`}
+                                    />
                                   </div>
                                 );
                               })()}
