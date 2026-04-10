@@ -336,6 +336,24 @@ export default function ConciseReport() {
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
 
+          // Fix header: html2canvas can't render -webkit-background-clip:text so replace with solid color
+          const investorNameEl = el.querySelector<HTMLElement>("[data-pdf-investor-name='true']");
+          if (investorNameEl) {
+            investorNameEl.style.setProperty("background", "none", "important");
+            investorNameEl.style.setProperty("-webkit-background-clip", "unset", "important");
+            investorNameEl.style.setProperty("-webkit-text-fill-color", "#d0f70f", "important");
+            investorNameEl.style.setProperty("color", "#d0f70f", "important");
+          }
+          // Ensure header background gradient renders correctly (inline styles already set)
+          const headerEl = el.querySelector<HTMLElement>("[data-pdf-header='true']");
+          if (headerEl) {
+            headerEl.style.setProperty("background", "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", "important");
+            headerEl.style.setProperty("border-radius", "16px", "important");
+            headerEl.style.setProperty("overflow", "hidden", "important");
+            headerEl.style.setProperty("border", "1px solid rgba(96,165,250,0.18)", "important");
+            headerEl.style.setProperty("padding", "28px 32px", "important");
+          }
+
           // Transform Recommended Funds rows: replace <select> inputs with static text fields
           el.querySelectorAll<HTMLElement>("[data-testid^='card-recommended-fund-']").forEach(card => {
             const selects = Array.from(card.querySelectorAll<HTMLSelectElement>("select"));
@@ -1294,11 +1312,11 @@ export default function ConciseReport() {
         <div ref={reportRef} className="space-y-6">
 
           {/* Header */}
-          <div className="relative overflow-hidden rounded-2xl px-8 py-7" style={{ background: "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", border: "1px solid rgba(96,165,250,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
+          <div data-pdf-clip="true" data-pdf-header="true" className="relative overflow-hidden rounded-2xl px-8 py-7" style={{ background: "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", border: "1px solid rgba(96,165,250,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
             <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 50%,rgba(139,92,246,0.12) 0%,transparent 70%)" }} />
             <div className="relative z-10">
               {investorName && (
-                <h1 className="text-4xl font-black mb-2 tracking-tight" style={{ background: "linear-gradient(90deg,#d0f70f,#a3e635)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <h1 data-pdf-investor-name="true" className="text-4xl font-black mb-2 tracking-tight" style={{ background: "linear-gradient(90deg,#d0f70f,#a3e635)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                   {investorName}
                 </h1>
               )}
