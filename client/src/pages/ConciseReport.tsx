@@ -1,6 +1,6 @@
 import { useParams, useLocation } from "wouter";
 import { useReport } from "@/hooks/use-reports";
-import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, FileSpreadsheet, Plus, Trash2 } from "lucide-react";
@@ -1482,15 +1482,15 @@ export default function ConciseReport() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      {/* Column group labels */}
+                      {/* Column group labels — 8 main columns */}
                       <tr className="bg-slate-50 border-b border-slate-100">
                         <th colSpan={4} className="px-4 py-1.5" />
                         <th colSpan={3} className="px-4 py-1.5 text-center">
                           <span className="text-[8px] font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5">CAGR vs Benchmark</span>
                         </th>
-                        <th colSpan={3} className="px-4 py-1.5" />
+                        <th className="px-4 py-1.5" />
                       </tr>
-                      {/* Column headers */}
+                      {/* 8 column headers */}
                       <tr className="bg-slate-50 border-b border-slate-200">
                         <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 w-8">#</th>
                         <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 min-w-[220px]">Fund Name</th>
@@ -1500,8 +1500,6 @@ export default function ConciseReport() {
                         <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50">3Y</th>
                         <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50 border-r border-indigo-100">5Y</th>
                         <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Score</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Rating</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1516,143 +1514,176 @@ export default function ConciseReport() {
                         const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
                         const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
                         const sipAmt = sipAmounts[r.mf.scheme_name];
+                        const rowKey = `${r.mf.isin || idx}_${r.mf.folio_no || idx}`;
 
                         return (
-                          <tr
-                            key={`${r.mf.isin || idx}_${r.mf.folio_no || idx}`}
-                            className={`border-b border-slate-100 border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/60`}
-                          >
-                            {/* # */}
-                            <td className="px-4 py-4 text-[10px] text-slate-400 font-mono align-top pt-5">{idx + 1}</td>
+                          <Fragment key={rowKey}>
+                            {/* ── Main data row (8 cols) ── */}
+                            <tr
+                              className={`border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/50`}
+                            >
+                              {/* # */}
+                              <td className="px-4 pt-4 pb-1 text-[10px] text-slate-400 font-mono align-top">{idx + 1}</td>
 
-                            {/* Fund Name */}
-                            <td className="px-4 py-4 align-top">
-                              <div className="flex flex-col gap-1 min-w-[200px] max-w-[280px]">
-                                <span className="text-[12px] font-semibold text-slate-800 leading-snug">{r.mf.scheme_name}</span>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wide border ${
-                                    (r.mf.fund_category || "").toLowerCase().includes("equity") ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                    (r.mf.fund_category || "").toLowerCase().includes("debt") ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                    "bg-slate-100 text-slate-500 border-slate-200"
-                                  }`}>{r.mf.fund_category || "—"}</span>
-                                  <span className="text-[9px] text-slate-400 font-mono">{r.mf.isin}</span>
-                                  {r.mf.folio_no && <span className="text-[9px] text-slate-400">· {r.mf.folio_no}</span>}
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Risk Type */}
-                            <td className="px-4 py-4 text-center align-top pt-5">
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
-                                {r.mf.fund_type || "—"}
-                              </span>
-                            </td>
-
-                            {/* SIP Amount */}
-                            <td className="px-4 py-4 text-center align-top pt-5">
-                              {sipAmt != null ? (
-                                <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
-                                  ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                </span>
-                              ) : (
-                                <span className="text-slate-300 text-[11px]">—</span>
-                              )}
-                            </td>
-
-                            {/* CAGR columns */}
-                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30">{fmtCagr(r.cagr1y, r.bm1y)}</td>
-                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30">{fmtCagr(r.cagr3y, r.bm3y)}</td>
-                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30 border-r border-indigo-100">{fmtCagr(r.cagr5y, r.bm5y)}</td>
-
-                            {/* Score */}
-                            <td className="px-4 py-4 text-center align-top pt-5">
-                              <div className="flex flex-col items-center gap-1.5">
-                                <div className="flex items-baseline gap-0.5">
-                                  <span className="text-[18px] font-black leading-none" style={{ color: meta.dot }}>{r.combined}</span>
-                                  <span className="text-[10px] text-slate-400 font-medium">/{r.maxScore}</span>
-                                </div>
-                                <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                  <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: meta.dot }} />
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Rating */}
-                            <td className="px-4 py-4 text-center align-top pt-5">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${meta.pill}`}>
-                                {r.rating}
-                              </span>
-                            </td>
-
-                            {/* Action */}
-                            <td className="px-4 py-4 align-top">
-                              <div
-                                className="flex flex-col gap-2 min-w-[190px]"
-                                data-action-block="true"
-                                data-scheme-name={sn}
-                              >
-                                <select
-                                  value={action}
-                                  onChange={(e) => updateAction(sn, e.target.value)}
-                                  className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-1 w-full ${aMeta.cls}`}
-                                  data-testid={`concise-action-select-${idx}`}
-                                >
-                                  <option value="">Select Action</option>
-                                  <option value="hold">Hold</option>
-                                  <option value="switch">Switch</option>
-                                  <option value="merge">Merge</option>
-                                  <option value="sell">Sell</option>
-                                </select>
-                                {action !== "hold" && (
-                                  <div className="flex flex-col gap-1.5 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                                    <select
-                                      value={tCat}
-                                      onChange={(e) => updateTargetCategory(sn, e.target.value)}
-                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full"
-                                      data-testid={`target-cat-${idx}`}
-                                    >
-                                      <option value="">Target Category…</option>
-                                      {recommendedOptions.map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                      ))}
-                                    </select>
-                                    <select
-                                      value={tSubCat}
-                                      onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
-                                      disabled={!tCat}
-                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full disabled:opacity-40"
-                                      data-testid={`target-subcat-${idx}`}
-                                    >
-                                      <option value="">Sub Category…</option>
-                                      {subCatOptions.map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                      ))}
-                                    </select>
-                                    <select
-                                      value={tFund}
-                                      onChange={(e) => updateTargetFund(sn, e.target.value)}
-                                      disabled={!tSubCat}
-                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full disabled:opacity-40"
-                                      data-testid={`target-fund-${idx}`}
-                                    >
-                                      <option value="">Target Fund…</option>
-                                      {fundOptions.map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                      ))}
-                                    </select>
+                              {/* Fund Name */}
+                              <td className="px-4 pt-4 pb-1 align-top">
+                                <div className="flex flex-col gap-1 min-w-[200px] max-w-[280px]">
+                                  <span className="text-[12px] font-semibold text-slate-800 leading-snug">{r.mf.scheme_name}</span>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wide border ${
+                                      (r.mf.fund_category || "").toLowerCase().includes("equity") ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                      (r.mf.fund_category || "").toLowerCase().includes("debt") ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                      "bg-slate-100 text-slate-500 border-slate-200"
+                                    }`}>{r.mf.fund_category || "—"}</span>
+                                    <span className="text-[9px] text-slate-400 font-mono">{r.mf.isin}</span>
+                                    {r.mf.folio_no && <span className="text-[9px] text-slate-400">· {r.mf.folio_no}</span>}
                                   </div>
+                                </div>
+                              </td>
+
+                              {/* Risk Type */}
+                              <td className="px-4 pt-4 pb-1 text-center align-top">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+                                  {r.mf.fund_type || "—"}
+                                </span>
+                              </td>
+
+                              {/* SIP Amount */}
+                              <td className="px-4 pt-4 pb-1 text-center align-top">
+                                {sipAmt != null ? (
+                                  <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+                                    ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-300 text-[11px]">—</span>
                                 )}
-                                <textarea
-                                  value={remarks[sn] || ""}
-                                  onChange={(e) => updateRemark(sn, e.target.value)}
-                                  placeholder="Add remarks…"
-                                  rows={2}
-                                  className="text-[9px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full resize-none placeholder:text-slate-300"
-                                  data-testid={`remark-${idx}`}
-                                />
-                              </div>
-                            </td>
-                          </tr>
+                              </td>
+
+                              {/* CAGR columns */}
+                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30">{fmtCagr(r.cagr1y, r.bm1y)}</td>
+                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30">{fmtCagr(r.cagr3y, r.bm3y)}</td>
+                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30 border-r border-indigo-100">{fmtCagr(r.cagr5y, r.bm5y)}</td>
+
+                              {/* Score */}
+                              <td className="px-4 pt-4 pb-1 text-center align-top">
+                                <div className="flex flex-col items-center gap-1.5">
+                                  <div className="flex items-baseline gap-0.5">
+                                    <span className="text-[18px] font-black leading-none" style={{ color: meta.dot }}>{r.combined}</span>
+                                    <span className="text-[10px] text-slate-400 font-medium">/{r.maxScore}</span>
+                                  </div>
+                                  <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                    <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: meta.dot }} />
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+
+                            {/* ── Sub-row: Rating + Action side by side ── */}
+                            <tr
+                              key={`sub-${rowKey}`}
+                              className={`border-b border-slate-100 border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/50`}
+                            >
+                              <td colSpan={8} className="px-4 pt-1 pb-4">
+                                <div className="flex items-start gap-4">
+                                  {/* Rating pill */}
+                                  <div className="flex-shrink-0 flex flex-col items-start gap-1 pt-0.5">
+                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Rating</span>
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${meta.pill}`}>
+                                      {r.rating}
+                                    </span>
+                                  </div>
+
+                                  {/* Divider */}
+                                  <div className="w-px self-stretch bg-slate-200 flex-shrink-0" />
+
+                                  {/* Action panel */}
+                                  <div
+                                    className="flex-1 flex flex-wrap items-start gap-3"
+                                    data-action-block="true"
+                                    data-scheme-name={sn}
+                                  >
+                                    <div className="flex flex-col gap-1 flex-shrink-0">
+                                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Action</span>
+                                      <select
+                                        value={action}
+                                        onChange={(e) => updateAction(sn, e.target.value)}
+                                        className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-1 w-[120px] ${aMeta.cls}`}
+                                        data-testid={`concise-action-select-${idx}`}
+                                      >
+                                        <option value="">Select</option>
+                                        <option value="hold">Hold</option>
+                                        <option value="switch">Switch</option>
+                                        <option value="merge">Merge</option>
+                                        <option value="sell">Sell</option>
+                                      </select>
+                                    </div>
+
+                                    {action !== "hold" && (
+                                      <div className="flex items-end gap-2 flex-wrap">
+                                        <div className="flex flex-col gap-1">
+                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Category</span>
+                                          <select
+                                            value={tCat}
+                                            onChange={(e) => updateTargetCategory(sn, e.target.value)}
+                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[140px]"
+                                            data-testid={`target-cat-${idx}`}
+                                          >
+                                            <option value="">Category…</option>
+                                            {recommendedOptions.map(opt => (
+                                              <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Sub Category</span>
+                                          <select
+                                            value={tSubCat}
+                                            onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
+                                            disabled={!tCat}
+                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[140px] disabled:opacity-40"
+                                            data-testid={`target-subcat-${idx}`}
+                                          >
+                                            <option value="">Sub Category…</option>
+                                            {subCatOptions.map(opt => (
+                                              <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Target Fund</span>
+                                          <select
+                                            value={tFund}
+                                            onChange={(e) => updateTargetFund(sn, e.target.value)}
+                                            disabled={!tSubCat}
+                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[160px] disabled:opacity-40"
+                                            data-testid={`target-fund-${idx}`}
+                                          >
+                                            <option value="">Fund…</option>
+                                            {fundOptions.map(opt => (
+                                              <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Remarks always visible, right side */}
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
+                                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Remarks</span>
+                                      <textarea
+                                        value={remarks[sn] || ""}
+                                        onChange={(e) => updateRemark(sn, e.target.value)}
+                                        placeholder="Add remarks…"
+                                        rows={2}
+                                        className="text-[9px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full resize-none placeholder:text-slate-300"
+                                        data-testid={`remark-${idx}`}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </Fragment>
                         );
                       })}
                     </tbody>
