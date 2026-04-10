@@ -1446,7 +1446,7 @@ export default function ConciseReport() {
                     <span className="text-[9px] text-slate-400 leading-none">BM: {bmVal.toFixed(1)}%</span>
                   )}
                   {diff !== null && (
-                    <span className={`text-[8px] font-semibold px-1 py-0.5 rounded-sm leading-none ${diff >= 0 ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}>
+                    <span className={`text-[8px] font-semibold leading-none ${diff >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
                       {diff >= 0 ? "+" : ""}{diff.toFixed(1)}%
                     </span>
                   )}
