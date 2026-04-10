@@ -336,6 +336,67 @@ export default function ConciseReport() {
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
 
+          // Transform Recommended Funds rows: replace <select> inputs with static text fields
+          el.querySelectorAll<HTMLElement>("[data-testid^='card-recommended-fund-']").forEach(card => {
+            const selects = Array.from(card.querySelectorAll<HTMLSelectElement>("select"));
+            const labels  = Array.from(card.querySelectorAll<HTMLLabelElement>("label"));
+
+            const newCard = doc.createElement("div");
+            newCard.style.cssText = [
+              "display:grid",
+              "grid-template-columns:1fr 1fr 1fr",
+              "gap:12px",
+              "border:1px solid #e2e8f0",
+              "border-radius:12px",
+              "padding:12px 16px",
+              "background:#f8fafc",
+              "box-sizing:border-box",
+              "width:100%",
+            ].join(";");
+
+            selects.forEach((sel, i) => {
+              const labelText = labels[i]?.textContent?.trim() ?? "";
+              const selectedOpt = sel.options[sel.selectedIndex]?.text ?? "";
+              const isPlaceholder = !selectedOpt || selectedOpt.toLowerCase().startsWith("select ");
+              const displayValue = isPlaceholder ? "—" : selectedOpt;
+
+              const fieldDiv = doc.createElement("div");
+              fieldDiv.style.cssText = "display:flex;flex-direction:column;gap:4px;min-width:0";
+
+              const labelDiv = doc.createElement("div");
+              labelDiv.textContent = labelText;
+              labelDiv.style.cssText = [
+                "font-size:9px",
+                "font-weight:700",
+                "letter-spacing:0.06em",
+                "text-transform:uppercase",
+                "color:#64748b",
+              ].join(";");
+
+              const valueDiv = doc.createElement("div");
+              valueDiv.textContent = displayValue;
+              valueDiv.style.cssText = [
+                "font-size:11px",
+                "color:" + (isPlaceholder ? "#94a3b8" : "#1e293b"),
+                "border:1px solid #e2e8f0",
+                "border-radius:6px",
+                "padding:6px 10px",
+                "background:#ffffff",
+                "white-space:normal",
+                "word-break:break-word",
+                "line-height:1.4",
+                "min-height:30px",
+                "box-sizing:border-box",
+              ].join(";");
+
+              fieldDiv.appendChild(labelDiv);
+              fieldDiv.appendChild(valueDiv);
+              newCard.appendChild(fieldDiv);
+            });
+
+            card.replaceWith(newCard);
+          });
+
           el.querySelectorAll<HTMLTableCellElement>("td").forEach(cell => {
             const actionBlock = cell.querySelector<HTMLElement>("[data-action-block='true']");
             if (!actionBlock) return;
