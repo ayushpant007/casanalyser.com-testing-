@@ -1770,15 +1770,15 @@ export default function ConciseReport() {
                       .replace(/\s*Growth (Option|Plan)?\s*/gi, "")
                       .replace(/\s*-\s*Growth\s*$/i, "")
                       .replace(/\s+/g, " ").trim();
-                    const shortName = name.length > 40 ? name.slice(0, 38) + "…" : name;
+                    const shortName = name.length > 52 ? name.slice(0, 50) + "…" : name;
                     return (
                       <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-3 py-2 font-semibold text-slate-700 max-w-[200px]" title={mf.scheme_name}>{shortName}</td>
-                        <td className="px-3 py-2 text-slate-600">{mf.fund_category || '—'}</td>
-                        <td className="px-3 py-2 text-right text-slate-600">{(mf.units || mf.closing_balance)?.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
-                        <td className="px-3 py-2 text-right font-mono">{mf.nav?.toFixed(4)}</td>
-                        <td className="px-3 py-2 text-right text-slate-600">{mf.invested_amount?.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right font-bold text-slate-900">{mf.valuation?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                        <td className="px-3 py-2 font-semibold text-slate-700 max-w-[240px] whitespace-normal leading-snug" title={mf.scheme_name}>{shortName}</td>
+                        <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{mf.fund_category || '—'}</td>
+                        <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">{(mf.units || mf.closing_balance)?.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
+                        <td className="px-3 py-2 text-right font-mono whitespace-nowrap">{mf.nav?.toFixed(4)}</td>
+                        <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">{mf.invested_amount?.toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900 whitespace-nowrap">{mf.valuation?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                         <td className={`px-3 py-2 text-right font-semibold ${mf.unrealised_profit_loss >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {mf.unrealised_profit_loss?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </td>
