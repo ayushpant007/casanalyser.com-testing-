@@ -752,7 +752,8 @@ export default function ConciseReport() {
           const finScore = sc?.totalScore ?? 0;
           const total = finScore + perfScore;
           const rating = sc?.fundRating || "—";
-          const action = (actionSelections[mf.scheme_name] || "hold").toUpperCase();
+          const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
+          const action = (actionSelections[mfKey] || "hold").toUpperCase();
           const sip = sipAmounts[mf.scheme_name];
           const c1 = pv(cagr["1y"]), c3 = pv(cagr["3y"]), c5 = pv(cagr["5y"]);
           const b1 = pv(bm["1y"]), b3 = pv(bm["3y"]), b5 = pv(bm["5y"]);
@@ -813,10 +814,10 @@ export default function ConciseReport() {
             num(total, "0", i),
             ratingStyle(total),
             actionStyle(action),
-            txt(targetCategory[mf.scheme_name] || "—", i),
-            txt(targetSubCategory[mf.scheme_name] || "—", i),
-            txt(targetFund[mf.scheme_name] || "—", i, true),
-            txt(remarks[mf.scheme_name] || "—", i, true),
+            txt(targetCategory[mfKey] || "—", i),
+            txt(targetSubCategory[mfKey] || "—", i),
+            txt(targetFund[mfKey] || "—", i, true),
+            txt(remarks[mfKey] || "—", i, true),
           ];
         }),
       ];
@@ -873,11 +874,12 @@ export default function ConciseReport() {
       // Group by fundName + cat + subCat so duplicates collapse into one row
       const naPortfolioMap: Record<string, { fundName: string; cat: string; subCat: string; labels: string[]; valuation: number }> = {};
       snap.forEach((mf: any) => {
-        const action = (actionSelections[mf.scheme_name] || "hold");
+        const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
+        const action = (actionSelections[mfKey] || "hold");
         const isHold = action === "hold";
-        const fundName = isHold ? (mf.scheme_name || "—") : (targetFund[mf.scheme_name] || "—");
-        const cat = isHold ? (mf.fund_category || "—") : (targetCategory[mf.scheme_name] || "—");
-        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mf.scheme_name] || "—");
+        const fundName = isHold ? (mf.scheme_name || "—") : (targetFund[mfKey] || "—");
+        const cat = isHold ? (mf.fund_category || "—") : (targetCategory[mfKey] || "—");
+        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mfKey] || "—");
         const label = isHold ? "Existing Fund" : "New Fund";
         const valuation = mf.valuation || 0;
         const key = `${fundName}||${cat}||${subCat}`;
@@ -913,10 +915,11 @@ export default function ConciseReport() {
       // Allocation summary: group by category + sub-category
       const summaryMap: Record<string, { cat: string; subCat: string; val: number }> = {};
       snap.forEach((mf: any) => {
-        const action = (actionSelections[mf.scheme_name] || "hold");
+        const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
+        const action = (actionSelections[mfKey] || "hold");
         const isHold = action === "hold";
-        const cat = isHold ? (mf.fund_category || "Others") : (targetCategory[mf.scheme_name] || "—");
-        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mf.scheme_name] || "—");
+        const cat = isHold ? (mf.fund_category || "Others") : (targetCategory[mfKey] || "—");
+        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mfKey] || "—");
         const key = `${cat}||${subCat}`;
         if (!summaryMap[key]) summaryMap[key] = { cat, subCat, val: 0 };
         summaryMap[key].val += (mf.valuation || 0);
@@ -1514,7 +1517,7 @@ export default function ConciseReport() {
                             </td>
                             <td className="px-4 py-3">
                               {(() => {
-                                const sn = r.mf.scheme_name;
+                                const sn = `${r.mf.isin || r.mf.scheme_name}_${r.mf.folio_no || ''}`;
                                 const action = actionSelections[sn] || "hold";
                                 const cls = ACTION_STYLES[action] ?? ACTION_STYLES.hold;
                                 const tCat = targetCategory[sn] || "";
