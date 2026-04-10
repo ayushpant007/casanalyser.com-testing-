@@ -1381,9 +1381,9 @@ export default function ConciseReport() {
                     </div>
                     <div className="space-y-2">
                       {subs.map(([type, subPct]) => (
-                        <div key={type} className="flex items-center gap-3">
-                          <span data-pdf-clip="true" className="text-xs text-slate-600 w-28 flex-shrink-0 truncate">{type}</span>
-                          <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div key={type} className="flex items-start gap-3">
+                          <span className="text-xs text-slate-600 w-36 flex-shrink-0 break-words leading-tight">{type}</span>
+                          <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1">
                             <div className="h-full rounded-full" style={{ width: `${Math.min(subPct, 100)}%`, backgroundColor: meta.color }} />
                           </div>
                           <span className="text-xs font-semibold text-slate-700 w-12 text-right">{subPct.toFixed(2)}%</span>
