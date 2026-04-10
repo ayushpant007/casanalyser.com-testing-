@@ -403,17 +403,10 @@ export default function ConciseReport() {
             const sn = actionBlock.getAttribute("data-scheme-name") || "";
             const action = actionSelections[sn] || "hold";
             const tCat = targetCategory[sn] || "";
+            const tSubCat = targetSubCategory[sn] || "";
             const tFund = targetFund[sn] || "";
             const remarksText = remarks[sn] || "";
-            const actionLabel = action.toUpperCase();
             const isHold = action === "hold";
-
-            const wrap = doc.createElement("div");
-            wrap.style.cssText = actionBlock.style.cssText;
-            wrap.style.setProperty("display", "flex", "important");
-            wrap.style.setProperty("flex-direction", "column", "important");
-            wrap.style.setProperty("gap", "4px", "important");
-            wrap.style.setProperty("min-width", "180px", "important");
 
             const ACTION_COLOR_MAP: Record<string, { bg: string; color: string; border: string }> = {
               hold:   { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
@@ -423,47 +416,117 @@ export default function ConciseReport() {
             };
             const aColor = ACTION_COLOR_MAP[action] ?? ACTION_COLOR_MAP.hold;
 
-            const actionLine = doc.createElement("div");
-            actionLine.textContent = actionLabel;
-            actionLine.style.setProperty("font-size", "9px", "important");
-            actionLine.style.setProperty("font-weight", "700", "important");
-            actionLine.style.setProperty("text-transform", "uppercase", "important");
-            actionLine.style.setProperty("letter-spacing", "0.05em", "important");
-            actionLine.style.setProperty("padding", "3px 6px", "important");
-            actionLine.style.setProperty("border-radius", "4px", "important");
-            actionLine.style.setProperty("background-color", aColor.bg, "important");
-            actionLine.style.setProperty("color", aColor.color, "important");
-            actionLine.style.setProperty("border", `1px solid ${aColor.border}`, "important");
-            actionLine.style.setProperty("width", "100%", "important");
-            actionLine.style.setProperty("box-sizing", "border-box", "important");
+            // Helper: create a labelled static field (matching web view style)
+            const makeField = (labelText: string, valueText: string, opts: { width?: string; flex?: string; color?: string; bold?: boolean } = {}) => {
+              const wrap = doc.createElement("div");
+              wrap.style.cssText = [
+                "display:flex",
+                "flex-direction:column",
+                "gap:3px",
+                opts.width ? `width:${opts.width}` : "",
+                opts.flex  ? `flex:${opts.flex}` : "flex-shrink:0",
+                "min-width:0",
+              ].filter(Boolean).join(";");
 
-            const targetLine = doc.createElement("div");
-            targetLine.textContent = isHold ? "—" : [tCat, tFund].filter(Boolean).join(" • ");
-            targetLine.style.setProperty("font-size", "9px", "important");
-            targetLine.style.setProperty("font-weight", "700", "important");
-            targetLine.style.setProperty("padding", "3px 6px", "important");
-            targetLine.style.setProperty("border-radius", "4px", "important");
-            targetLine.style.setProperty("border", "1px solid #e2e8f0", "important");
-            targetLine.style.setProperty("width", "100%", "important");
-            targetLine.style.setProperty("box-sizing", "border-box", "important");
-            targetLine.style.setProperty("white-space", "pre-wrap", "important");
+              const lbl = doc.createElement("div");
+              lbl.textContent = labelText;
+              lbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
 
-            const remarksLine = doc.createElement("div");
-            remarksLine.textContent = remarksText || "Add remarks...";
-            remarksLine.style.setProperty("font-size", "9px", "important");
-            remarksLine.style.setProperty("padding", "3px 6px", "important");
-            remarksLine.style.setProperty("border-radius", "4px", "important");
-            remarksLine.style.setProperty("border", "1px solid #e2e8f0", "important");
-            remarksLine.style.setProperty("min-height", "44px", "important");
-            remarksLine.style.setProperty("width", "100%", "important");
-            remarksLine.style.setProperty("box-sizing", "border-box", "important");
-            remarksLine.style.setProperty("white-space", "pre-wrap", "important");
-            remarksLine.style.setProperty("color", remarksText ? "#334155" : "#94a3b8", "important");
+              const val = doc.createElement("div");
+              val.textContent = valueText || "—";
+              val.style.cssText = [
+                "font-size:9px",
+                "font-weight:" + (opts.bold ? "700" : "500"),
+                "color:" + (opts.color || (valueText ? "#334155" : "#94a3b8")),
+                "border:1px solid #e2e8f0",
+                "border-radius:6px",
+                "padding:4px 8px",
+                "background:#ffffff",
+                "white-space:normal",
+                "word-break:break-word",
+                "line-height:1.4",
+                "min-height:26px",
+                "box-sizing:border-box",
+              ].join(";");
 
-            wrap.appendChild(actionLine);
-            if (!isHold) wrap.appendChild(targetLine);
-            wrap.appendChild(remarksLine);
-            cell.replaceChildren(wrap);
+              wrap.appendChild(lbl);
+              wrap.appendChild(val);
+              return wrap;
+            };
+
+            // Outer row: horizontal flex matching web layout
+            const outerRow = doc.createElement("div");
+            outerRow.style.cssText = "display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;width:100%;box-sizing:border-box";
+
+            // Action badge field
+            const actionValDiv = doc.createElement("div");
+            actionValDiv.textContent = action.toUpperCase();
+            actionValDiv.style.cssText = [
+              "font-size:9px",
+              "font-weight:700",
+              "text-transform:uppercase",
+              "letter-spacing:0.05em",
+              "padding:4px 10px",
+              "border-radius:6px",
+              `background-color:${aColor.bg}`,
+              `color:${aColor.color}`,
+              `border:1px solid ${aColor.border}`,
+              "min-height:26px",
+              "box-sizing:border-box",
+              "align-self:flex-end",
+            ].join(";");
+
+            const actionFieldWrap = doc.createElement("div");
+            actionFieldWrap.style.cssText = "display:flex;flex-direction:column;gap:3px;flex-shrink:0";
+            const actionLbl = doc.createElement("div");
+            actionLbl.textContent = "ACTION";
+            actionLbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
+            actionFieldWrap.appendChild(actionLbl);
+            actionFieldWrap.appendChild(actionValDiv);
+            outerRow.appendChild(actionFieldWrap);
+
+            // Vertical divider
+            const divider = doc.createElement("div");
+            divider.style.cssText = "width:1px;background:#e2e8f0;align-self:stretch;flex-shrink:0;margin-top:14px";
+            outerRow.appendChild(divider);
+
+            // Target fields (only if not hold)
+            if (!isHold) {
+              outerRow.appendChild(makeField("Category", tCat, { width: "130px" }));
+              outerRow.appendChild(makeField("Sub Category", tSubCat, { width: "130px" }));
+              outerRow.appendChild(makeField("Target Fund", tFund, { width: "160px" }));
+
+              const divider2 = doc.createElement("div");
+              divider2.style.cssText = "width:1px;background:#e2e8f0;align-self:stretch;flex-shrink:0;margin-top:14px";
+              outerRow.appendChild(divider2);
+            }
+
+            // Remarks (always shown, grows to fill remaining space)
+            const remarksFieldWrap = doc.createElement("div");
+            remarksFieldWrap.style.cssText = "display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px";
+            const remarksLbl = doc.createElement("div");
+            remarksLbl.textContent = "REMARKS";
+            remarksLbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
+            const remarksVal = doc.createElement("div");
+            remarksVal.textContent = remarksText || "—";
+            remarksVal.style.cssText = [
+              "font-size:9px",
+              "color:" + (remarksText ? "#334155" : "#94a3b8"),
+              "border:1px solid #e2e8f0",
+              "border-radius:6px",
+              "padding:4px 8px",
+              "background:#ffffff",
+              "white-space:pre-wrap",
+              "word-break:break-word",
+              "line-height:1.4",
+              "min-height:40px",
+              "box-sizing:border-box",
+            ].join(";");
+            remarksFieldWrap.appendChild(remarksLbl);
+            remarksFieldWrap.appendChild(remarksVal);
+            outerRow.appendChild(remarksFieldWrap);
+
+            cell.replaceChildren(outerRow);
           });
         },
       } as any);
