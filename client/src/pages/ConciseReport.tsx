@@ -317,8 +317,11 @@ export default function ConciseReport() {
           el.style.setProperty("padding", "32px", "important");
           el.style.setProperty("width", `${CAPTURE_WIDTH - 64}px`, "important");
           el.style.setProperty("max-width", "none", "important");
-          // Remove all overflow clipping so nothing gets cut off
+          // Remove overflow clipping on containers so nothing gets cut off,
+          // but skip elements marked data-pdf-clip (progress bars, pill fills, truncated text)
+          // which need overflow:hidden to maintain their shape / ellipsis behaviour.
           el.querySelectorAll<HTMLElement>("*").forEach(child => {
+            if (child.dataset.pdfClip) return;
             const cs = doc.defaultView?.getComputedStyle(child);
             if (!cs) return;
             if (cs.overflow === "hidden" || cs.overflow === "scroll" || cs.overflow === "auto") {
@@ -1321,7 +1324,7 @@ export default function ConciseReport() {
                               <td className="px-5 py-3.5 text-sm text-slate-600 font-medium">{ideal.toFixed(0)}%</td>
                               <td className="px-5 py-3.5">
                                 <div className="flex items-center gap-1.5">
-                                  <div className="flex-1 bg-slate-100 rounded-full h-2" style={{ maxWidth: 120 }}>
+                                  <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden" style={{ maxWidth: 120 }}>
                                     <div className="h-2 rounded-full" style={{ width: `${Math.min(actual, 100)}%`, backgroundColor: meta.color }} />
                                   </div>
                                   <span className="text-xs font-semibold" style={{ color: statusColor }}>
@@ -1373,14 +1376,14 @@ export default function ConciseReport() {
                         <div className="text-xs text-slate-400">{pct.toFixed(2)}% of portfolio</div>
                       </div>
                     </div>
-                    <div className="h-2 rounded-full mb-4 overflow-hidden bg-slate-100">
+                    <div data-pdf-clip="true" className="h-2 rounded-full mb-4 overflow-hidden bg-slate-100">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: meta.color }} />
                     </div>
                     <div className="space-y-2">
                       {subs.map(([type, subPct]) => (
                         <div key={type} className="flex items-center gap-3">
-                          <span className="text-xs text-slate-600 w-28 flex-shrink-0 truncate">{type}</span>
-                          <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                          <span data-pdf-clip="true" className="text-xs text-slate-600 w-28 flex-shrink-0 truncate">{type}</span>
+                          <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div className="h-full rounded-full" style={{ width: `${Math.min(subPct, 100)}%`, backgroundColor: meta.color }} />
                           </div>
                           <span className="text-xs font-semibold text-slate-700 w-12 text-right">{subPct.toFixed(2)}%</span>
@@ -1571,7 +1574,7 @@ export default function ConciseReport() {
                                     <span className="text-[18px] font-black leading-none" style={{ color: meta.dot }}>{r.combined}</span>
                                     <span className="text-[10px] text-slate-400 font-medium">/{r.maxScore}</span>
                                   </div>
-                                  <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                  <div data-pdf-clip="true" className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                                     <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: meta.dot }} />
                                   </div>
                                 </div>
