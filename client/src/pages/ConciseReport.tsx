@@ -1244,33 +1244,34 @@ export default function ConciseReport() {
       {/* Navbar */}
       <nav className="border-b" style={{ background: "rgba(10,14,46,0.6)", backdropFilter: "blur(16px)", borderColor: "rgba(96,165,250,0.15)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg" style={{ background: "linear-gradient(135deg,#3b6fff,#9333ea)", boxShadow: "0 0 16px rgba(59,111,255,0.5)" }}>
+          <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110" style={{ background: "linear-gradient(135deg,#3b6fff,#9333ea)", boxShadow: "0 0 20px rgba(59,111,255,0.55)" }}>
               <BarChart2 className="w-5 h-5" />
             </div>
-            <span className="text-xl font-bold font-display" style={{ background: "linear-gradient(90deg,#60a5fa,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span className="text-xl font-bold tracking-tight" style={{ background: "linear-gradient(90deg,#60a5fa,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               FinAnalyze
             </span>
           </div>
-          <span className="text-slate-400 text-sm font-medium">AI-Powered Portfolio Insights</span>
+          <span className="hidden sm:block text-slate-500 text-xs font-semibold uppercase tracking-widest">AI-Powered Portfolio Insights</span>
         </div>
       </nav>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-4 relative z-10">
-        {/* Top bar: Back + title + Download */}
+        {/* Top bar: Back + Download */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
+            className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium transition-all duration-200 hover:gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Full Report
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Button
               onClick={downloadExcel}
               disabled={isExporting}
-              className="bg-emerald-700 text-white hover:bg-emerald-600"
+              className="text-white border-0 font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg,#059669,#10b981)" }}
               data-testid="button-download-concise-excel"
             >
               {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 mr-2" />}
@@ -1279,7 +1280,8 @@ export default function ConciseReport() {
             <Button
               onClick={downloadPDF}
               disabled={isDownloading}
-              className="bg-slate-900 text-white hover:bg-slate-700"
+              className="text-white border border-slate-600 font-semibold shadow-lg hover:shadow-slate-500/30 transition-all duration-200 hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg,#1e293b,#334155)" }}
               data-testid="button-download-concise-pdf"
             >
               {isDownloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
@@ -1292,22 +1294,42 @@ export default function ConciseReport() {
         <div ref={reportRef} className="space-y-6">
 
           {/* Header */}
-          <div className="pb-4 border-b border-slate-200/20">
-            {investorName && <h1 className="text-3xl font-bold text-[#d0f70f] mb-1">{investorName}</h1>}
-            <div className="flex items-center gap-2 text-slate-400">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
+          <div className="relative overflow-hidden rounded-2xl px-8 py-7" style={{ background: "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", border: "1px solid rgba(96,165,250,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 50%,rgba(139,92,246,0.12) 0%,transparent 70%)" }} />
+            <div className="relative z-10">
+              {investorName && (
+                <h1 className="text-4xl font-black mb-2 tracking-tight" style={{ background: "linear-gradient(90deg,#d0f70f,#a3e635)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  {investorName}
+                </h1>
+              )}
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-1.5 text-slate-400 text-sm">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
+                </div>
+                {report.investorType && (
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(99,102,241,0.15)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.3)" }}>
+                    {report.investorType}
+                  </span>
+                )}
+                {report.ageGroup && (
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(20,184,166,0.12)", color: "#5eead4", border: "1px solid rgba(20,184,166,0.25)" }}>
+                    Age {report.ageGroup}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
           {/* 1. Portfolio Overview */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-6 pt-5 pb-2 border-b border-slate-100">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
+            <div className="px-6 pt-4 pb-3 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#6366f1,#8b5cf6)" }} />
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 Portfolio Overview&nbsp;&nbsp;·&nbsp;&nbsp;{format(new Date(), "MMM d, yyyy")}
               </p>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-5">
               {(() => {
                 const absoluteReturn = totalValuation - totalInvested;
                 const absoluteReturnPct = totalInvested > 0 ? (absoluteReturn / totalInvested) * 100 : 0;
@@ -1315,43 +1337,45 @@ export default function ConciseReport() {
                 const accounts = analysis.account_summaries || [];
                 const totalSchemes = mfSnapshot.length;
                 return (
-                  <>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="p-4 rounded-xl bg-slate-50">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Value</p>
-                        <p className="text-xl font-bold text-slate-900">{formatLakh(totalValuation)}</p>
-                        <p className={`text-xs font-semibold mt-0.5 ${absoluteReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {absoluteReturn >= 0 ? '+' : ''}{absoluteReturnPct.toFixed(1)}% overall return
-                        </p>
-                      </div>
-                      <div className="p-4 rounded-xl bg-slate-50">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Approx. CAGR</p>
-                        <p className="text-xl font-bold text-slate-900">{approxCagr.toFixed(1)}%</p>
-                        <p className="text-xs text-slate-400 mt-0.5">estimated 2-year</p>
-                      </div>
-                      <div className="p-4 rounded-xl bg-slate-50">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Absolute Gain</p>
-                        <p className={`text-xl font-bold ${absoluteReturn >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                          {absoluteReturn >= 0 ? '+' : ''}{formatLakh(Math.abs(absoluteReturn))}
-                        </p>
-                        <p className={`text-xs font-semibold mt-0.5 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          on ₹{(totalInvested / 100000).toFixed(2)} L invested
-                        </p>
-                      </div>
-                      <div className="p-4 rounded-xl bg-slate-50">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Schemes</p>
-                        <p className="text-xl font-bold text-slate-900">{totalSchemes}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
-                      </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {/* Total Value */}
+                    <div className="p-4 rounded-xl border border-indigo-100/70 bg-gradient-to-br from-indigo-50 to-blue-50 hover:shadow-md hover:border-indigo-200 transition-all duration-200 cursor-default">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-400 mb-1.5">Total Value</p>
+                      <p className="text-xl font-black text-indigo-900">{formatLakh(totalValuation)}</p>
+                      <p className={`text-xs font-semibold mt-1 ${absoluteReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {absoluteReturn >= 0 ? '+' : ''}{absoluteReturnPct.toFixed(1)}% overall return
+                      </p>
                     </div>
-                  </>
+                    {/* CAGR */}
+                    <div className="p-4 rounded-xl border border-violet-100/70 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-md hover:border-violet-200 transition-all duration-200 cursor-default">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-violet-400 mb-1.5">Approx. CAGR</p>
+                      <p className="text-xl font-black text-violet-900">{approxCagr.toFixed(1)}%</p>
+                      <p className="text-xs text-violet-400 mt-1 font-medium">estimated 2-year</p>
+                    </div>
+                    {/* Absolute Gain */}
+                    <div className={`p-4 rounded-xl border transition-all duration-200 cursor-default hover:shadow-md ${absoluteReturn >= 0 ? 'border-emerald-100/70 bg-gradient-to-br from-emerald-50 to-teal-50 hover:border-emerald-200' : 'border-rose-100/70 bg-gradient-to-br from-rose-50 to-pink-50 hover:border-rose-200'}`}>
+                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1.5 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-400'}`}>Absolute Gain</p>
+                      <p className={`text-xl font-black ${absoluteReturn >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                        {absoluteReturn >= 0 ? '+' : ''}{formatLakh(Math.abs(absoluteReturn))}
+                      </p>
+                      <p className={`text-xs font-semibold mt-1 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        on ₹{(totalInvested / 100000).toFixed(2)} L invested
+                      </p>
+                    </div>
+                    {/* Total Schemes */}
+                    <div className="p-4 rounded-xl border border-amber-100/70 bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-default">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-amber-500 mb-1.5">Total Schemes</p>
+                      <p className="text-xl font-black text-amber-900">{totalSchemes}</p>
+                      <p className="text-xs text-amber-400 mt-1 font-medium">across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
                 );
               })()}
             </div>
           </div>
 
           {/* 2. Asset Allocation Check */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
             {(() => {
               const idealMap: Record<string, number> = {};
               allCategories.forEach(c => { idealMap[c] = parseIdeal(idealRaw[c]); });
@@ -1382,17 +1406,20 @@ export default function ConciseReport() {
               return (
                 <>
                   <div className="px-6 pt-5 pb-4 flex items-start justify-between border-b border-slate-100">
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-800 mb-2">Asset allocation check</h3>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-100">{report.investorType || "—"}</span>
-                        <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1 rounded-full">Age {report.ageGroup || "—"}</span>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1 h-full min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: "linear-gradient(180deg,#3b82f6,#6366f1)" }} />
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-800 mb-2">Asset allocation check</h3>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-100">{report.investorType || "—"}</span>
+                          <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1 rounded-full">Age {report.ageGroup || "—"}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-400 font-medium mb-0.5">Overall health</div>
-                      <div className="text-3xl font-bold" style={{ color: healthColor }}>{healthScore}<span className="text-base font-semibold text-slate-400">/100</span></div>
-                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${healthColor}18`, color: healthColor }}>{healthLabel}</span>
+                      <div className="text-xs text-slate-400 font-medium mb-0.5 uppercase tracking-widest">Overall health</div>
+                      <div className="text-4xl font-black" style={{ color: healthColor }}>{healthScore}<span className="text-base font-semibold text-slate-400">/100</span></div>
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${healthColor}18`, color: healthColor, border: `1px solid ${healthColor}30` }}>{healthLabel}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
@@ -1468,17 +1495,21 @@ export default function ConciseReport() {
           </div>
 
           {/* 3. Category Wise Distribution */}
-          <div className="bg-[#f5f0e8] rounded-2xl border border-slate-200 overflow-hidden p-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">
-              Category Wise Distribution · Portfolio Weightage by Fund Category
-            </p>
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
+            <div className="px-6 pt-4 pb-3 border-b border-slate-100 flex items-center gap-3" style={{ background: "linear-gradient(90deg,#fafaf7 0%,#f5f0e8 100%)" }}>
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#f59e0b,#d97706)" }} />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                Category Wise Distribution · Portfolio Weightage by Fund Category
+              </p>
+            </div>
+            <div className="p-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {["Equity","Debt","Hybrid","Gold/Silver"].map(cat => {
                 const meta = { Equity: { color:"#3b82f6",label:"Equity" }, Debt: { color:"#f59e0b",label:"Debt" }, Hybrid: { color:"#94a3b8",label:"Hybrid" }, "Gold/Silver": { color:"#d97706",label:"Gold / Silver" } }[cat]!;
                 const pct = actualMap[cat] || 0;
                 const subCount = Object.keys(typeMap[cat] || {}).length;
                 return (
-                  <div key={cat} className="bg-white rounded-xl p-4 border border-slate-100">
+                  <div key={cat} className="bg-white rounded-xl p-4 border hover:shadow-md transition-all duration-200 cursor-default" style={{ borderColor: `${meta.color}30`, borderTopWidth: 3, borderTopColor: meta.color }}>
                     <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: meta.color }}>{meta.label}</div>
                     <div className="text-2xl font-bold text-slate-800">{pct.toFixed(2)}%</div>
                     <div className="text-xs text-slate-400 mt-0.5">{subCount > 0 ? `${subCount} sub-categor${subCount === 1 ? "y" : "ies"}` : "No data"}</div>
@@ -1517,6 +1548,7 @@ export default function ConciseReport() {
                   </div>
                 );
               })}
+            </div>
             </div>
           </div>
 
@@ -1821,20 +1853,36 @@ export default function ConciseReport() {
           })()}
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-4 text-white flex items-center justify-between">
-              <h3 className="text-lg font-bold">Recommended Funds</h3>
-              <Button type="button" size="sm" onClick={addRecommendedFund} className="bg-white/15 hover:bg-white/25 text-white" data-testid="button-add-recommended-fund">
+            <div className="p-5 text-white flex items-center justify-between" style={{ background: "linear-gradient(135deg,#059669 0%,#0d9488 50%,#0891b2 100%)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold tracking-tight">Recommended Funds</h3>
+                  <p className="text-emerald-100 text-xs font-medium">Curated fund suggestions for your portfolio</p>
+                </div>
+              </div>
+              <Button type="button" size="sm" onClick={addRecommendedFund} className="bg-white/20 hover:bg-white/30 text-white border-white/30 border font-semibold transition-all duration-200" data-testid="button-add-recommended-fund">
                 <Plus className="h-4 w-4 mr-1" />
-                Add Recommended Fund +
+                Add Fund
               </Button>
             </div>
             <div className="p-4 space-y-3">
-              {recommendedFunds.length === 0 && <div className="text-sm text-slate-500" data-testid="text-no-recommended-funds">No recommended funds added yet.</div>}
+              {recommendedFunds.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-center" data-testid="text-no-recommended-funds">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                    <Plus className="w-5 h-5 text-slate-400" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-500">No recommended funds added yet</p>
+                  <p className="text-xs text-slate-400 mt-1">Click "Add Fund" to get started</p>
+                </div>
+              )}
               {recommendedFunds.map((row, idx) => {
                 const subCategories = row.category ? recommendedRowsByCategory(row.category) : [];
                 const fundNames = row.category && row.subCategory ? recommendedFundsBySelection(row.category, row.subCategory) : [];
                 return (
-                  <div key={row.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end border border-slate-200 rounded-xl p-3 bg-slate-50/60" data-testid={`card-recommended-fund-${row.id}`}>
+                  <div key={row.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end border border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all duration-200" data-testid={`card-recommended-fund-${row.id}`}>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
                       <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.category} onChange={(e) => updateRecommendedFund(row.id, { category: e.target.value, subCategory: "", fundName: "" })} data-testid={`select-recommended-category-${idx}`}>
@@ -1869,9 +1917,15 @@ export default function ConciseReport() {
           </div>
 
           {/* 5. Portfolio Snapshot - Mutual Fund Units */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white">
-              <h3 className="text-lg font-bold">Portfolio Snapshot - Mutual Fund Units</h3>
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
+            <div className="p-5 text-white flex items-center gap-3" style={{ background: "linear-gradient(135deg,#1d4ed8 0%,#4f46e5 50%,#7c3aed 100%)" }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold tracking-tight">Portfolio Snapshot</h3>
+                <p className="text-blue-200 text-xs font-medium">Mutual Fund Units &amp; Valuation</p>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px] text-left">
