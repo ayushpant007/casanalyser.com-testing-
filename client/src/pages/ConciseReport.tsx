@@ -1395,12 +1395,11 @@ export default function ConciseReport() {
 
           {/* 4. Concise Performance Check */}
           {Object.keys(storedPerformances).length > 0 && (() => {
-            const RATING_STYLE: Record<string, { pill: string; bar: string }> = {
-              "Excellent": { pill: "bg-emerald-100 text-emerald-700 border-emerald-200", bar: "#10b981" },
-              "Good":      { pill: "bg-blue-100 text-blue-700 border-blue-200",          bar: "#3b82f6" },
-              "Average":   { pill: "bg-amber-100 text-amber-700 border-amber-200",       bar: "#f59e0b" },
-              "Poor":      { pill: "bg-rose-100 text-rose-600 border-rose-200",          bar: "#ef4444" },
-              "Very Poor": { pill: "bg-rose-200 text-rose-800 border-rose-300",          bar: "#b91c1c" },
+            const RATING_META: Record<string, { pill: string; bar: string; dot: string; accent: string }> = {
+              "Excellent": { pill: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-1 ring-emerald-100", bar: "#10b981", dot: "#10b981", accent: "border-l-emerald-400" },
+              "Good":      { pill: "bg-blue-50 text-blue-700 border-blue-200 ring-1 ring-blue-100",             bar: "#3b82f6", dot: "#3b82f6", accent: "border-l-blue-400" },
+              "Average":   { pill: "bg-amber-50 text-amber-700 border-amber-200 ring-1 ring-amber-100",         bar: "#f59e0b", dot: "#f59e0b", accent: "border-l-amber-400" },
+              "Poor":      { pill: "bg-rose-50 text-rose-600 border-rose-200 ring-1 ring-rose-100",             bar: "#ef4444", dot: "#ef4444", accent: "border-l-rose-400" },
             };
             const getRatingLabel = (score: number) => {
               if (score >= 71) return "Excellent";
@@ -1429,169 +1428,229 @@ export default function ConciseReport() {
                 return { mf, perf, sc, perfScore, combined, maxScore, rating, pct, cagr1y, cagr3y, cagr5y, bm1y, bm3y, bm5y };
               });
 
+            const fmtCagr = (v: string, bm: string | null) => {
+              const val = parseFloat(v?.replace(/[^\d.-]/g, "") || "");
+              const bmVal = parseFloat(bm?.replace(/[^\d.-]/g, "") ?? "");
+              const isAvail = !isNaN(val);
+              const isGood = isAvail && !isNaN(bmVal) && val >= bmVal;
+              const diff = isAvail && !isNaN(bmVal) ? val - bmVal : null;
+              return (
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className={`text-[12px] font-bold leading-none ${!isAvail ? "text-slate-300" : isGood ? "text-emerald-600" : "text-rose-500"}`}>
+                    {isAvail ? `${val.toFixed(1)}%` : "—"}
+                  </span>
+                  {isAvail && !isNaN(bmVal) && (
+                    <span className="text-[9px] text-slate-400 leading-none">BM: {bmVal.toFixed(1)}%</span>
+                  )}
+                  {diff !== null && (
+                    <span className={`text-[8px] font-semibold px-1 py-0.5 rounded-sm leading-none ${diff >= 0 ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}>
+                      {diff >= 0 ? "+" : ""}{diff.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+              );
+            };
+
+            const ACTION_META: Record<string, { label: string; cls: string; dot: string }> = {
+              hold:   { label: "Hold",   cls: "bg-blue-50 text-blue-700 border-blue-200",     dot: "#3b82f6" },
+              switch: { label: "Switch", cls: "bg-amber-50 text-amber-700 border-amber-200",   dot: "#f59e0b" },
+              merge:  { label: "Merge",  cls: "bg-violet-50 text-violet-700 border-violet-200", dot: "#7c3aed" },
+              sell:   { label: "Sell",   cls: "bg-rose-50 text-rose-600 border-rose-200",       dot: "#ef4444" },
+            };
+
             return (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-4 text-white">
-                  <h3 className="text-lg font-bold">Concise Performance Check</h3>
-                  <p className="text-violet-200 text-xs mt-0.5">Fund-level scores vs benchmark · Risk Metrics Summary</p>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-700 px-6 py-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-white tracking-tight">Concise Performance Check</h3>
+                      <p className="text-violet-200 text-xs mt-1 font-medium">Fund-level scores vs benchmark · Risk Metrics Summary</p>
+                    </div>
+                    <div className="flex gap-3">
+                      {(["Excellent","Good","Average","Poor"] as const).map(r => (
+                        <div key={r} className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: RATING_META[r].dot }} />
+                          <span className="text-[10px] text-white/70 font-medium">{r}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Table */}
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
+                      {/* Column group labels */}
+                      <tr className="bg-slate-50 border-b border-slate-100">
+                        <th colSpan={4} className="px-4 py-1.5" />
+                        <th colSpan={3} className="px-4 py-1.5 text-center">
+                          <span className="text-[8px] font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5">CAGR vs Benchmark</span>
+                        </th>
+                        <th colSpan={3} className="px-4 py-1.5" />
+                      </tr>
+                      {/* Column headers */}
                       <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 w-8">#</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400">Fund Name</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Risk Type</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">SIP Amount</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">1Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">3Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">5Y CAGR</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Score</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Rating</th>
-                        <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Action</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 w-8">#</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 min-w-[220px]">Fund Name</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Risk Type</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">SIP Amt</th>
+                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50">1Y</th>
+                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50">3Y</th>
+                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50 border-r border-indigo-100">5Y</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Score</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Rating</th>
+                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody>
                       {rows.map((r, idx) => {
-                        const style = RATING_STYLE[r.rating] ?? { pill: "bg-slate-100 text-slate-500 border-slate-200", bar: "#94a3b8" };
-                        const fmtCagr = (v: string, bm: string | null) => {
-                          const val = parseFloat(v?.replace(/[^\d.-]/g, "") || "");
-                          const bmVal = parseFloat(bm?.replace(/[^\d.-]/g, "") ?? "");
-                          const isGood = !isNaN(val) && !isNaN(bmVal) && val >= bmVal;
-                          const isAvail = !isNaN(val);
-                          return (
-                            <span className={`font-bold text-[11px] ${!isAvail ? "text-slate-300" : isGood ? "text-emerald-600" : "text-rose-500"}`}>
-                              {isAvail ? `${val.toFixed(1)}%` : "—"}
-                              {isAvail && !isNaN(bmVal) && (
-                                <span className="block text-[9px] font-normal text-slate-400">BM: {bmVal.toFixed(1)}%</span>
-                              )}
-                            </span>
-                          );
-                        };
+                        const meta = RATING_META[r.rating] ?? { pill: "bg-slate-100 text-slate-500 border-slate-200", bar: "#94a3b8", dot: "#94a3b8", accent: "border-l-slate-300" };
+                        const sn = `${r.mf.isin || r.mf.scheme_name}_${r.mf.folio_no || ''}`;
+                        const action = actionSelections[sn] || "hold";
+                        const aMeta = ACTION_META[action] ?? ACTION_META.hold;
+                        const tCat = targetCategory[sn] || "";
+                        const tSubCat = targetSubCategory[sn] || "";
+                        const tFund = targetFund[sn] || "";
+                        const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
+                        const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
+                        const sipAmt = sipAmounts[r.mf.scheme_name];
+
                         return (
-                          <tr key={r.mf.isin || idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"} hover:bg-violet-50/30 transition-colors`}>
-                            <td className="px-4 py-3 text-[10px] text-slate-400 font-mono">{idx + 1}</td>
-                            <td className="px-4 py-3">
-                              <div className="flex flex-col gap-0.5 max-w-[260px]">
-                                <span className="text-[11px] font-semibold text-slate-800 leading-snug line-clamp-2">{r.mf.scheme_name}</span>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide bg-blue-50 text-blue-600 border border-blue-100">{r.mf.fund_category || "—"}</span>
-                                  <span className="text-[9px] text-slate-400">{r.mf.isin}</span>
+                          <tr
+                            key={`${r.mf.isin || idx}_${r.mf.folio_no || idx}`}
+                            className={`border-b border-slate-100 border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/60`}
+                          >
+                            {/* # */}
+                            <td className="px-4 py-4 text-[10px] text-slate-400 font-mono align-top pt-5">{idx + 1}</td>
+
+                            {/* Fund Name */}
+                            <td className="px-4 py-4 align-top">
+                              <div className="flex flex-col gap-1 min-w-[200px] max-w-[280px]">
+                                <span className="text-[12px] font-semibold text-slate-800 leading-snug">{r.mf.scheme_name}</span>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wide border ${
+                                    (r.mf.fund_category || "").toLowerCase().includes("equity") ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                    (r.mf.fund_category || "").toLowerCase().includes("debt") ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                    "bg-slate-100 text-slate-500 border-slate-200"
+                                  }`}>{r.mf.fund_category || "—"}</span>
+                                  <span className="text-[9px] text-slate-400 font-mono">{r.mf.isin}</span>
+                                  {r.mf.folio_no && <span className="text-[9px] text-slate-400">· {r.mf.folio_no}</span>}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              <span className="px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+
+                            {/* Risk Type */}
+                            <td className="px-4 py-4 text-center align-top pt-5">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
                                 {r.mf.fund_type || "—"}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              {(() => {
-                                const sipAmt = sipAmounts[r.mf.scheme_name];
-                                return sipAmt != null ? (
-                                  <span className="font-mono text-[11px] font-semibold text-slate-700">
-                                    ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-300 text-[11px]">—</span>
-                                );
-                              })()}
+
+                            {/* SIP Amount */}
+                            <td className="px-4 py-4 text-center align-top pt-5">
+                              {sipAmt != null ? (
+                                <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+                                  ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                </span>
+                              ) : (
+                                <span className="text-slate-300 text-[11px]">—</span>
+                              )}
                             </td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr1y, r.bm1y)}</td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr3y, r.bm3y)}</td>
-                            <td className="px-4 py-3 text-center">{fmtCagr(r.cagr5y, r.bm5y)}</td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex flex-col items-center gap-1">
-                                <span className="text-[13px] font-black text-slate-800">{r.combined}<span className="text-[9px] font-normal text-slate-400">/{r.maxScore}</span></span>
-                                <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                  <div className="h-full rounded-full" style={{ width: `${r.pct}%`, backgroundColor: style.bar }} />
+
+                            {/* CAGR columns */}
+                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30">{fmtCagr(r.cagr1y, r.bm1y)}</td>
+                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30">{fmtCagr(r.cagr3y, r.bm3y)}</td>
+                            <td className="px-3 py-4 text-center align-top pt-5 bg-indigo-50/30 border-r border-indigo-100">{fmtCagr(r.cagr5y, r.bm5y)}</td>
+
+                            {/* Score */}
+                            <td className="px-4 py-4 text-center align-top pt-5">
+                              <div className="flex flex-col items-center gap-1.5">
+                                <div className="flex items-baseline gap-0.5">
+                                  <span className="text-[18px] font-black leading-none" style={{ color: meta.dot }}>{r.combined}</span>
+                                  <span className="text-[10px] text-slate-400 font-medium">/{r.maxScore}</span>
+                                </div>
+                                <div className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                  <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: meta.dot }} />
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              {r.rating ? (
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border ${style.pill}`}>
-                                  {r.rating}
-                                </span>
-                              ) : <span className="text-slate-300 text-[10px]">—</span>}
+
+                            {/* Rating */}
+                            <td className="px-4 py-4 text-center align-top pt-5">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${meta.pill}`}>
+                                {r.rating}
+                              </span>
                             </td>
-                            <td className="px-4 py-3">
-                              {(() => {
-                                const sn = `${r.mf.isin || r.mf.scheme_name}_${r.mf.folio_no || ''}`;
-                                const action = actionSelections[sn] || "hold";
-                                const cls = ACTION_STYLES[action] ?? ACTION_STYLES.hold;
-                                const tCat = targetCategory[sn] || "";
-                                const tSubCat = targetSubCategory[sn] || "";
-                                const tFund = targetFund[sn] || "";
-                                const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
-                                const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
-                                return (
-                                  <div
-                                    className="flex flex-col gap-1.5 min-w-[180px] max-w-[220px]"
-                                    data-action-block="true"
-                                    data-scheme-name={sn}
-                                  >
+
+                            {/* Action */}
+                            <td className="px-4 py-4 align-top">
+                              <div
+                                className="flex flex-col gap-2 min-w-[190px]"
+                                data-action-block="true"
+                                data-scheme-name={sn}
+                              >
+                                <select
+                                  value={action}
+                                  onChange={(e) => updateAction(sn, e.target.value)}
+                                  className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-1 w-full ${aMeta.cls}`}
+                                  data-testid={`concise-action-select-${idx}`}
+                                >
+                                  <option value="">Select Action</option>
+                                  <option value="hold">Hold</option>
+                                  <option value="switch">Switch</option>
+                                  <option value="merge">Merge</option>
+                                  <option value="sell">Sell</option>
+                                </select>
+                                {action !== "hold" && (
+                                  <div className="flex flex-col gap-1.5 p-2 bg-slate-50 rounded-lg border border-slate-200">
                                     <select
-                                      value={action}
-                                      onChange={(e) => updateAction(sn, e.target.value)}
-                                      className={`text-[9px] font-bold border rounded px-1.5 py-1 cursor-pointer uppercase tracking-wide focus:outline-none w-full ${cls}`}
-                                      data-testid={`concise-action-select-${idx}`}
+                                      value={tCat}
+                                      onChange={(e) => updateTargetCategory(sn, e.target.value)}
+                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full"
+                                      data-testid={`target-cat-${idx}`}
                                     >
-                                      <option value="">Select</option>
-                                      <option value="hold">Hold</option>
-                                      <option value="switch">Switch</option>
-                                      <option value="merge">Merge</option>
-                                      <option value="sell">Sell</option>
+                                      <option value="">Target Category…</option>
+                                      {recommendedOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                      ))}
                                     </select>
-                                    {action !== "hold" && (
-                                      <div className="flex flex-col gap-1 mt-0.5 w-full">
-                                        <select
-                                          value={tCat}
-                                          onChange={(e) => updateTargetCategory(sn, e.target.value)}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0"
-                                          data-testid={`target-cat-${idx}`}
-                                        >
-                                          <option value="">Category…</option>
-                                          {recommendedOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                          ))}
-                                        </select>
-                                        <select
-                                          value={tSubCat}
-                                          onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
-                                          disabled={!tCat}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0 disabled:opacity-50"
-                                          data-testid={`target-subcat-${idx}`}
-                                        >
-                                          <option value="">Sub category…</option>
-                                          {subCatOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                          ))}
-                                        </select>
-                                        <select
-                                          value={tFund}
-                                          onChange={(e) => updateTargetFund(sn, e.target.value)}
-                                          disabled={!tSubCat}
-                                          className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-w-0 disabled:opacity-50"
-                                          data-testid={`target-fund-${idx}`}
-                                        >
-                                          <option value="">Fund name…</option>
-                                          {fundOptions.map(opt => (
-                                            <option key={opt} value={opt}>{opt}</option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    )}
-                                    <textarea
-                                      value={remarks[sn] || ""}
-                                      onChange={(e) => updateRemark(sn, e.target.value)}
-                                      placeholder="Add remarks..."
-                                      className="text-[9px] border border-slate-200 rounded px-1.5 py-1 focus:outline-none focus:border-blue-400 bg-white text-slate-700 w-full min-h-[44px]"
-                                      data-testid={`remark-${idx}`}
-                                    />
+                                    <select
+                                      value={tSubCat}
+                                      onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
+                                      disabled={!tCat}
+                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full disabled:opacity-40"
+                                      data-testid={`target-subcat-${idx}`}
+                                    >
+                                      <option value="">Sub Category…</option>
+                                      {subCatOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                      ))}
+                                    </select>
+                                    <select
+                                      value={tFund}
+                                      onChange={(e) => updateTargetFund(sn, e.target.value)}
+                                      disabled={!tSubCat}
+                                      className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full disabled:opacity-40"
+                                      data-testid={`target-fund-${idx}`}
+                                    >
+                                      <option value="">Target Fund…</option>
+                                      {fundOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                      ))}
+                                    </select>
                                   </div>
-                                );
-                              })()}
+                                )}
+                                <textarea
+                                  value={remarks[sn] || ""}
+                                  onChange={(e) => updateRemark(sn, e.target.value)}
+                                  placeholder="Add remarks…"
+                                  rows={2}
+                                  className="text-[9px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full resize-none placeholder:text-slate-300"
+                                  data-testid={`remark-${idx}`}
+                                />
+                              </div>
                             </td>
                           </tr>
                         );
