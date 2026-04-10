@@ -856,32 +856,47 @@ export default function ConciseReport() {
       XLSX.utils.book_append_sheet(wb, ws5, "Portfolio Snapshot");
 
       // ── Sheet 6: New Allocation ────────────────────────────────────────
-      // Columns: #, Fund Name, Category, Sub Category, Allocation Type
-      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type"];
-      const naColW = [4, 50, 22, 30, 16];
+      // Columns: #, Fund Name, Category, Sub Category, Allocation Type, Valuation (₹)
+      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type", "Valuation (₹)"];
+      const naColW = [4, 50, 22, 30, 18, 18];
 
       const allocTypeCell = (label: string, row: number) => {
-        const isNew = label === "New Fund";
+        const isNew = label.includes("New Fund") && !label.includes("Existing Fund");
         const isRec = label === "Recommended";
-        const fg = isNew ? C.BLUE : isRec ? "065F46" : C.NAVY;
-        const bg = isNew ? C.LTBLUE : isRec ? C.GREENL : C.SLATEL;
-        return { v: label, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: row % 2 === 0 ? bg : bg } }, alignment: { horizontal: "center" }, border } };
+        const isMixed = label.includes("+");
+        const fg = isRec ? "065F46" : isMixed ? C.SLATE : isNew ? C.BLUE : C.NAVY;
+        const bg = isRec ? C.GREENL : isMixed ? C.ALTROW : isNew ? C.LTBLUE : C.SLATEL;
+        return { v: label, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center", wrapText: true }, border } };
       };
 
       // Build portfolio rows: hold = "Existing Fund", switch/merge/sell = "New Fund"
-      const naPortfolioRows = snap.map((mf: any, i: number) => {
+      // Group by fundName + cat + subCat so duplicates collapse into one row
+      const naPortfolioMap: Record<string, { fundName: string; cat: string; subCat: string; labels: string[]; valuation: number }> = {};
+      snap.forEach((mf: any) => {
         const action = (actionSelections[mf.scheme_name] || "hold");
         const isHold = action === "hold";
         const fundName = isHold ? (mf.scheme_name || "—") : (targetFund[mf.scheme_name] || "—");
         const cat = isHold ? (mf.fund_category || "—") : (targetCategory[mf.scheme_name] || "—");
         const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mf.scheme_name] || "—");
         const label = isHold ? "Existing Fund" : "New Fund";
+        const valuation = mf.valuation || 0;
+        const key = `${fundName}||${cat}||${subCat}`;
+        if (!naPortfolioMap[key]) {
+          naPortfolioMap[key] = { fundName, cat, subCat, labels: [label], valuation };
+        } else {
+          if (!naPortfolioMap[key].labels.includes(label)) naPortfolioMap[key].labels.push(label);
+          naPortfolioMap[key].valuation += valuation;
+        }
+      });
+      const naPortfolioRows = Object.values(naPortfolioMap).map((row, i) => {
+        const combinedLabel = row.labels.join(" + ");
         return [
           num(i + 1, "0", i),
-          txt(fundName, i, true),
-          txt(cat, i),
-          txt(subCat, i),
-          allocTypeCell(label, i),
+          txt(row.fundName, i, true),
+          txt(row.cat, i),
+          txt(row.subCat, i),
+          allocTypeCell(combinedLabel, i),
+          num(row.valuation, '"₹"#,##0.00', i),
         ];
       });
 
@@ -892,6 +907,7 @@ export default function ConciseReport() {
         txt(rf.category || "—", i),
         txt(rf.subCategory || "—", i),
         allocTypeCell("Recommended", i),
+        { v: "—", t: "s", s: { font: { sz: 9, color: { rgb: C.SLATE }, name: "Calibri" }, fill: { fgColor: { rgb: i % 2 === 0 ? C.SLATEL : C.WHITE } }, alignment: { horizontal: "center" }, border } },
       ]);
 
       // Allocation summary: group by category + sub-category
