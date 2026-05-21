@@ -34,43 +34,41 @@ import allocationImg from "@assets/image_1776920279232.png";
 import categoryImg from "@assets/image_1776920296583.png";
 import snapshotImg from "@assets/image_1776920332583.png";
 import uploadImg from "@assets/image_1776920600846.png";
+import demoVideo from "@assets/VN20260515_154759_compressed.mp4";
 import { PieChart, Layers, Table2, UploadCloud, ChevronDown } from "lucide-react";
 
 function DemoVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeRef = useRef(false); // guards against play/pause race
 
-  const handleClick = () => {
+  const playVideo = async () => {
     const vid = videoRef.current;
-    if (!vid) return;
-    if (!playing) {
-      vid.play();
+    if (!vid || activeRef.current) return;
+    activeRef.current = true;
+    try {
+      vid.muted = false;
+      await vid.play();
       setPlaying(true);
-      setShowOverlay(false);
-    } else {
-      vid.pause();
-      setPlaying(false);
-      setShowOverlay(true);
+    } catch {
+      /* autoplay blocked or similar */
+    } finally {
+      activeRef.current = false;
     }
   };
 
-  const handlePlayingClick = () => {
+  const pauseVideo = () => {
     const vid = videoRef.current;
-    if (!vid) return;
+    if (!vid || activeRef.current) return;
+    activeRef.current = true;
     vid.pause();
     setPlaying(false);
-    setShowOverlay(true);
-    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    activeRef.current = false;
   };
 
-  const handleOverlayClick = () => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    vid.play();
-    setPlaying(true);
-    setShowOverlay(false);
+  const togglePlay = () => {
+    if (playing) pauseVideo();
+    else playVideo();
   };
 
   return (
@@ -88,25 +86,35 @@ function DemoVideo() {
           boxShadow: "0 0 60px -10px rgba(96,165,250,0.3), 0 0 0 1px rgba(255,255,255,0.04) inset",
         }}
       >
+        {/* Video element — NO click handler, overlays handle everything */}
         <video
           ref={videoRef}
-          src="/demo.mp4"
-          className="w-full block cursor-pointer"
+          src={demoVideo}
+          className="w-full block"
           playsInline
-          onEnded={() => { setPlaying(false); setShowOverlay(false); }}
-          onClick={playing ? handlePlayingClick : undefined}
+          loop
+          preload="metadata"
+          onEnded={() => setPlaying(false)}
         />
 
-        {/* Initial play overlay (before video starts) */}
-        {!playing && !showOverlay && (
-          <div
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            style={{ background: "rgba(5,10,30,0.55)", backdropFilter: "blur(2px)" }}
-            onClick={handleClick}
-          >
+        {/* Play / Pause overlay — single unified control surface */}
+        <div
+          className="absolute inset-0 flex items-center justify-center cursor-pointer"
+          style={{
+            background: playing ? "transparent" : "rgba(5,10,30,0.55)",
+            backdropFilter: playing ? "none" : "blur(2px)",
+            pointerEvents: "auto",
+            transition: "background 0.3s ease, backdrop-filter 0.3s ease",
+          }}
+          onClick={togglePlay}
+        >
+          {!playing && (
             <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.92 }}
               className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{
                 background: "linear-gradient(135deg,#3b6fff,#9333ea)",
@@ -115,38 +123,8 @@ function DemoVideo() {
             >
               <Play className="w-8 h-8 text-white ml-1" fill="white" />
             </motion.div>
-          </div>
-        )}
-
-        {/* Paused mid-playback overlay */}
-        <AnimatePresence>
-          {showOverlay && (
-            <motion.div
-              key="pause-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 flex items-center justify-center cursor-pointer"
-              style={{ background: "rgba(5,10,30,0.45)", backdropFilter: "blur(2px)" }}
-              onClick={handleOverlayClick}
-            >
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-20 h-20 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg,#3b6fff,#9333ea)",
-                  boxShadow: "0 0 40px rgba(59,111,255,0.6)",
-                }}
-              >
-                <Play className="w-8 h-8 text-white ml-1" fill="white" />
-              </motion.div>
-            </motion.div>
           )}
-        </AnimatePresence>
+        </div>
       </div>
     </motion.section>
   );
