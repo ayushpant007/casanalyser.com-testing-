@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Plus,
   Minus,
+  Play,
 } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ShinyButton } from "@/components/ui/shiny-button";
@@ -34,6 +35,59 @@ import categoryImg from "@assets/image_1776920296583.png";
 import snapshotImg from "@assets/image_1776920332583.png";
 import uploadImg from "@assets/image_1776920600846.png";
 import { PieChart, Layers, Table2, UploadCloud, ChevronDown } from "lucide-react";
+
+function DemoVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const handlePlay = () => {
+    videoRef.current?.play();
+    setPlaying(true);
+  };
+  return (
+    <motion.section
+      className="w-full max-w-4xl mx-auto mt-24"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7 }}
+    >
+      <div
+        className="relative rounded-2xl overflow-hidden border"
+        style={{
+          borderColor: "rgba(96,165,250,0.3)",
+          boxShadow: "0 0 60px -10px rgba(96,165,250,0.3), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        }}
+      >
+        <video
+          ref={videoRef}
+          src="/demo.mp4"
+          className="w-full block"
+          playsInline
+          onEnded={() => setPlaying(false)}
+        />
+        {!playing && (
+          <div
+            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+            style={{ background: "rgba(5,10,30,0.55)", backdropFilter: "blur(2px)" }}
+            onClick={handlePlay}
+          >
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-20 h-20 rounded-full flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg,#3b6fff,#9333ea)",
+                boxShadow: "0 0 40px rgba(59,111,255,0.6)",
+              }}
+            >
+              <Play className="w-8 h-8 text-white ml-1" fill="white" />
+            </motion.div>
+          </div>
+        )}
+      </div>
+    </motion.section>
+  );
+}
 
 interface ShowcaseSectionProps {
   index: number;
@@ -459,6 +513,9 @@ export default function Intro() {
             <ChevronDown className="w-4 h-4" />
           </motion.div>
         </section>
+
+        {/* ===================== DEMO VIDEO ===================== */}
+        <DemoVideo />
 
         {/* ===================== WHAT IS CAS ===================== */}
         <section className="w-full max-w-6xl mx-auto mt-32" data-testid="section-what-is-cas">
