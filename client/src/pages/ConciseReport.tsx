@@ -2582,7 +2582,7 @@ export default function ConciseReport() {
                         <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalInvestedSnap, 2)}</td>
                         <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalValueSnap, 2)}</td>
                         <td className={`px-4 py-3 text-right font-bold tabular-nums text-xs ${totalPLSnap >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                          {totalPLSnap >= 0 ? "+" : "-"}₹{inr(Math.abs(totalPLSnap), 2)}
+                          {totalPLSnap < 0 ? "-" : ""}₹{inr(Math.abs(totalPLSnap), 2)}
                         </td>
                         <td className="px-4 py-3 text-right text-xs text-slate-400">100%</td>
                       </tr>
