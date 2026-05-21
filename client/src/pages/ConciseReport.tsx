@@ -621,51 +621,68 @@ export default function ConciseReport() {
           el.style.setProperty("width", `${CAPTURE_WIDTH - 64}px`, "important");
           el.style.setProperty("max-width", "none", "important");
 
+          // ── Inject CSS into the cloned document so the browser CSSOM computes
+          //    correct values before html2canvas reads them via getComputedStyle.
+          const pdfStyle = doc.createElement("style");
+          pdfStyle.textContent = `
+            /* Normalise line-height globally — "normal" differs between engines */
+            * { line-height: 1.4; box-sizing: border-box; }
+
+            /* Flex display classes must be explicit so html2canvas picks them up */
+            .flex   { display: flex   !important; }
+            .inline-flex { display: inline-flex !important; }
+            .flex-col   { flex-direction: column !important; }
+            .items-center   { align-items: center   !important; }
+            .items-start    { align-items: flex-start !important; }
+            .items-end      { align-items: flex-end  !important; }
+            .justify-center  { justify-content: center       !important; }
+            .justify-between { justify-content: space-between!important; }
+            .justify-end     { justify-content: flex-end     !important; }
+            .flex-wrap   { flex-wrap: wrap !important; }
+            .flex-1      { flex: 1 1 0%  !important; }
+            .flex-shrink-0 { flex-shrink: 0 !important; }
+
+            /* Badge / pill text centering — keep inline-flex, force alignment */
+            span.rounded-full, div.rounded-full,
+            span.rounded-lg,  div.rounded-lg {
+              display: inline-flex   !important;
+              align-items: center    !important;
+              justify-content: center!important;
+              line-height: 1         !important;
+              white-space: nowrap    !important;
+            }
+
+            /* SVG icons inside flex rows */
+            svg { display: inline-block !important; vertical-align: middle !important; flex-shrink: 0 !important; }
+          `;
+          doc.head.appendChild(pdfStyle);
+
           el.querySelectorAll<HTMLElement>("*").forEach(child => {
             const cs = doc.defaultView?.getComputedStyle(child);
             if (!cs) return;
 
             // Fix overflow clipping
-            if (cs.overflow === "hidden" || cs.overflow === "scroll" || cs.overflow === "auto") {
-              child.style.setProperty("overflow", "visible", "important");
-            }
-            if (cs.overflowX === "hidden" || cs.overflowX === "scroll" || cs.overflowX === "auto") {
-              child.style.setProperty("overflow-x", "visible", "important");
-            }
-            if (cs.overflowY === "hidden" || cs.overflowY === "scroll" || cs.overflowY === "auto") {
-              child.style.setProperty("overflow-y", "visible", "important");
-            }
+            if (["hidden","scroll","auto"].includes(cs.overflow))  child.style.overflow  = "visible";
+            if (["hidden","scroll","auto"].includes(cs.overflowX)) child.style.overflowX = "visible";
+            if (["hidden","scroll","auto"].includes(cs.overflowY)) child.style.overflowY = "visible";
 
-            // Force-write all flex/grid layout properties so html2canvas sees them
+            // html2canvas doesn't reliably handle CSS `gap`; convert to margins on children
             if (cs.display === "flex" || cs.display === "inline-flex") {
-              child.style.setProperty("display", cs.display, "important");
-              child.style.setProperty("flex-direction", cs.flexDirection, "important");
-              child.style.setProperty("align-items", cs.alignItems, "important");
-              child.style.setProperty("justify-content", cs.justifyContent, "important");
-              child.style.setProperty("flex-wrap", cs.flexWrap, "important");
-              child.style.setProperty("gap", cs.gap, "important");
-            }
-
-            // Fix badge/pill vertical alignment — spans with rounded-full lose centering in html2canvas
-            if (
-              child.tagName === "SPAN" &&
-              (child.classList.contains("rounded-full") || child.classList.contains("rounded-lg"))
-            ) {
-              child.style.setProperty("display", "inline-block", "important");
-              child.style.setProperty("line-height", "1.6", "important");
-              child.style.setProperty("vertical-align", "middle", "important");
-              child.style.setProperty("text-align", "center", "important");
-            }
-
-            // Ensure text nodes in flex children have explicit line-height
-            if (cs.display === "flex" || cs.display === "inline-flex") {
-              Array.from(child.children).forEach((fc) => {
-                const fce = fc as HTMLElement;
-                const fcs = doc.defaultView?.getComputedStyle(fce);
-                if (fcs && fcs.lineHeight === "normal") {
-                  fce.style.setProperty("line-height", "1.4", "important");
-                }
-              });
+              const gapVal = parseFloat(cs.gap) || 0;
+              const colGap = parseFloat(cs.columnGap) || gapVal;
+              const rowGap = parseFloat(cs.rowGap)    || gapVal;
+              if (colGap > 0 || rowGap > 0) {
+                child.style.gap       = "0";
+                child.style.columnGap = "0";
+                child.style.rowGap    = "0";
+                const isCol = cs.flexDirection.startsWith("column");
+                Array.from(child.children).forEach((fc, idx) => {
+                  if (idx === 0) return;
+                  const fce = fc as HTMLElement;
+                  if (isCol) fce.style.marginTop  = `${rowGap}px`;
+                  else       fce.style.marginLeft = `${colGap}px`;
+                });
+              }
             }
           });
 
