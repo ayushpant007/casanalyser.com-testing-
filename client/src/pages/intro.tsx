@@ -39,10 +39,40 @@ import { PieChart, Layers, Table2, UploadCloud, ChevronDown } from "lucide-react
 function DemoVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const handlePlay = () => {
-    videoRef.current?.play();
-    setPlaying(true);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleClick = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (!playing) {
+      vid.play();
+      setPlaying(true);
+      setShowOverlay(false);
+    } else {
+      vid.pause();
+      setPlaying(false);
+      setShowOverlay(true);
+    }
   };
+
+  const handlePlayingClick = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.pause();
+    setPlaying(false);
+    setShowOverlay(true);
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+  };
+
+  const handleOverlayClick = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.play();
+    setPlaying(true);
+    setShowOverlay(false);
+  };
+
   return (
     <motion.section
       className="w-full max-w-4xl mx-auto mt-24"
@@ -61,15 +91,18 @@ function DemoVideo() {
         <video
           ref={videoRef}
           src="/demo.mp4"
-          className="w-full block"
+          className="w-full block cursor-pointer"
           playsInline
-          onEnded={() => setPlaying(false)}
+          onEnded={() => { setPlaying(false); setShowOverlay(false); }}
+          onClick={playing ? handlePlayingClick : undefined}
         />
-        {!playing && (
+
+        {/* Initial play overlay (before video starts) */}
+        {!playing && !showOverlay && (
           <div
             className="absolute inset-0 flex items-center justify-center cursor-pointer"
             style={{ background: "rgba(5,10,30,0.55)", backdropFilter: "blur(2px)" }}
-            onClick={handlePlay}
+            onClick={handleClick}
           >
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -84,6 +117,36 @@ function DemoVideo() {
             </motion.div>
           </div>
         )}
+
+        {/* Paused mid-playback overlay */}
+        <AnimatePresence>
+          {showOverlay && (
+            <motion.div
+              key="pause-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 flex items-center justify-center cursor-pointer"
+              style={{ background: "rgba(5,10,30,0.45)", backdropFilter: "blur(2px)" }}
+              onClick={handleOverlayClick}
+            >
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-20 h-20 rounded-full flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg,#3b6fff,#9333ea)",
+                  boxShadow: "0 0 40px rgba(59,111,255,0.6)",
+                }}
+              >
+                <Play className="w-8 h-8 text-white ml-1" fill="white" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.section>
   );
