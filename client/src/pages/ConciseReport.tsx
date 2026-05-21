@@ -1598,7 +1598,7 @@ export default function ConciseReport() {
           <div className="pb-4 border-b border-slate-200/20">
             {investorName && (
               <div className="flex items-center flex-wrap gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-[#d0f70f]">{investorName}</h1>
+                <h1 className="text-3xl font-bold text-white">{investorName}</h1>
                 {report.investorType && (
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                     report.investorType.toLowerCase().includes("aggressive")
@@ -2097,15 +2097,15 @@ export default function ConciseReport() {
                 <>
                   <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-4 sm:px-6 py-5 flex items-start justify-between gap-3 flex-wrap text-white">
                     <div>
-                      <h3 className="text-[20px] text-left text-[#fff5f5] font-semibold">Asset allocation check</h3>
+                      <h3 className="text-[20px] text-left text-white font-bold">Asset allocation check</h3>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-violet-100 text-xs font-semibold">{report.investorType || "—"}</span>
-                        <span className="text-violet-100 text-xs font-semibold">Age {report.ageGroup || "—"}</span>
+                        <span className="text-indigo-200 text-xs font-semibold">{report.investorType || "—"}</span>
+                        <span className="text-indigo-200 text-xs font-semibold">Age {report.ageGroup || "—"}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[11px] text-violet-200 font-medium mb-0.5 uppercase tracking-wider">Overall health</div>
-                      <div className="text-3xl font-bold text-white">{healthScore}<span className="text-base font-semibold text-violet-200">/100</span></div>
+                      <div className="text-[11px] text-indigo-200 font-medium mb-0.5 uppercase tracking-wider">Overall health</div>
+                      <div className="text-3xl font-bold text-white">{healthScore}<span className="text-base font-semibold text-indigo-200">/100</span></div>
                       <span className="text-xs font-semibold text-white">{healthLabel}</span>
                     </div>
                   </div>
@@ -2283,12 +2283,12 @@ export default function ConciseReport() {
           <div ref={sipHealthRef} />
           {sipHealthItems.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-cyan-600 to-teal-600 px-6 py-5 text-white">
+              <div className="bg-gradient-to-r from-indigo-700 to-blue-700 px-6 py-5 text-white">
                 <div className="flex items-center gap-2 mb-1">
                   <Activity className="w-4 h-4" />
                   <h3 className="text-lg font-bold">SIP Health Check</h3>
                 </div>
-                <p className="text-cyan-100 text-xs">How your SIP funds are performing vs benchmark</p>
+                <p className="text-indigo-200 text-xs">How your SIP funds are performing vs benchmark</p>
               </div>
               <div className="divide-y divide-slate-100">
                 {sipHealthItems.map((item: any, i: number) => (
@@ -2316,12 +2316,12 @@ export default function ConciseReport() {
           {/* ── Rebalancing Action Plan ────────────────────────────────────── */}
           {rebalancingPlan.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-white">
+              <div className="bg-gradient-to-r from-indigo-700 to-blue-700 px-6 py-5 text-white">
                 <div className="flex items-center gap-2 mb-1">
                   <Target className="w-4 h-4" />
                   <h3 className="text-lg font-bold">Rebalancing Action Plan</h3>
                 </div>
-                <p className="text-amber-100 text-xs">{rebalancingPlan.length} categories need attention</p>
+                <p className="text-indigo-200 text-xs">{rebalancingPlan.length} categories need attention</p>
               </div>
               <div className="p-5 space-y-3">
                 {rebalancingPlan.map((item: any, i: number) => (
@@ -2388,8 +2388,8 @@ export default function ConciseReport() {
             return (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-6 py-5 text-white">
-                  <h3 className="text-lg font-bold text-[#ffffff]">Concise Performance Check</h3>
-                  <p className="text-violet-200 text-xs mt-0.5">{rows.length} fund{rows.length !== 1 ? "s" : ""} analysed · Rating overview</p>
+                  <h3 className="text-lg font-bold text-white">Concise Performance Check</h3>
+                  <p className="text-indigo-200 text-xs mt-0.5">{rows.length} fund{rows.length !== 1 ? "s" : ""} analysed · Rating overview</p>
                   <div className="flex flex-wrap gap-3 mt-3">
                     {[
                       { label: "Poor",      range: "< 60%",    color: "#fca5a5" },
@@ -2506,7 +2506,7 @@ export default function ConciseReport() {
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
                       <h3 className="text-lg font-bold text-white" data-testid="text-snapshot-heading">Portfolio Snapshot</h3>
-                      <p className="text-violet-200 text-xs mt-0.5">{mfSnapshot.length} funds · click a row for details</p>
+                      <p className="text-indigo-200 text-xs mt-0.5">{mfSnapshot.length} funds · click a row for details</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="relative">
