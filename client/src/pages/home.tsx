@@ -225,7 +225,7 @@ export default function Home() {
             <img
               src={casAnalyzerLogo}
               alt="Cas Analyzer"
-              className="h-20 w-auto object-contain"
+              className="h-10 w-auto object-contain"
               data-testid="img-logo"
             />
           </div>
