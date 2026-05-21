@@ -1,7 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
+import { useEffect } from "react";
 
 export default function NotFound() {
+  useEffect(() => {
+    document.title = "404 Not Found | CasAnalyser";
+  }, []);
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md mx-4">

@@ -9,6 +9,7 @@ import path from "path";
 import os from "os";
 import { promisify } from "util";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { insertUserSchema, insertContactMessageSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat/routes";
 import { registerImageRoutes } from "./replit_integrations/image/routes";
 import { fetchNavForScheme, fetchNavByISIN, findSchemeCode, searchSchemeCodes } from "./mfapi";
@@ -16,7 +17,8 @@ import { extractMetricsFromFactsheet } from "./factsheet";
 import { getMetricsFromJson } from "./json_factsheet";
 import { getBenchmarkReturns } from "./benchmarks";
 import { lookupByIsinOrName } from "./scoring";
-import { createReadStream } from "fs";
+import { detectCasSource, calculateFundVsBenchmark } from "./fund-benchmark";
+import { uploadCasToDrive } from "./gdrive";
 
 const execAsync = promisify(exec);
 const upload = multer({ storage: multer.memoryStorage() });
@@ -52,6 +54,45 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerImageRoutes(app);
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const parsed = insertUserSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: parsed.error.issues[0]?.message || "Invalid input",
+        });
+      }
+      const user = await storage.createUser(parsed.data);
+      res.json({ id: user.id, email: user.email });
+    } catch (err: any) {
+      console.error("Failed to create user:", err);
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  app.get("/api/users/check", async (req, res) => {
+    const email = String(req.query.email || "").trim();
+    if (!email) return res.json({ exists: false });
+    const user = await storage.getUserByEmail(email);
+    res.json({ exists: !!user });
+  });
+
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const parsed = insertContactMessageSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: parsed.error.issues[0]?.message || "Invalid input",
+        });
+      }
+      const message = await storage.createContactMessage(parsed.data);
+      res.json({ id: message.id });
+    } catch (err: any) {
+      console.error("Failed to save contact message:", err);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
 
   app.post(api.analyze.path, upload.single("file"), async (req: any, res) => {
     if (!req.file) {
@@ -104,36 +145,33 @@ ${csvContent}
 Extract:
 0. Investor name: Extract the full name of the investor/account holder from the CAS report header or personal details section. Return as "investor_name": string.
 1. Portfolio summary: {"net_asset_value": number, "total_cost": number}
+   - "total_cost" MUST equal the GRAND TOTAL of the "Cost Value" / "Invested Amount" / "Cost" column in the Mutual Fund Portfolio Snapshot / Holdings table (the last row labelled Grand Total / Total). Do NOT use Current Value or Market Value here.
+   - "net_asset_value" MUST equal the GRAND TOTAL of the "Market Value" / "Current Value" / "Valuation" column.
 2. Account-wise summary table: [{"type": string, "details": string, "count": number, "value": number}]
-3. Historical Portfolio Valuation: [{"month_year": string, "valuation": number, "change_value": number, "change_percentage": number}]
-4. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
-5. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string}]
+3. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
+4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string}]
    - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" column value from the statement for each scheme.
-6. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
+   - "invested_amount" MUST be the value in the cost/invested column for that scheme — NOT the current/market value, NOT the P/L. Use the column whose header is one of:
+       • "Cumulative Amount Invested (in INR)"   ← CDSL CAS (Mutual Fund Units Held / Consolidated Account Statement)
+       • "Invested (₹)" / "Invested Amount"      ← CAMS / KFinTech CAS
+       • "Cost Value" / "Cost"                   ← NSDL CAS
+     Do NOT confuse this with "Valuation (₹)", "Value (₹)", "Market Value", "Current Value", or any P/L column. In CDSL statements the Cumulative Amount Invested column appears BEFORE the Valuation column — pick the correct one strictly by header text, not by column position.
+   - Extract EVERY row of that table without omission so the sum of invested_amount across all rows EXACTLY equals the GRAND TOTAL shown in that table's last row (e.g. CDSL "Grand Total" row).
+   - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" column for that scheme.
+5. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
    - Current Category Allocation (Equity, Debt, Hybrid, Others)
    - Comparison with Category Ratio (Current % vs Target % from CSV)
    - Category-Fund Type Comparison (Large Cap, Mid Cap, Small Cap, etc. for Equity portion)
    - Comparison with Type Ratio (Current % vs Target % from CSV)
-   - Transactions (STP/SIP/SWP extraction): [{"date": string, "scheme_name": string, "type": string, "amount": number}]
-   
-   IMPORTANT: For transactions, carefully identify the type based on transaction keywords in the text:
-   - Explicitly says "SIP", "Purchase – SIP", "Purchase – Systematic", or "Systematic Investment" → type: "SIP"
-   - Says "Purchase – Lumpsum", "Purchase – Online", "Purchase – Initial", "Purchase – NFO", or is clearly a one-time purchase without SIP/Systematic qualifier → type: "PURCHASE"
-   - "Switch Out" or "Systematic Transfer Plan - Switch Out" → type: "STP-OUT"
-   - "Switch In" or "Systematic Transfer Plan - Switch In" → type: "STP-IN"
-   - "STP" or "Systematic Transfer" (direction unclear) → type: "STP-OUT"
-   - "SWP", "Systematic Withdrawal", "Redemption" → type: "SWP"
-   - Extract the correct date (e.g., DD-MMM-YYYY or DD/MM/YYYY), scheme name, and amount.
-   - CRITICAL: Distinguish Switch In (receiving fund, destination) from Switch Out (source fund, money leaving). Only use "STP-OUT" for the fund from which money is transferred out.
-   - CRITICAL: Do NOT classify STP-IN as SIP. STP-IN is money arriving from a debt fund via transfer, NOT a new SIP investment.
-   - Be comprehensive: extract ALL systematic transactions found in the text.
+6. Transactions (SIP detection only): [{"date": string, "scheme_name": string, "type": string, "amount": number}]
+   - Identify type as "SIP" for transactions explicitly tagged as SIP, "Purchase – SIP", "Purchase – Systematic", or "Systematic Investment".
+   - Identify type as "PURCHASE" for one-time purchases (Lumpsum, Online, Initial, NFO).
    - For amount, use the numerical value (e.g., if it says ₹1,000, extract 1000).
 
 Return ONLY valid JSON with this exact structure: {
   "investor_name": string,
   "summary": {"net_asset_value": number, "total_cost": number}, 
   "account_summaries": [...], 
-  "historical_valuations": [...], 
   "asset_allocation": [...], 
   "mf_snapshot": [...],
   "category_comparison": [{"category": string, "current_pct": number, "target_pct": number}],
@@ -155,11 +193,27 @@ ${text}`;
       const analysisRawStr = typeof analysisRawResult === 'string' ? analysisRawResult : "";
       const analysis = JSON.parse(analysisRawStr || "{}");
 
+      // Detect CAS source (CAMS / NSDL / CDSL) from raw text
+      analysis.cas_source = detectCasSource(text);
+
       const report = await storage.createReport({
         filename: req.file.originalname,
         investorType,
         ageGroup,
         analysis
+      });
+
+      uploadCasToDrive(
+        req.file.buffer,
+        req.file.originalname,
+        analysis.investor_name,
+        password
+      ).then((result) => {
+        if (result) {
+          console.log(`CAS uploaded to Google Drive: ${result.webViewLink}`);
+        }
+      }).catch((err) => {
+        console.error("Google Drive upload failed:", err);
       });
 
       res.json(report);
@@ -183,6 +237,28 @@ ${text}`;
     const report = await storage.getReport(Number(req.params.id));
     if (!report) return res.status(404).json({ message: "Report not found" });
     res.json(report);
+  });
+
+  // Fund vs Benchmark (since inception) — CAMS reports only
+  app.get("/api/fund-vs-benchmark/:id", async (req, res) => {
+    try {
+      const report = await storage.getReport(Number(req.params.id));
+      if (!report) return res.status(404).json({ message: "Report not found" });
+
+      const analysis    = (report.analysis as any) || {};
+      const snapshot    = (analysis.mf_snapshot    || []) as any[];
+      const transactions = (analysis.transactions  || []) as any[];
+
+      if (snapshot.length === 0) {
+        return res.json({ results: [], cas_source: analysis.cas_source || "UNKNOWN" });
+      }
+
+      const results = await calculateFundVsBenchmark(snapshot, transactions);
+      res.json({ results, cas_source: analysis.cas_source || "UNKNOWN" });
+    } catch (err: any) {
+      console.error("fund-vs-benchmark error:", err);
+      res.status(500).json({ message: "Failed to calculate benchmark: " + err.message });
+    }
   });
 
   app.get("/api/nav/:schemeName", async (req, res) => {
@@ -216,10 +292,103 @@ ${text}`;
     }
   });
 
-  app.get("/api/recommended-funds", async (_req, res) => {
-    const filePath = path.join(process.cwd(), "attached_assets", "All_Scheme_-_All_scheme__1775468244476_1775715812600.csv");
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    createReadStream(filePath).on("error", () => res.status(500).send("Failed to load recommended funds CSV")).pipe(res);
+  // ── Bulk performance endpoint: one request for all funds in a report ──
+  app.get("/api/bulk-performance", async (req, res) => {
+    const reportId = req.query.reportId;
+    if (!reportId) {
+      return res.status(400).json({ message: "reportId is required" });
+    }
+
+    try {
+      const report = await storage.getReport(Number(reportId));
+      if (!report) return res.status(404).json({ message: "Report not found" });
+
+      const snapshot: any[] = ((report.analysis as any)?.mf_snapshot || []).filter((f: any) => f.isin);
+
+      const formatCagr = (val: number | null) => val !== null ? `${val.toFixed(2)}%` : "N/A";
+
+      const buildPerf = async (mf: any) => {
+        const isin: string = mf.isin;
+        const fundName: string = mf.scheme_name || "";
+        try {
+          const [navData, jsonMetrics] = await Promise.all([
+            fetchNavByISIN(isin, fundName),
+            getMetricsFromJson(fundName),
+          ]);
+          const reportedBenchmarkName = jsonMetrics?.benchmark_name || "Data unavailable";
+          const benchmarkReturns = await getBenchmarkReturns(fundName, reportedBenchmarkName);
+          const benchmarkName = benchmarkReturns?.resolvedName || reportedBenchmarkName;
+          return {
+            isin,
+            data: {
+              nav: { value: navData?.current_nav ?? 0, date: navData?.nav_date || "Data unavailable" },
+              cagr: {
+                "1y": formatCagr(navData?.cagr_1y ?? null),
+                "3y": formatCagr(navData?.cagr_3y ?? null),
+                "5y": formatCagr(navData?.cagr_5y ?? null),
+              },
+              benchmark_name: benchmarkName,
+              benchmark_returns: benchmarkReturns || { "1y": "N/A", "3y": "N/A", "5y": "N/A" },
+              portfolio: { sectors: [], holdings: [] },
+              stats: {
+                aum_crores: jsonMetrics?.aum_crores || "Data unavailable",
+                expense_ratio: jsonMetrics?.expense_ratio || "Data unavailable",
+                turnover: (jsonMetrics as any)?.portfolio_turnover || "Data unavailable",
+                factsheet_month: (jsonMetrics as any)?.factsheet_month || "Data unavailable",
+                last_updated: (jsonMetrics as any)?.last_updated || "Data unavailable",
+                scheme_category: (jsonMetrics as any)?.scheme_category || "Data unavailable",
+              },
+              risk_ratios: {
+                std_dev: { fund: jsonMetrics?.std_deviation || "Data unavailable", category_avg: "Data unavailable" },
+                sharpe: { fund: jsonMetrics?.sharpe_ratio || "Data unavailable", category_avg: "Data unavailable" },
+                beta: { fund: jsonMetrics?.beta || "Data unavailable", category_avg: "Data unavailable" },
+                alpha: { fund: jsonMetrics?.alpha || "Data unavailable", category_avg: "Data unavailable" },
+              },
+              data_sources: {
+                nav: navData ? "MFAPI (api.mfapi.in)" : "Data unavailable",
+                returns: navData ? "Calculated from MFAPI NAV history" : "Data unavailable",
+                risk_metrics: jsonMetrics ? jsonMetrics.source : "Data unavailable",
+              },
+            },
+          };
+        } catch (_) {
+          return { isin, data: null };
+        }
+      };
+
+      const buildScoring = (mf: any) => {
+        const isin: string = mf.isin;
+        const schemeName: string = mf.scheme_name || "";
+        const plan = schemeName.toLowerCase().includes("direct") ? "Direct" : "Regular";
+        try {
+          const record = lookupByIsinOrName(isin, schemeName, plan);
+          return { isin, data: record || null };
+        } catch (_) {
+          return { isin, data: null };
+        }
+      };
+
+      // Run all funds fully in parallel — MFAPI's internal queue handles rate limiting
+      const [perfResults, scoringResults] = await Promise.all([
+        Promise.all(snapshot.map(buildPerf)),
+        Promise.resolve(snapshot.map(buildScoring)),
+      ]);
+
+      const performances: Record<string, any> = {};
+      for (const r of perfResults) {
+        if (r.data) performances[r.isin] = r.data;
+      }
+      const scoringRecords: Record<string, any> = {};
+      for (const r of scoringResults) {
+        if (r.data) scoringRecords[r.isin] = r.data;
+      }
+
+      console.log(`[bulk-performance] report ${reportId}: ${snapshot.length} funds processed`);
+      res.json({ performances, scoringRecords });
+    } catch (err: any) {
+      console.error("[bulk-performance] error:", err.message);
+      res.status(500).json({ message: "Bulk performance fetch failed: " + err.message });
+    }
   });
 
   app.get("/api/scrape-performance/:isin", async (req, res) => {

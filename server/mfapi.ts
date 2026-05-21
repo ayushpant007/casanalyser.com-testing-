@@ -307,9 +307,9 @@ function calculateCAGR(currentNav: number, oldNav: number, years: number): numbe
 const navCache = new Map<number, { data: NavData; ts: number }>();
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
-// ── Concurrency limiter (max 2 simultaneous MFAPI requests) ───────────
-const MAX_CONCURRENT = 2;
-const MIN_DELAY_MS = 400; // minimum gap between consecutive MFAPI calls
+// ── Concurrency limiter (max 4 simultaneous MFAPI requests) ───────────
+const MAX_CONCURRENT = 4;
+const MIN_DELAY_MS = 150; // minimum gap between consecutive MFAPI calls
 let activeCount = 0;
 let lastRequestTime = 0;
 const waitQueue: Array<() => void> = [];

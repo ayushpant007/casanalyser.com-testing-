@@ -1,10 +1,10 @@
 import { useParams, useLocation } from "wouter";
 import { useReport } from "@/hooks/use-reports";
-import { useRef, useState, useMemo, useEffect, useCallback, Fragment } from "react";
+import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, FileSpreadsheet, Plus, Trash2 } from "lucide-react";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip } from "recharts";
+import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Shield, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw } from "lucide-react";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, Area, AreaChart } from "recharts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2 } from "lucide-react";
 
@@ -62,12 +62,129 @@ const ACTION_STYLES: Record<string, string> = {
   sell:   "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-type RecommendedFundRow = {
-  id: string;
-  category: string;
-  subCategory: string;
-  fundName: string;
-};
+function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1400, decimals = 0, className = "" }: {
+  value: number; prefix?: string; suffix?: string; duration?: number; decimals?: number; className?: string;
+}) {
+  const [display, setDisplay] = useState(0);
+  const frameRef = useRef<number>(0);
+  useEffect(() => {
+    const start = Date.now();
+    const step = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(parseFloat((value * eased).toFixed(decimals)));
+      if (progress < 1) frameRef.current = requestAnimationFrame(step);
+    };
+    frameRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [value, duration, decimals]);
+  const formatted = decimals > 0 ? display.toFixed(decimals) : Math.round(display).toLocaleString("en-IN");
+  return <span className={className}>{prefix}{formatted}{suffix}</span>;
+}
+
+function HealthGauge({ score }: { score: number }) {
+  const r = 46; const cx = 60; const cy = 60;
+  const startAngle = -210; const totalAngle = 240;
+  const toXY = (a: number) => ({ x: cx + r * Math.cos((a * Math.PI) / 180), y: cy + r * Math.sin((a * Math.PI) / 180) });
+  const arc = (s: number, e: number) => {
+    const sp = toXY(s); const ep = toXY(e);
+    return `M ${sp.x} ${sp.y} A ${r} ${r} 0 ${e - s > 180 ? 1 : 0} 1 ${ep.x} ${ep.y}`;
+  };
+  const fillEnd = startAngle + (Math.max(0, Math.min(score, 100)) / 100) * totalAngle;
+  const color = score >= 80 ? "#10b981" : score >= 60 ? "#3b82f6" : score >= 40 ? "#f59e0b" : "#ef4444";
+  const label = score >= 80 ? "Excellent" : score >= 60 ? "Good" : score >= 40 ? "Fair" : "Poor";
+  return (
+    <div className="flex flex-col items-center">
+      <svg width={120} height={85} viewBox="0 0 120 85">
+        <path d={arc(startAngle, startAngle + totalAngle)} fill="none" stroke="#e2e8f0" strokeWidth={9} strokeLinecap="round" />
+        {score > 0 && <path d={arc(startAngle, fillEnd)} fill="none" stroke={color} strokeWidth={9} strokeLinecap="round" />}
+        <text x={cx} y={cy + 6} textAnchor="middle" fontSize={19} fontWeight={800} fill={color}>{score}</text>
+        <text x={cx} y={cy + 18} textAnchor="middle" fontSize={8} fill="#94a3b8" fontWeight={600}>/ 100</text>
+      </svg>
+      <div className="text-[11px] font-bold -mt-1" style={{ color }}>{label}</div>
+      <div className="text-[9px] text-slate-400 mt-0.5 uppercase tracking-widest">Health Score</div>
+    </div>
+  );
+}
+
+function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: any; scoring: any; onClose: () => void }) {
+  const pv = (v: string | undefined) => parseFloat((v || "0").replace(/[^\d.-]/g, "") || "0");
+  const bm = perf?.benchmark_returns || {};
+  const cagr = perf?.cagr || {};
+  const pl = (fund.valuation || 0) - (fund.invested_amount || 0);
+  const plPct = fund.invested_amount > 0 ? (pl / fund.invested_amount) * 100 : 0;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-5 py-4 text-white rounded-t-2xl">
+          <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+            <X className="w-4 h-4 text-white" />
+          </button>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-1">{fund.fund_category || "—"} · {fund.fund_type || "—"}</p>
+          <h3 className="text-sm font-bold text-white leading-tight pr-8">{fund.scheme_name}</h3>
+          <p className="text-[10px] text-violet-300 mt-0.5 font-mono">{fund.isin}</p>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "Invested", value: `₹${(fund.invested_amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: "text-slate-800" },
+              { label: "Current Value", value: `₹${(fund.valuation || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: "text-slate-800" },
+              { label: `P/L (${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}%)`, value: `${pl >= 0 ? "+" : "-"}₹${Math.abs(pl).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: pl >= 0 ? "text-emerald-600" : "text-rose-600" },
+            ].map(item => (
+              <div key={item.label} className="bg-slate-50 rounded-xl p-2.5 text-center border border-slate-100">
+                <p className="text-[9px] text-slate-400 font-semibold mb-1 uppercase tracking-wide">{item.label}</p>
+                <p className={`text-xs font-bold ${item.cls}`}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wide mb-1">Units</p>
+              <p className="text-sm font-bold text-slate-800">{(fund.units || fund.closing_balance || 0).toFixed(3)}</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wide mb-1">NAV</p>
+              <p className="text-sm font-bold text-slate-800">₹{(fund.nav || 0).toFixed(4)}</p>
+            </div>
+          </div>
+          {perf && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">CAGR vs Benchmark</p>
+              <div className="space-y-2.5">
+                {(["1y", "3y", "5y"] as const).map(period => {
+                  const cv = pv(cagr[period]); const bv = pv(bm[period]); const beating = cv >= bv;
+                  return (
+                    <div key={period} className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-slate-500 w-5 uppercase">{period}</span>
+                      <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className="h-2 rounded-full transition-all" style={{ width: `${Math.min(Math.abs(cv) * 3, 100)}%`, backgroundColor: beating ? "#10b981" : "#ef4444" }} />
+                      </div>
+                      <span className={`text-[11px] font-bold w-12 text-right ${beating ? "text-emerald-600" : "text-rose-600"}`}>{cv > 0 ? "+" : ""}{cv.toFixed(2)}%</span>
+                      <span className="text-[10px] text-slate-400 w-12 text-right">BM:{bv.toFixed(1)}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {scoring && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Financial Score</p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div className="h-2.5 rounded-full bg-violet-500" style={{ width: `${Math.min((scoring.totalScore / 40) * 100, 100)}%` }} />
+                </div>
+                <span className="text-sm font-bold text-violet-600">{scoring.totalScore}/40</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ConciseReport() {
   const params = useParams<{ id: string }>();
@@ -82,10 +199,6 @@ export default function ConciseReport() {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_actions_${reportId}`) || "{}"); } catch { return {}; }
   });
-  const [remarks, setRemarks] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_remarks_${reportId}`) || "{}"); } catch { return {}; }
-  });
 
   const updateAction = (schemeName: string, value: string) => {
     setActionSelections(prev => {
@@ -95,27 +208,19 @@ export default function ConciseReport() {
     });
   };
 
-  const updateRemark = (schemeName: string, value: string) => {
-    setRemarks(prev => {
-      const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_remarks_${reportId}`, JSON.stringify(next));
-      return next;
-    });
-  };
-
   const [targetCategory, setTargetCategory] = useState<Record<string, string>>(() => {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_target_cat_${reportId}`) || "{}"); } catch { return {}; }
   });
 
-  const [targetSubCategory, setTargetSubCategory] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_target_subcat_${reportId}`) || "{}"); } catch { return {}; }
-  });
-
   const [targetFund, setTargetFund] = useState<Record<string, string>>(() => {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_target_fund_${reportId}`) || "{}"); } catch { return {}; }
+  });
+
+  const [targetSubCategory, setTargetSubCategory] = useState<Record<string, string>>(() => {
+    if (!reportId) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_target_subcat_${reportId}`) || "{}"); } catch { return {}; }
   });
 
   const updateTargetCategory = useCallback((schemeName: string, value: string) => {
@@ -124,7 +229,7 @@ export default function ConciseReport() {
       if (reportId) localStorage.setItem(`fin_target_cat_${reportId}`, JSON.stringify(next));
       return next;
     });
-    // Reset sub-category and fund when category changes
+    // Reset subcategory and fund when category changes
     setTargetSubCategory(prev => {
       const next = { ...prev, [schemeName]: "" };
       if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
@@ -143,7 +248,7 @@ export default function ConciseReport() {
       if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
       return next;
     });
-    // Reset fund when sub-category changes
+    // Reset fund when subcategory changes
     setTargetFund(prev => {
       const next = { ...prev, [schemeName]: "" };
       if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
@@ -159,38 +264,190 @@ export default function ConciseReport() {
     });
   }, [reportId]);
 
-  const [fundMasterRows, setFundMasterRows] = useState<Array<{ category: string; subCategory: string; fundName: string }>>([]);
-  const [recommendedFunds, setRecommendedFunds] = useState<RecommendedFundRow[]>([]);
+  const [remarks, setRemarks] = useState<Record<string, string>>(() => {
+    if (!reportId) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_remarks_${reportId}`) || "{}"); } catch { return {}; }
+  });
+
+  const updateRemarks = useCallback((schemeName: string, value: string) => {
+    setRemarks(prev => {
+      const next = { ...prev, [schemeName]: value };
+      if (reportId) localStorage.setItem(`fin_remarks_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  }, [reportId]);
+
+  const [fundSchemes, setFundSchemes] = useState<string[]>([]);
+  const [fundSearchQuery, setFundSearchQuery] = useState<Record<string, string>>({});
+  const [openFundDropdown, setOpenFundDropdown] = useState<string | null>(null);
+
+  const [recommendedFunds, setRecommendedFunds] = useState<Array<{ id: string; category: string; subCategory: string; fund: string }>>(() => {
+    if (!reportId) return [];
+    try { return JSON.parse(localStorage.getItem(`fin_recommended_${reportId}`) || "[]"); } catch { return []; }
+  });
+
+  const [schemeData, setSchemeData] = useState<Array<{ category: string; subCategory: string; schemeName: string }>>([]);
+
+  const addRecommendedFund = useCallback(() => {
+    const newId = `rec_${Date.now()}`;
+    setRecommendedFunds(prev => {
+      const next = [...prev, { id: newId, category: "", subCategory: "", fund: "" }];
+      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  }, [reportId]);
+
+  const updateRecommendedFund = useCallback((id: string, field: string, value: string) => {
+    setRecommendedFunds(prev => {
+      const next = prev.map(f => f.id === id ? { ...f, [field]: value } : f);
+      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  }, [reportId]);
+
+  const deleteRecommendedFund = useCallback((id: string) => {
+    setRecommendedFunds(prev => {
+      const next = prev.filter(f => f.id !== id);
+      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      return next;
+    });
+  }, [reportId]);
 
   useEffect(() => {
-    fetch("/api/recommended-funds")
+    // Load the scheme data CSV for recommended funds section
+    fetch("/attached_assets/All_Scheme_-_All_scheme__1775468244476.csv")
       .then(r => r.text())
       .then(text => {
-        const rows = text.split("\n").map((l: string) => l.trim()).filter(Boolean);
-        const parsed = rows.slice(1).map((row: string) => {
-          const first = row.indexOf(",");
-          const second = row.indexOf(",", first + 1);
-          if (first < 0 || second < 0) return null;
-          return {
-            category: row.slice(0, first).trim(),
-            subCategory: row.slice(first + 1, second).trim(),
-            fundName: row.slice(second + 1).trim(),
-          };
-        }).filter((r: { category: string; subCategory: string; fundName: string } | null): r is { category: string; subCategory: string; fundName: string } => !!r && !!r.category && !!r.subCategory && !!r.fundName);
-        setFundMasterRows(parsed);
+        const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+        const header = lines[0];
+        if (header && header.includes("Category") && header.includes("Sub Category") && header.includes("Scheme Name")) {
+          const data = lines.slice(1).map(line => {
+            // Simple CSV parsing - assumes fields don't have commas inside them
+            const parts = line.split(",");
+            return {
+              category: (parts[0] || "").trim(),
+              subCategory: (parts[1] || "").trim(),
+              schemeName: (parts[2] || "").trim()
+            };
+          }).filter(d => d.category && d.subCategory && d.schemeName);
+          setSchemeData(data);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fallback to simple fund schemes
+        fetch("/fund-schemes.csv")
+          .then(r => r.text())
+          .then(text => {
+            const lines = text.split("\n").map(l => l.trim()).filter(l => l && l !== "Scheme Name");
+            setFundSchemes(lines);
+          })
+          .catch(() => {});
+      });
   }, []);
 
-  const storedPerformances = useMemo<Record<string, any>>(() => {
+  const [storedPerformances, setStoredPerformances] = useState<Record<string, any>>(() => {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_perf_${reportId}`) || "{}"); } catch { return {}; }
-  }, [reportId]);
+  });
 
-  const storedScoring = useMemo<Record<string, any>>(() => {
+  const [storedScoring, setStoredScoring] = useState<Record<string, any>>(() => {
     if (!reportId) return {};
     try { return JSON.parse(localStorage.getItem(`fin_scoring_${reportId}`) || "{}"); } catch { return {}; }
-  }, [reportId]);
+  });
+
+  const [isAutoAnalyzing, setIsAutoAnalyzing] = useState(false);
+  const [analyzeProgress, setAnalyzeProgress] = useState({ done: 0, total: 0 });
+  const [benchmarkPeriod, setBenchmarkPeriod] = useState<"1y" | "3y">("1y");
+  const hasAutoStarted = useRef(false);
+
+  // ── New UI state ──────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState("overview");
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [snapshotSort, setSnapshotSort] = useState<{ col: string; dir: "asc" | "desc" }>({ col: "value", dir: "desc" });
+  const [snapshotSearch, setSnapshotSearch] = useState("");
+  const [snapshotGrouped, setSnapshotGrouped] = useState(true);
+  const [selectedFundIsin, setSelectedFundIsin] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // ── Section refs for tab navigation ──────────────────────────────────────
+  const overviewRef = useRef<HTMLDivElement>(null);
+  const benchmarkRef = useRef<HTMLDivElement>(null);
+  const allocationRef = useRef<HTMLDivElement>(null);
+  const sipHealthRef = useRef<HTMLDivElement>(null);
+  const performanceRef = useRef<HTMLDivElement>(null);
+  const snapshotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+      const sections = [
+        { id: "overview", ref: overviewRef },
+        { id: "benchmark", ref: benchmarkRef },
+        { id: "allocation", ref: allocationRef },
+        { id: "sip", ref: sipHealthRef },
+        { id: "performance", ref: performanceRef },
+        { id: "snapshot", ref: snapshotRef },
+      ];
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = sections[i].ref.current;
+        if (el && el.getBoundingClientRect().top <= 120) {
+          setActiveTab(sections[i].id);
+          break;
+        }
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!report || hasAutoStarted.current) return;
+    const analysisData = (report.analysis as any) || {};
+    const funds: any[] = (analysisData.mf_snapshot || []).filter((mf: any) => mf.isin);
+    if (!funds.length) return;
+    const alreadyDone = Object.keys(storedPerformances).length;
+    if (alreadyDone >= funds.length) return;
+    hasAutoStarted.current = true;
+    setIsAutoAnalyzing(true);
+    setAnalyzeProgress({ done: alreadyDone, total: funds.length });
+    const newPerfs: Record<string, any> = { ...storedPerformances };
+    const newScoring: Record<string, any> = { ...storedScoring };
+    const analyzeOne = async (mf: any) => {
+      const isin = mf.isin;
+      if (newPerfs[isin] && newScoring[isin]) return;
+      const schemeName = mf.scheme_name || "";
+      const plan = schemeName.toLowerCase().includes("direct") ? "Direct" : "Regular";
+      const scoringParams = new URLSearchParams({ schemeName, plan });
+      const [perfRes, scoringRes] = await Promise.allSettled([
+        fetch(`/api/scrape-performance/${isin}?reportId=${reportId}`),
+        fetch(`/api/scoring/${encodeURIComponent(isin)}?${scoringParams}`)
+      ]);
+      if (perfRes.status === "fulfilled" && perfRes.value.ok) {
+        const data = await perfRes.value.json();
+        newPerfs[isin] = data;
+        setStoredPerformances(prev => ({ ...prev, [isin]: data }));
+      }
+      if (scoringRes.status === "fulfilled" && scoringRes.value.ok) {
+        const data = await scoringRes.value.json();
+        newScoring[isin] = data;
+        setStoredScoring(prev => ({ ...prev, [isin]: data }));
+      }
+    };
+    const runAll = async () => {
+      const BATCH = 3;
+      for (let i = 0; i < funds.length; i += BATCH) {
+        const batch = funds.slice(i, i + BATCH);
+        await Promise.all(batch.map(analyzeOne));
+        setAnalyzeProgress({ done: Math.min(i + BATCH, funds.length), total: funds.length });
+      }
+      try {
+        localStorage.setItem(`fin_perf_${reportId}`, JSON.stringify(newPerfs));
+        localStorage.setItem(`fin_scoring_${reportId}`, JSON.stringify(newScoring));
+      } catch (_) {}
+      setIsAutoAnalyzing(false);
+    };
+    runAll().catch(() => setIsAutoAnalyzing(false));
+  }, [report]);
 
   const analysis = (report?.analysis as any) || {};
 
@@ -222,44 +479,103 @@ export default function ConciseReport() {
     });
   }, [analysis.mf_snapshot, storedPerformances]);
 
-  const totalInvested = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.invested_amount || 0), 0), [mfSnapshot]);
+  const totalInvested = useMemo(
+    () => mfSnapshot.reduce((a: number, m: any) => a + (m.invested_amount || 0), 0),
+    [mfSnapshot]
+  );
   const totalValuation = useMemo(() => {
     return mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
   }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.unrealised_profit_loss || 0), 0), [mfSnapshot]);
-  const recommendedOptions = useMemo(() => {
-    const categories = Array.from(new Set(fundMasterRows.map((r: { category: string }) => r.category))).sort();
-    return categories;
-  }, [fundMasterRows]);
-  const recommendedRowsByCategory = (category: string) =>
-    Array.from(
-      new Set(
-        fundMasterRows
-          .filter((r: { category: string }) => r.category === category)
-          .map((r: { subCategory: string }) => r.subCategory)
-      )
-    ).sort();
-  const recommendedFundsBySelection = (category: string, subCategory: string) =>
-    fundMasterRows
-      .filter((r: { category: string; subCategory: string }) => r.category === category && r.subCategory === subCategory)
-      .map((r: { fundName: string }) => r.fundName)
-      .sort();
 
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];
-    // Count occurrences of scheme+amount for repeat detection
+    if (!txns.length) return {};
+    
+    // Parse date in CAMS/NSDL format: DD-MMM-YYYY or DD/MM/YYYY
+    const parseDate = (dateStr: string): number => {
+      if (!dateStr) return 0;
+      const trimmed = dateStr.trim();
+      
+      // Try parsing DD-MMM-YYYY format (e.g., "25-Oct-2020")
+      const monthMap: Record<string, string> = {
+        "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06",
+        "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12",
+      };
+      
+      const ddMmmYyyyMatch = trimmed.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+      if (ddMmmYyyyMatch) {
+        const [, day, month, year] = ddMmmYyyyMatch;
+        const monthNum = monthMap[month] || "01";
+        return new Date(`${year}-${monthNum}-${day.padStart(2, "0")}`).getTime();
+      }
+      
+      // Fallback: try standard date parsing
+      return new Date(trimmed).getTime();
+    };
+    
+    // Exclusion types and patterns for last transaction (CAMS/NSDL formats)
+    const exclusionTypes = new Set(["CANCELLED", "STAMP_DUTY", "SWP", "STP-OUT", "REDEMPTION"]);
+    const exclusionPatterns = [
+      /cancelled/i,
+      /cancel/i,
+      /marked\s+duty/i,
+      /stamp\s*duty/i,
+      /switch.*out/i,
+      /redemption/i,
+      /exit/i,
+    ];
+    
+    // Group transactions by scheme and sort by date (descending)
+    const txnsByScheme: Record<string, any[]> = {};
+    txns.forEach((t: any) => {
+      if (!t.scheme_name) return;
+      if (!txnsByScheme[t.scheme_name]) txnsByScheme[t.scheme_name] = [];
+      txnsByScheme[t.scheme_name].push(t);
+    });
+    
+    // Sort each scheme's transactions by date (latest first)
+    Object.keys(txnsByScheme).forEach(scheme => {
+      txnsByScheme[scheme].sort((a: any, b: any) => {
+        const dateA = parseDate(a.date || "");
+        const dateB = parseDate(b.date || "");
+        return dateB - dateA; // Latest first
+      });
+    });
+    
+    // Get last transaction for each scheme and check if it's excluded
+    const lastTxnByScheme: Record<string, any> = {};
+    Object.entries(txnsByScheme).forEach(([scheme, allTxns]) => {
+      const lastTxn = allTxns[0]; // Already sorted by date descending
+      if (lastTxn) {
+        const typeUpper = (lastTxn.type || "").toUpperCase();
+        const isExcludedByType = exclusionTypes.has(typeUpper);
+        const isExcludedByPattern = exclusionPatterns.some(p => p.test(lastTxn.type || ""));
+        if (!isExcludedByType && !isExcludedByPattern) {
+          lastTxnByScheme[scheme] = lastTxn;
+        }
+      }
+    });
+    
+    // Count SIP/PURCHASE occurrences (excluding schemes with exclusion in last txn)
     const repeatCount: Record<string, number> = {};
     txns.forEach((t: any) => {
       if (!t.scheme_name || !t.amount) return;
+      if (!(t.scheme_name in lastTxnByScheme)) return; // Skip if last txn is excluded
+      
       const type = (t.type || "").toUpperCase();
       if (type === "SIP" || type === "PURCHASE") {
         const key = `${t.scheme_name}||${Math.round(t.amount)}`;
         repeatCount[key] = (repeatCount[key] || 0) + 1;
       }
     });
+    
+    // Build final SIP map
     const map: Record<string, number> = {};
     for (const t of txns) {
       if (!t.scheme_name || !t.amount) continue;
+      if (!(t.scheme_name in lastTxnByScheme)) continue; // Skip if excluded
+      
       const type = (t.type || "").toUpperCase();
       const key = `${t.scheme_name}||${Math.round(t.amount)}`;
       const isTrueSip = type === "SIP" || (type === "PURCHASE" && (repeatCount[key] || 0) >= 2);
@@ -283,16 +599,6 @@ export default function ConciseReport() {
     return name;
   })();
 
-  const addRecommendedFund = () => {
-    setRecommendedFunds(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, category: "", subCategory: "", fundName: "" }]);
-  };
-
-  const updateRecommendedFund = (id: string, patch: Partial<RecommendedFundRow>) => {
-    setRecommendedFunds(prev => prev.map(row => row.id === id ? { ...row, ...patch } : row));
-  };
-
-  const removeRecommendedFund = (id: string) => setRecommendedFunds(prev => prev.filter(row => row.id !== id));
-
   const downloadPDF = async () => {
     if (!reportRef.current) return;
     setIsDownloading(true);
@@ -314,11 +620,8 @@ export default function ConciseReport() {
           el.style.setProperty("padding", "32px", "important");
           el.style.setProperty("width", `${CAPTURE_WIDTH - 64}px`, "important");
           el.style.setProperty("max-width", "none", "important");
-          // Remove overflow clipping on containers so nothing gets cut off,
-          // but skip elements marked data-pdf-clip (progress bars, pill fills, truncated text)
-          // which need overflow:hidden to maintain their shape / ellipsis behaviour.
+          // Remove all overflow clipping so nothing gets cut off
           el.querySelectorAll<HTMLElement>("*").forEach(child => {
-            if (child.dataset.pdfClip) return;
             const cs = doc.defaultView?.getComputedStyle(child);
             if (!cs) return;
             if (cs.overflow === "hidden" || cs.overflow === "scroll" || cs.overflow === "auto") {
@@ -332,217 +635,6 @@ export default function ConciseReport() {
             }
           });
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
-
-          // Fix header: html2canvas can't render -webkit-background-clip:text so replace with solid color
-          const investorNameEl = el.querySelector<HTMLElement>("[data-pdf-investor-name='true']");
-          if (investorNameEl) {
-            investorNameEl.style.setProperty("background", "none", "important");
-            investorNameEl.style.setProperty("-webkit-background-clip", "unset", "important");
-            investorNameEl.style.setProperty("-webkit-text-fill-color", "#d0f70f", "important");
-            investorNameEl.style.setProperty("color", "#d0f70f", "important");
-          }
-          // Ensure header background gradient renders correctly (inline styles already set)
-          const headerEl = el.querySelector<HTMLElement>("[data-pdf-header='true']");
-          if (headerEl) {
-            headerEl.style.setProperty("background", "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", "important");
-            headerEl.style.setProperty("border-radius", "16px", "important");
-            headerEl.style.setProperty("overflow", "hidden", "important");
-            headerEl.style.setProperty("border", "1px solid rgba(96,165,250,0.18)", "important");
-            headerEl.style.setProperty("padding", "28px 32px", "important");
-          }
-
-          // Transform Recommended Funds rows: replace <select> inputs with static text fields
-          el.querySelectorAll<HTMLElement>("[data-testid^='card-recommended-fund-']").forEach(card => {
-            const selects = Array.from(card.querySelectorAll<HTMLSelectElement>("select"));
-            const labels  = Array.from(card.querySelectorAll<HTMLLabelElement>("label"));
-
-            const newCard = doc.createElement("div");
-            newCard.style.cssText = [
-              "display:grid",
-              "grid-template-columns:1fr 1fr 1fr",
-              "gap:12px",
-              "border:1px solid #e2e8f0",
-              "border-radius:12px",
-              "padding:12px 16px",
-              "background:#f8fafc",
-              "box-sizing:border-box",
-              "width:100%",
-            ].join(";");
-
-            selects.forEach((sel, i) => {
-              const labelText = labels[i]?.textContent?.trim() ?? "";
-              const selectedOpt = sel.options[sel.selectedIndex]?.text ?? "";
-              const isPlaceholder = !selectedOpt || selectedOpt.toLowerCase().startsWith("select ");
-              const displayValue = isPlaceholder ? "—" : selectedOpt;
-
-              const fieldDiv = doc.createElement("div");
-              fieldDiv.style.cssText = "display:flex;flex-direction:column;gap:4px;min-width:0";
-
-              const labelDiv = doc.createElement("div");
-              labelDiv.textContent = labelText;
-              labelDiv.style.cssText = [
-                "font-size:9px",
-                "font-weight:700",
-                "letter-spacing:0.06em",
-                "text-transform:uppercase",
-                "color:#64748b",
-              ].join(";");
-
-              const valueDiv = doc.createElement("div");
-              valueDiv.textContent = displayValue;
-              valueDiv.style.cssText = [
-                "font-size:11px",
-                "color:" + (isPlaceholder ? "#94a3b8" : "#1e293b"),
-                "border:1px solid #e2e8f0",
-                "border-radius:6px",
-                "padding:6px 10px",
-                "background:#ffffff",
-                "white-space:normal",
-                "word-break:break-word",
-                "line-height:1.4",
-                "min-height:30px",
-                "box-sizing:border-box",
-              ].join(";");
-
-              fieldDiv.appendChild(labelDiv);
-              fieldDiv.appendChild(valueDiv);
-              newCard.appendChild(fieldDiv);
-            });
-
-            card.replaceWith(newCard);
-          });
-
-          el.querySelectorAll<HTMLTableCellElement>("td").forEach(cell => {
-            const actionBlock = cell.querySelector<HTMLElement>("[data-action-block='true']");
-            if (!actionBlock) return;
-            const sn = actionBlock.getAttribute("data-scheme-name") || "";
-            const action = actionSelections[sn] || "hold";
-            const tCat = targetCategory[sn] || "";
-            const tSubCat = targetSubCategory[sn] || "";
-            const tFund = targetFund[sn] || "";
-            const remarksText = remarks[sn] || "";
-            const isHold = action === "hold";
-
-            const ACTION_COLOR_MAP: Record<string, { bg: string; color: string; border: string }> = {
-              hold:   { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
-              switch: { bg: "#fffbeb", color: "#b45309", border: "#fde68a" },
-              merge:  { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
-              sell:   { bg: "#fff1f2", color: "#e11d48", border: "#fecdd3" },
-            };
-            const aColor = ACTION_COLOR_MAP[action] ?? ACTION_COLOR_MAP.hold;
-
-            // Helper: create a labelled static field (matching web view style)
-            const makeField = (labelText: string, valueText: string, opts: { width?: string; flex?: string; color?: string; bold?: boolean } = {}) => {
-              const wrap = doc.createElement("div");
-              wrap.style.cssText = [
-                "display:flex",
-                "flex-direction:column",
-                "gap:3px",
-                opts.width ? `width:${opts.width}` : "",
-                opts.flex  ? `flex:${opts.flex}` : "flex-shrink:0",
-                "min-width:0",
-              ].filter(Boolean).join(";");
-
-              const lbl = doc.createElement("div");
-              lbl.textContent = labelText;
-              lbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
-
-              const val = doc.createElement("div");
-              val.textContent = valueText || "—";
-              val.style.cssText = [
-                "font-size:9px",
-                "font-weight:" + (opts.bold ? "700" : "500"),
-                "color:" + (opts.color || (valueText ? "#334155" : "#94a3b8")),
-                "border:1px solid #e2e8f0",
-                "border-radius:6px",
-                "padding:4px 8px",
-                "background:#ffffff",
-                "white-space:normal",
-                "word-break:break-word",
-                "line-height:1.4",
-                "min-height:26px",
-                "box-sizing:border-box",
-              ].join(";");
-
-              wrap.appendChild(lbl);
-              wrap.appendChild(val);
-              return wrap;
-            };
-
-            // Outer row: horizontal flex matching web layout
-            const outerRow = doc.createElement("div");
-            outerRow.style.cssText = "display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;width:100%;box-sizing:border-box";
-
-            // Action badge field
-            const actionValDiv = doc.createElement("div");
-            actionValDiv.textContent = action.toUpperCase();
-            actionValDiv.style.cssText = [
-              "font-size:9px",
-              "font-weight:700",
-              "text-transform:uppercase",
-              "letter-spacing:0.05em",
-              "padding:4px 10px",
-              "border-radius:6px",
-              `background-color:${aColor.bg}`,
-              `color:${aColor.color}`,
-              `border:1px solid ${aColor.border}`,
-              "min-height:26px",
-              "box-sizing:border-box",
-              "align-self:flex-end",
-            ].join(";");
-
-            const actionFieldWrap = doc.createElement("div");
-            actionFieldWrap.style.cssText = "display:flex;flex-direction:column;gap:3px;flex-shrink:0";
-            const actionLbl = doc.createElement("div");
-            actionLbl.textContent = "ACTION";
-            actionLbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
-            actionFieldWrap.appendChild(actionLbl);
-            actionFieldWrap.appendChild(actionValDiv);
-            outerRow.appendChild(actionFieldWrap);
-
-            // Vertical divider
-            const divider = doc.createElement("div");
-            divider.style.cssText = "width:1px;background:#e2e8f0;align-self:stretch;flex-shrink:0;margin-top:14px";
-            outerRow.appendChild(divider);
-
-            // Target fields (only if not hold)
-            if (!isHold) {
-              outerRow.appendChild(makeField("Category", tCat, { width: "130px" }));
-              outerRow.appendChild(makeField("Sub Category", tSubCat, { width: "130px" }));
-              outerRow.appendChild(makeField("Target Fund", tFund, { width: "160px" }));
-
-              const divider2 = doc.createElement("div");
-              divider2.style.cssText = "width:1px;background:#e2e8f0;align-self:stretch;flex-shrink:0;margin-top:14px";
-              outerRow.appendChild(divider2);
-            }
-
-            // Remarks (always shown, grows to fill remaining space)
-            const remarksFieldWrap = doc.createElement("div");
-            remarksFieldWrap.style.cssText = "display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px";
-            const remarksLbl = doc.createElement("div");
-            remarksLbl.textContent = "REMARKS";
-            remarksLbl.style.cssText = "font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8";
-            const remarksVal = doc.createElement("div");
-            remarksVal.textContent = remarksText || "—";
-            remarksVal.style.cssText = [
-              "font-size:9px",
-              "color:" + (remarksText ? "#334155" : "#94a3b8"),
-              "border:1px solid #e2e8f0",
-              "border-radius:6px",
-              "padding:4px 8px",
-              "background:#ffffff",
-              "white-space:pre-wrap",
-              "word-break:break-word",
-              "line-height:1.4",
-              "min-height:40px",
-              "box-sizing:border-box",
-            ].join(";");
-            remarksFieldWrap.appendChild(remarksLbl);
-            remarksFieldWrap.appendChild(remarksVal);
-            outerRow.appendChild(remarksFieldWrap);
-
-            cell.replaceChildren(outerRow);
-          });
         },
       } as any);
 
@@ -710,7 +802,30 @@ export default function ConciseReport() {
       const absReturnPct = totalInvested > 0 ? (absReturn / totalInvested) * 100 : 0;
       const approxCagr = totalInvested > 0 ? (Math.pow(totalValuation / totalInvested, 1 / 2) - 1) * 100 : 0;
 
-      // ── Sheet 1: Portfolio Overview + Asset Allocation + Category Distribution (combined) ──
+      // ── Sheet 1: Portfolio Overview + Asset Allocation + Category Distribution ──
+      const ov: any[][] = [
+        [title("Portfolio Report – " + (investorName || "Portfolio")), empty(), empty(), empty()],
+        [lbl("Analyzed on"), meta(report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : ""), empty(), empty()],
+        [lbl("Investor Type"), meta(report.investorType || "—"), lbl("Age Group"), meta(report.ageGroup || "—")],
+        [empty(), empty(), empty(), empty()],
+        [sec("PORTFOLIO SUMMARY"), empty(), empty(), empty()],
+        [lbl("Total Portfolio Value"), num(totalValuation, '"₹"#,##0.00'), empty(), empty()],
+        [lbl("Total Invested"), num(totalInvested, '"₹"#,##0.00'), empty(), empty()],
+        [lbl("Absolute Gain / Loss"), plCell(absReturn), empty(), empty()],
+        [lbl("Overall Return (%)"), pctCell(absReturnPct), empty(), empty()],
+        [lbl("Approx 2-Yr CAGR (%)"), pctCell(approxCagr), empty(), empty()],
+        [lbl("Total Schemes"), num(snap.length, "0"), empty(), empty()],
+        [lbl("Total Accounts"), num(accounts.length, "0"), empty(), empty()],
+        [empty(), empty(), empty(), empty()],
+        [sec("ACCOUNT BREAKDOWN"), empty(), empty(), empty()],
+        [hdr("Account Type"), hdr("Schemes / Count"), hdr("Value (₹)"), hdr("% of Total")],
+        ...accounts.map((a: any, i: number) => {
+          const pct = totalValuation > 0 ? (a.value / totalValuation) * 100 : 0;
+          return [txt(a.type, i), num(a.count, "0", i), num(a.value, '"₹"#,##0.00', i), pctCell(pct, i)];
+        }),
+      ];
+      
+      // Asset Allocation section - start row after portfolio overview
       const allCats = ["Equity", "Debt", "Hybrid", "Gold/Silver", "Others"];
       const parseIdealPct = (v: string) => parseFloat(v?.replace("%", "") || "0");
       const idealMap2 = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
@@ -725,7 +840,7 @@ export default function ConciseReport() {
         else actMap2["Others"] = (actMap2["Others"] || 0) + pct;
       });
       let healthScore2 = 100;
-      allCats.forEach(c => { healthScore2 -= Math.abs((actMap2[c] || 0) - (parseIdealPct(idealMap2[c] || "0"))) * 0.8; });
+      allCats.forEach((c: string) => { healthScore2 -= Math.abs((actMap2[c] || 0) - (parseIdealPct(idealMap2[c] || "0"))) * 0.8; });
       healthScore2 = Math.max(0, Math.min(100, Math.round(healthScore2)));
 
       const statusCell = (status: string, row: number) => {
@@ -739,6 +854,23 @@ export default function ConciseReport() {
         }};
       };
 
+      const alData: any[][] = [
+        [empty(), empty(), empty(), empty(), empty()],
+        [title("Asset Allocation Check"), empty(), empty(), empty(), empty()],
+        [lbl("Investor Type"), meta(report.investorType || "—"), empty(), lbl("Age Group"), meta(report.ageGroup || "—")],
+        [lbl("Health Score"), { v: healthScore2 + " / 100", t: "s", s: { font: { bold: true, sz: 12, color: { rgb: healthScore2 >= 70 ? C.GREEN : healthScore2 >= 50 ? C.AMBER : C.RED }, name: "Calibri" }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, empty(), empty(), empty()],
+        [empty(), empty(), empty(), empty(), empty()],
+        [hdr("Category"), hdr("Actual (%)"), hdr("Ideal (%)"), hdr("Difference (%)"), hdr("Status")],
+        ...allCats.map((cat, i) => {
+          const actual = actMap2[cat] || 0;
+          const ideal = parseIdealPct(idealMap2[cat] || "0");
+          const diff = actual - ideal;
+          const status = Math.abs(diff) < 1 ? "On target" : diff > 0 ? "Over" : "Under";
+          return [txt(cat, i), pctCell(actual, i), pctCell(ideal, i), pctCell(diff, i), statusCell(status, i)];
+        }),
+      ];
+      
+      // Category Distribution section
       const typeMap2: Record<string, Record<string, number>> = {};
       snap.forEach((mf: any) => {
         const cat = (mf.fund_category || "").toLowerCase();
@@ -757,122 +889,38 @@ export default function ConciseReport() {
         if (subs.length === 0) return [[cat, "—", 0]];
         return subs.map(([type, pct], i) => [i === 0 ? cat : "", type, pct]);
       });
-
-      // ── 5 columns throughout: [Label/Cat, Val1, Val2, Val3, Val4] ──
-      const NC = 5; // number of columns
-      const e5 = () => Array(NC).fill(empty());
-      const sec5 = (v: string) => [sec(v), ...Array(NC - 1).fill({ v: "", t: "s", s: { fill: { fgColor: { rgb: C.MIDBLUE } }, border } })];
-      const lv = (l: string, v: any) => [lbl(l), v, empty(), empty(), empty()]; // label + value, rest empty
-
-      // ─── SECTION A: Portfolio Summary ───
-      const ovRows: any[][] = [
-        [title("Portfolio Report – " + (investorName || "Portfolio")), empty(), empty(), empty(), empty()],
-        [lbl("Analyzed on"), meta(report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : ""), empty(), empty(), empty()],
-        [lbl("Investor Type"), meta(report.investorType || "—"), empty(), lbl("Age Group"), meta(report.ageGroup || "—")],
-        e5(),
-        sec5("PORTFOLIO SUMMARY"),
-        lv("Total Portfolio Value", num(totalValuation, '"₹"#,##0.00')),
-        lv("Total Invested", num(totalInvested, '"₹"#,##0.00')),
-        lv("Absolute Gain / Loss", plCell(absReturn)),
-        lv("Overall Return (%)", pctCell(absReturnPct)),
-        lv("Approx 2-Yr CAGR (%)", pctCell(approxCagr)),
-        lv("Total Schemes", num(snap.length, "0")),
-        lv("Total Accounts", num(accounts.length, "0")),
-        e5(),
-        sec5("ACCOUNT BREAKDOWN"),
-        [hdr("Account Type"), hdr("Schemes / Count"), hdr("Value (₹)"), hdr("% of Total"), empty()],
-        ...accounts.map((a: any, i: number) => {
-          const pct = totalValuation > 0 ? (a.value / totalValuation) * 100 : 0;
-          return [txt(a.type, i), num(a.count, "0", i), num(a.value, '"₹"#,##0.00', i), pctCell(pct, i), empty()];
-        }),
-      ];
-
-      // ─── SECTION B: Asset Allocation ───
-      const aaStartRow = ovRows.length;
-      const aaRows: any[][] = [
-        e5(),
-        sec5("ASSET ALLOCATION CHECK"),
-        [lbl("Health Score"), { v: healthScore2 + " / 100", t: "s", s: { font: { bold: true, sz: 11, color: { rgb: healthScore2 >= 70 ? C.GREEN : healthScore2 >= 50 ? C.AMBER : C.RED }, name: "Calibri" }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, empty(), empty(), empty()],
-        [hdr("Category"), hdr("Actual (%)"), hdr("Ideal (%)"), hdr("Difference (%)"), hdr("Status")],
-        ...allCats.map((cat, i) => {
-          const actual = actMap2[cat] || 0;
-          const ideal = parseIdealPct(idealMap2[cat] || "0");
-          const diff = actual - ideal;
-          const status = Math.abs(diff) < 1 ? "On target" : diff > 0 ? "Over" : "Under";
-          return [txt(cat, i), pctCell(actual, i), pctCell(ideal, i), pctCell(diff, i), statusCell(status, i)];
-        }),
-      ];
-
-      // ─── SECTION C: Category Distribution ───
-      const cdRows: any[][] = [
-        e5(),
-        sec5("CATEGORY WISE DISTRIBUTION"),
-        [hdr("Main Category"), hdr("Sub-Category / Type"), hdr("Allocation (%)"), empty(), empty()],
+      
+      const distData2: any[][] = [
+        [empty(), empty(), empty()],
+        [title("Category Wise Distribution"), empty(), empty()],
+        [empty(), empty(), empty()],
+        [hdr("Main Category"), hdr("Sub-Category / Type"), hdr("Allocation (%)")],
         ...distData.map(([cat, type, pct], i) => [
           cat ? txt(String(cat), i) : empty(),
           txt(String(type), i),
           pctCell(Number(pct), i),
-          empty(),
-          empty(),
         ]),
       ];
-
-      const combined: any[][] = [...ovRows, ...aaRows, ...cdRows];
-      const ws1 = XLSX.utils.aoa_to_sheet(combined);
-      setColWidths(ws1, [30, 20, 16, 18, 14]);
-
-      // Build merges
-      const totalRows = combined.length;
-      const ws1Merges: any[] = [];
-      const span5 = (r: number) => ({ s: { r, c: 0 }, e: { r, c: NC - 1 } });
-      const span3 = (r: number) => ({ s: { r, c: 1 }, e: { r, c: 4 } }); // value spans cols 1-4
-      const span2last = (r: number) => ({ s: { r, c: 3 }, e: { r, c: 4 } }); // last two cols merged for Age Group
-      // Row 0: title span all
-      ws1Merges.push(span5(0));
-      // Row 1: analyzed on — merge cols 1-4
-      ws1Merges.push(span3(1));
-      // Row 3: blank
-      ws1Merges.push(span5(3));
-      // Row 4: PORTFOLIO SUMMARY header
-      ws1Merges.push(span5(4));
-      // Rows 5-11: lbl+value, merge cols 2-4
-      for (let r = 5; r <= 11; r++) ws1Merges.push({ s: { r, c: 2 }, e: { r, c: 4 } });
-      // Row 12: blank
-      ws1Merges.push(span5(12));
-      // Row 13: ACCOUNT BREAKDOWN header
-      ws1Merges.push(span5(13));
-      // Account rows: col 4 empty for each
-      const accHdrRow = 14;
-      const accDataStart = 15;
-      const accCount = accounts.length;
-      // Asset Allocation section
-      const aaBlankRow = aaStartRow;
-      ws1Merges.push(span5(aaBlankRow));
-      const aaSecRow = aaStartRow + 1;
-      ws1Merges.push(span5(aaSecRow));
-      // healthScore row: merge cols 1-4
-      const aaHealthRow = aaStartRow + 2;
-      ws1Merges.push(span3(aaHealthRow));
-      // Category Distribution section
-      const cdStart = aaStartRow + aaRows.length;
-      ws1Merges.push(span5(cdStart));           // blank
-      ws1Merges.push(span5(cdStart + 1));       // section header
-      // cd hdr: cols 3-4 merged for blank
-      ws1Merges.push({ s: { r: cdStart + 2, c: 3 }, e: { r: cdStart + 2, c: 4 } });
-      // cd data rows: cols 3-4 merged
-      for (let r = cdStart + 3; r < totalRows; r++) {
-        ws1Merges.push({ s: { r, c: 3 }, e: { r, c: 4 } });
-      }
-      ws1["!merges"] = ws1Merges;
+      
+      // Combine all three sections into one sheet
+      const combinedData = [...ov, ...alData, ...distData2];
+      const ws1 = XLSX.utils.aoa_to_sheet(combinedData);
+      setColWidths(ws1, [32, 22, 18, 14]);
       setRowHeights(ws1, { 0: 28, 4: 22, 13: 22 });
+      ws1["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+        { s: { r: 4, c: 0 }, e: { r: 4, c: 3 } },
+        { s: { r: 13, c: 0 }, e: { r: 13, c: 3 } },
+        ...([5,6,7,8,9,10,11].map(r => ({ s: { r, c: 2 }, e: { r, c: 3 } }))),
+      ];
       XLSX.utils.book_append_sheet(wb, ws1, "Portfolio Overview");
 
-      // ── Sheet 4: Performance Check ────────────────────────────────────
+      // ── Sheet 2: Performance Check + Portfolio Snapshot ────────────────
       const pv = (v: string) => parseFloat(v?.replace(/[^\d.-]/g, "") || "0");
       const perfFunds = snap.filter((mf: any) => storedPerformances[mf.isin]);
       const perfHdrs = ["#", "Fund Name", "ISIN", "Category", "Risk Type", "SIP Amt (₹)",
         "1Y CAGR%", "BM 1Y%", "3Y CAGR%", "BM 3Y%", "5Y CAGR%", "BM 5Y%",
-        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Sub Category", "Target Fund", "Remarks"];
+        "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Fund", "Remarks"];
       const cagrColor = (val: number, bm: number) => isNaN(val) ? "1E293B" : val >= bm ? C.GREEN : C.RED;
 
       const perf: any[][] = [
@@ -893,25 +941,17 @@ export default function ConciseReport() {
           const perfScore = s1 + s3 + s5;
           const finScore = sc?.totalScore ?? 0;
           const total = finScore + perfScore;
-          const rating = sc?.fundRating || "—";
-          const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
-          const action = (actionSelections[mfKey] || "hold").toUpperCase();
+          const pctXl = Math.round((total / 80) * 100);
+          const rating = pctXl >= 80 ? "Excellent" : pctXl >= 60 ? "Good" : "Poor";
+          const action = (actionSelections[mf.scheme_name] || "hold").toUpperCase();
           const sip = sipAmounts[mf.scheme_name];
           const c1 = pv(cagr["1y"]), c3 = pv(cagr["3y"]), c5 = pv(cagr["5y"]);
           const b1 = pv(bm["1y"]), b3 = pv(bm["3y"]), b5 = pv(bm["5y"]);
 
-          const getRatingLabel = (score: number) => {
-            if (score >= 71) return "Excellent";
-            if (score >= 51) return "Good";
-            if (score >= 26) return "Average";
-            return "Poor";
-          };
-
-          const ratingStyle = (score: number) => {
-            const r = getRatingLabel(score);
+          const ratingStyle = (r: string) => {
             const map: Record<string, [string, string]> = {
               "Excellent": [C.GREEN, C.GREENL], "Good": [C.BLUE, C.LTBLUE],
-              "Average": [C.AMBER, C.AMBERL], "Poor": [C.RED, C.REDL], "Very Poor": [C.RED, C.REDL],
+              "Poor": [C.RED, C.REDL],
             };
             const [fg, bg] = map[r] || [C.SLATE, C.SLATEL];
             return { v: r, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center" }, border } };
@@ -954,24 +994,19 @@ export default function ConciseReport() {
             num(finScore, "0", i),
             num(perfScore, "0", i),
             num(total, "0", i),
-            ratingStyle(total),
+            ratingStyle(rating),
             actionStyle(action),
-            txt(targetCategory[mfKey] || "—", i),
-            txt(targetSubCategory[mfKey] || "—", i),
-            txt(targetFund[mfKey] || "—", i, true),
-            txt(remarks[mfKey] || "—", i, true),
+            txt(targetCategory[mf.scheme_name] || "—", i),
+            txt(targetFund[mf.scheme_name] || "—", i, true),
+            txt(remarks[mf.scheme_name] || "—", i, true),
           ];
         }),
       ];
-      const ws4 = XLSX.utils.aoa_to_sheet(perf);
-      setColWidths(ws4, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 22, 38, 42]);
-      setRowHeights(ws4, { 0: 28, 2: 32 });
-      ws4["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: perfHdrs.length - 1 } }];
-      XLSX.utils.book_append_sheet(wb, ws4, "Performance Check");
-
-      // ── Sheet 5: Portfolio Snapshot ───────────────────────────────────
+      
+      // Portfolio Snapshot section
       const snapHdrs = ["#", "Scheme Name", "Category", "Fund Type", "Units", "NAV (₹)", "Invested (₹)", "Value (₹)", "P/L (₹)"];
-      const sn: any[][] = [
+      const snData: any[][] = [
+        [empty(), ...Array(snapHdrs.length - 1).fill(empty())],
         [title("Portfolio Snapshot – Mutual Fund Units"), ...Array(snapHdrs.length - 1).fill(empty())],
         [empty(), ...Array(snapHdrs.length - 1).fill(empty())],
         snapHdrs.map(h => hdr(h)),
@@ -992,138 +1027,268 @@ export default function ConciseReport() {
           { ...tot(totalUnrealised, '"₹"#,##0.00'), s: { ...tot("").s, font: { bold: true, sz: 10, color: { rgb: totalUnrealised >= 0 ? "6EE7B7" : "FCA5A5" }, name: "Calibri" }, fill: { fgColor: { rgb: C.TOTALBG } }, alignment: { horizontal: "right" }, border: borderMed } },
         ],
       ];
-      const ws5 = XLSX.utils.aoa_to_sheet(sn);
-      setColWidths(ws5, [4, 42, 16, 16, 12, 12, 16, 16, 16]);
-      setRowHeights(ws5, { 0: 28, 2: 28 });
-      ws5["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: snapHdrs.length - 1 } }];
-      XLSX.utils.book_append_sheet(wb, ws5, "Portfolio Snapshot");
+      
+      // Combine Performance Check and Portfolio Snapshot
+      const combinedPerfSnap = [...perf, ...snData];
+      const ws2 = XLSX.utils.aoa_to_sheet(combinedPerfSnap);
+      setColWidths(ws2, [4, 38, 14, 16, 14, 12, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 10, 18, 38, 28]);
+      setRowHeights(ws2, { 0: 28, 2: 32 });
+      ws2["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: perfHdrs.length - 1 } }];
+      XLSX.utils.book_append_sheet(wb, ws2, "Performance Check");
 
-      // ── Sheet 6: New Allocation ────────────────────────────────────────
-      // Columns: #, Fund Name, Category, Sub Category, Allocation Type, Valuation (₹)
-      const naHdrs = ["#", "Fund Name", "Category", "Sub Category", "Allocation Type", "Valuation (₹)"];
-      const naColW = [4, 50, 22, 30, 18, 18];
-
-      const allocTypeCell = (label: string, row: number) => {
-        const isNew = label.includes("New Fund") && !label.includes("Existing Fund");
-        const isRec = label === "Recommended";
-        const isMixed = label.includes("+");
-        const fg = isRec ? "065F46" : isMixed ? C.SLATE : isNew ? C.BLUE : C.NAVY;
-        const bg = isRec ? C.GREENL : isMixed ? C.ALTROW : isNew ? C.LTBLUE : C.SLATEL;
-        return { v: label, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center", wrapText: true }, border } };
-      };
-
-      // Build portfolio rows: hold = "Existing Fund", switch/merge/sell = "New Fund"
-      // Group by fundName + cat + subCat so duplicates collapse into one row
-      const naPortfolioMap: Record<string, { fundName: string; cat: string; subCat: string; labels: string[]; valuation: number }> = {};
+      // ── Sheet 3: New Allocation ────────────────────────────────────────
+      const naHdrs = ["Category", "Sub-Category", "Allocation (%)", "New Category", "New Sub-Category", "Fund Name", "Action"];
+      const naRows: any[][] = [];
+      let rowIdx = 0;
+      
+      // Build allocation data by category -> subcategory -> funds
+      const catSubtypeMap: Record<string, Record<string, any[]>> = {};
       snap.forEach((mf: any) => {
-        const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
-        const action = (actionSelections[mfKey] || "hold");
-        const isHold = action === "hold";
-        const fundName = isHold ? (mf.scheme_name || "—") : (targetFund[mfKey] || "—");
-        const cat = isHold ? (mf.fund_category || "—") : (targetCategory[mfKey] || "—");
-        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mfKey] || "—");
-        const label = isHold ? "Existing Fund" : "New Fund";
+        const cat = (mf.fund_category || "").toLowerCase();
+        let mainCat = "Others";
+        if (cat.includes("equity")) mainCat = "Equity";
+        else if (cat.includes("debt")) mainCat = "Debt";
+        else if (cat.includes("hybrid")) mainCat = "Hybrid";
+        else if (cat.includes("gold") || cat.includes("silver")) mainCat = "Gold/Silver";
+        
+        if (!catSubtypeMap[mainCat]) catSubtypeMap[mainCat] = {};
+        const subtype = mf.fund_type || "Other";
+        if (!catSubtypeMap[mainCat][subtype]) catSubtypeMap[mainCat][subtype] = [];
+        catSubtypeMap[mainCat][subtype].push(mf);
+      });
+      
+      // Generate rows grouped by category and subcategory
+      allCats.forEach((mainCat: string) => {
+        const subtypes = catSubtypeMap[mainCat] || {};
+        const subtypeEntries = Object.entries(subtypes);
+        
+        if (subtypeEntries.length === 0) return;
+        
+        subtypeEntries.forEach(([subtype, funds], stIdx) => {
+          const catAlloc = actMap2[mainCat] || 0;
+          const subtypeTotal = funds.reduce((s: number, f: any) => s + (f.valuation || 0), 0);
+          const subtypeAlloc = totalVal > 0 ? (subtypeTotal / totalVal) * 100 : 0;
+          
+          funds.forEach((mf: any, fIdx: number) => {
+            const act = (actionSelections[mf.scheme_name] || "hold").toUpperCase();
+            let actionLabel = "Existing Fund";
+            let displayFund = mf.scheme_name || "—";
+            let displaySubCat = "";
+            
+            if (act === "SWITCH" || act === "MERGE" || act === "SELL") {
+              actionLabel = "New Fund";
+              displayFund = targetFund[mf.scheme_name] || mf.scheme_name || "—";
+              displaySubCat = targetSubCategory[mf.scheme_name] || "";
+            }
+            
+            const actionStyle = (label: string) => {
+              const isNewFund = label === "New Fund";
+              const fg = isNewFund ? C.AMBER : C.BLUE;
+              const bg = isNewFund ? C.AMBERL : C.LTBLUE;
+              return { v: label, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center" }, border } };
+            };
+            
+            const newCat = (act === "SWITCH" || act === "MERGE" || act === "SELL") ? targetCategory[mf.scheme_name] || "—" : "—";
+            naRows.push([
+              fIdx === 0 && stIdx === 0 ? txt(mainCat, rowIdx) : empty(),
+              fIdx === 0 ? txt(subtype, rowIdx) : empty(),
+              fIdx === 0 ? pctCell(subtypeAlloc, rowIdx) : empty(),
+              txt(newCat, rowIdx),
+              txt(displaySubCat || "—", rowIdx),
+              txt(displayFund, rowIdx, true),
+              actionStyle(actionLabel),
+            ]);
+            rowIdx++;
+          });
+        });
+      });
+      
+      // Recommended Funds section
+      const recFundsStart = rowIdx + 3;
+      const recRows: any[][] = [
+        [empty()],
+        [sec("RECOMMENDED FUNDS"), empty(), empty(), empty(), empty()],
+        [hdr("Category"), hdr("Sub Category"), hdr("Fund Name"), empty(), empty()],
+      ];
+      
+      if (recommendedFunds.length === 0) {
+        // If no recommended funds, show N/A
+        recRows.push([
+          txt("N/A", 0),
+          empty(),
+          empty(),
+          empty(),
+          empty(),
+        ]);
+        // Add blank row for spacing
+        recRows.push([empty(), empty(), empty(), empty(), empty()]);
+      } else {
+        recommendedFunds.forEach((rec, idx) => {
+          recRows.push([
+            txt(rec.category || "—", idx),
+            txt(rec.subCategory || "—", idx),
+            txt(rec.fund || "—", idx, true),
+            empty(),
+            empty(),
+          ]);
+        });
+      }
+      
+      // Calculate OLD allocation from original mfSnapshot
+      const oldAllocMap: Record<string, Record<string, number>> = {};
+      mfSnapshot.forEach((mf: any) => {
+        const cat = (mf.fund_category || "").toLowerCase();
+        const allocCat = cat.includes("equity") ? "Equity" : cat.includes("debt") ? "Debt" : cat.includes("hybrid") ? "Hybrid" : "Others";
+        const allocSubCat = mf.fund_type || "Other";
         const valuation = mf.valuation || 0;
-        const key = `${fundName}||${cat}||${subCat}`;
-        if (!naPortfolioMap[key]) {
-          naPortfolioMap[key] = { fundName, cat, subCat, labels: [label], valuation };
-        } else {
-          if (!naPortfolioMap[key].labels.includes(label)) naPortfolioMap[key].labels.push(label);
-          naPortfolioMap[key].valuation += valuation;
+        
+        if (!oldAllocMap[allocCat]) oldAllocMap[allocCat] = {};
+        oldAllocMap[allocCat][allocSubCat] = (oldAllocMap[allocCat][allocSubCat] || 0) + valuation;
+      });
+      
+      // Calculate NEW allocation based on actions
+      const newAllocMap: Record<string, Record<string, number>> = {};
+      
+      mfSnapshot.forEach((mf: any) => {
+        const action = (actionSelections[mf.scheme_name] || "hold").toLowerCase();
+        const valuation = mf.valuation || 0;
+        
+        let allocCat = "";
+        let allocSubCat = "";
+        
+        if (action === "hold") {
+          // Use original category and type
+          const cat = (mf.fund_category || "").toLowerCase();
+          allocCat = cat.includes("equity") ? "Equity" : cat.includes("debt") ? "Debt" : cat.includes("hybrid") ? "Hybrid" : "Others";
+          allocSubCat = mf.fund_type || "Other";
+        } else if (action === "switch" || action === "merge" || action === "sell") {
+          // Use NEW category and sub-category
+          allocCat = targetCategory[mf.scheme_name] || "";
+          allocSubCat = targetSubCategory[mf.scheme_name] || "";
+          
+          // If category is selected but subcategory is not, try to get it from the selected fund
+          if (allocCat && !allocSubCat && schemeData && schemeData.length > 0) {
+            const selectedFundName = targetFund[mf.scheme_name] || "";
+            if (selectedFundName) {
+              const fundData = schemeData.find(s => s.schemeName === selectedFundName && s.category === allocCat);
+              if (fundData) {
+                allocSubCat = fundData.subCategory;
+              }
+            }
+          }
+          
+          // If category is not selected, skip this fund (no action taken)
+          if (!allocCat) {
+            allocCat = "";
+            allocSubCat = "";
+          }
+        }
+        
+        // Only add if both category and subcategory are properly set
+        if (allocCat && allocSubCat && allocCat !== "—" && allocSubCat !== "—") {
+          if (!newAllocMap[allocCat]) newAllocMap[allocCat] = {};
+          newAllocMap[allocCat][allocSubCat] = (newAllocMap[allocCat][allocSubCat] || 0) + valuation;
         }
       });
-      const naPortfolioRows = Object.values(naPortfolioMap).map((row, i) => {
-        const combinedLabel = row.labels.join(" + ");
-        return [
-          num(i + 1, "0", i),
-          txt(row.fundName, i, true),
-          txt(row.cat, i),
-          txt(row.subCat, i),
-          allocTypeCell(combinedLabel, i),
-          num(row.valuation, '"₹"#,##0.00', i),
-        ];
+      
+      // Add recommended funds to the new allocation map
+      recommendedFunds.forEach((rec) => {
+        if (rec.category && rec.subCategory) {
+          // Normalize category (remove "Scheme" suffix if present)
+          const normalizedCat = rec.category.replace(/\s+Scheme$/i, "").trim();
+          if (!newAllocMap[normalizedCat]) newAllocMap[normalizedCat] = {};
+          // For recommended funds, add a nominal value (0.01) to show they exist
+          newAllocMap[normalizedCat][rec.subCategory] = (newAllocMap[normalizedCat][rec.subCategory] || 0) + 0.01;
+        }
       });
-
-      // Recommended funds section rows
-      const naRecRows = recommendedFunds.map((rf, i) => [
-        num(i + 1, "0", i),
-        txt(rf.fundName || "—", i, true),
-        txt(rf.category || "—", i),
-        txt(rf.subCategory || "—", i),
-        allocTypeCell("Recommended", i),
-        { v: "—", t: "s", s: { font: { sz: 9, color: { rgb: C.SLATE }, name: "Calibri" }, fill: { fgColor: { rgb: i % 2 === 0 ? C.SLATEL : C.WHITE } }, alignment: { horizontal: "center" }, border } },
-      ]);
-
-      // Allocation summary: group by category + sub-category
-      const summaryMap: Record<string, { cat: string; subCat: string; val: number }> = {};
-      snap.forEach((mf: any) => {
-        const mfKey = `${mf.isin || mf.scheme_name}_${mf.folio_no || ''}`;
-        const action = (actionSelections[mfKey] || "hold");
-        const isHold = action === "hold";
-        const cat = isHold ? (mf.fund_category || "Others") : (targetCategory[mfKey] || "—");
-        const subCat = isHold ? (mf.fund_type || "—") : (targetSubCategory[mfKey] || "—");
-        const key = `${cat}||${subCat}`;
-        if (!summaryMap[key]) summaryMap[key] = { cat, subCat, val: 0 };
-        summaryMap[key].val += (mf.valuation || 0);
+      
+      // Normalize category names in both maps (remove "Scheme" suffix)
+      const normalizeCategory = (cat: string) => cat.replace(/\s+Scheme$/i, "").trim();
+      
+      // Create normalized versions of both maps
+      const normalizedOldMap: Record<string, Record<string, number>> = {};
+      Object.keys(oldAllocMap).forEach(cat => {
+        const normCat = normalizeCategory(cat);
+        if (!normalizedOldMap[normCat]) normalizedOldMap[normCat] = {};
+        Object.keys(oldAllocMap[cat]).forEach(subcat => {
+          normalizedOldMap[normCat][subcat] = (normalizedOldMap[normCat][subcat] || 0) + oldAllocMap[cat][subcat];
+        });
       });
-      const summaryTotal = Object.values(summaryMap).reduce((s, v) => s + v.val, 0);
-      const summaryRows = Object.values(summaryMap).sort((a, b) => b.val - a.val).map((row, i) => {
-        const pct = summaryTotal > 0 ? (row.val / summaryTotal) * 100 : 0;
-        return [txt(row.cat, i), txt(row.subCat, i), pctCell(pct, i)];
+      
+      const normalizedNewMap: Record<string, Record<string, number>> = {};
+      Object.keys(newAllocMap).forEach(cat => {
+        const normCat = normalizeCategory(cat);
+        if (!normalizedNewMap[normCat]) normalizedNewMap[normCat] = {};
+        Object.keys(newAllocMap[cat]).forEach(subcat => {
+          normalizedNewMap[normCat][subcat] = (normalizedNewMap[normCat][subcat] || 0) + newAllocMap[cat][subcat];
+        });
       });
-
-      // Blank rows / section dividers
-      const blankRow7 = Array(naHdrs.length).fill(empty());
-      const sectionHdr = (label: string) => [
-        sec(label), ...Array(naHdrs.length - 1).fill({ v: "", t: "s", s: { fill: { fgColor: { rgb: C.MIDBLUE } }, border } }),
+      
+      // Build Updated allocation summary rows (4 columns: Category, Sub-Category, Old %, New %)
+      const allocSummaryRows: any[][] = [
+        [sec("Updated allocation"), empty(), empty(), empty()],
+        [hdr("Category"), hdr("Sub-Category"), hdr("Old Allocation (%)"), hdr("New Allocation (%)")],
       ];
-
+      
+      // Collect all unique category+subcategory combinations from both normalized maps
+      const allCombos = new Set<string>();
+      Object.keys(normalizedOldMap).forEach(cat => {
+        Object.keys(normalizedOldMap[cat]).forEach(subcat => {
+          allCombos.add(`${cat}|${subcat}`);
+        });
+      });
+      Object.keys(normalizedNewMap).forEach(cat => {
+        Object.keys(normalizedNewMap[cat]).forEach(subcat => {
+          allCombos.add(`${cat}|${subcat}`);
+        });
+      });
+      
+      // Sort combos by category order
+      const catOrder = ["Equity", "Debt", "Hybrid", "Gold/Silver", "Others"];
+      const sortedCombos = Array.from(allCombos).sort((a, b) => {
+        const [catA, subcatA] = a.split("|");
+        const [catB, subcatB] = b.split("|");
+        const catOrder2 = catOrder.indexOf(catA) - catOrder.indexOf(catB);
+        return catOrder2 !== 0 ? catOrder2 : subcatA.localeCompare(subcatB);
+      });
+      
+      // Build rows using normalized maps
+      let lastCat = "";
+      sortedCombos.forEach((combo) => {
+        const [cat, subcat] = combo.split("|");
+        const oldVal = normalizedOldMap[cat]?.[subcat] || 0;
+        const newVal = normalizedNewMap[cat]?.[subcat] || 0;
+        const oldPct = totalVal > 0 ? (oldVal / totalVal) * 100 : 0;
+        const newPct = totalVal > 0 ? (newVal / totalVal) * 100 : 0;
+        
+        allocSummaryRows.push([
+          cat !== lastCat ? txt(cat, allocSummaryRows.length % 2) : empty(),
+          txt(subcat, allocSummaryRows.length % 2),
+          pctCell(oldPct, allocSummaryRows.length % 2),
+          pctCell(newPct, allocSummaryRows.length % 2),
+        ]);
+        lastCat = cat;
+      });
+      
       const na: any[][] = [
-        [title("New Allocation – Portfolio Plan"), ...Array(naHdrs.length - 1).fill(empty())],
+        [title("New Allocation Sheet – Updated Allocation & Actions"), ...Array(naHdrs.length - 1).fill(empty())],
         [lbl("Generated on"), meta(dateStr), ...Array(naHdrs.length - 2).fill(empty())],
-        blankRow7,
-        sectionHdr("PORTFOLIO ALLOCATION (EXISTING & NEW FUNDS)"),
+        [empty(), ...Array(naHdrs.length - 1).fill(empty())],
         naHdrs.map(h => hdr(h)),
-        ...(naPortfolioRows.length === 0
-          ? [[{ v: "No funds found", t: "s", s: { font: { italic: true, sz: 9, color: { rgb: C.SLATE } }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, ...Array(naHdrs.length - 1).fill(empty())]
-          ]
-          : naPortfolioRows),
-        blankRow7,
-        sectionHdr("RECOMMENDED FUNDS"),
-        naHdrs.map(h => hdr(h)),
-        ...(naRecRows.length === 0
-          ? [[{ v: "No recommended funds added", t: "s", s: { font: { italic: true, sz: 9, color: { rgb: C.SLATE } }, fill: { fgColor: { rgb: C.SLATEL } }, alignment: { horizontal: "left" }, border } }, ...Array(naHdrs.length - 1).fill(empty())]
-          ]
-          : naRecRows),
-        blankRow7,
-        sectionHdr("ALLOCATION SUMMARY"),
-        [hdr("Category"), hdr("Sub Category"), hdr("Allocation (%)"), ...Array(naHdrs.length - 3).fill(empty())],
-        ...summaryRows,
-        [tot("TOTAL"), tot(""), tot(100, "0.00"), ...Array(naHdrs.length - 3).fill(tot(""))],
+        ...naRows,
+        ...recRows,
+        ...allocSummaryRows,
       ];
-
-      const ws6 = XLSX.utils.aoa_to_sheet(na);
-      setColWidths(ws6, naColW);
-      setRowHeights(ws6, { 0: 28 });
-      // Row layout (0-based):
-      // 0: title, 1: gen on, 2: blank, 3: section hdr "PORTFOLIO…", 4: col hdrs,
-      // 5...(4+portCount): portfolio rows, 5+portCount: blank,
-      // 6+portCount: "RECOMMENDED FUNDS", 7+portCount: col hdrs,
-      // 8+portCount...(7+portCount+recCount): rec rows, 8+portCount+recCount: blank,
-      // 9+portCount+recCount: "ALLOCATION SUMMARY"
-      const portCount = naPortfolioRows.length === 0 ? 1 : naPortfolioRows.length;
-      const recCount = naRecRows.length === 0 ? 1 : naRecRows.length;
-      const recSecRow = 6 + portCount;
-      const sumSecRow = recSecRow + 3 + recCount;
-      ws6["!merges"] = [
+      const ws3 = XLSX.utils.aoa_to_sheet(na);
+      setColWidths(ws3, [14, 16, 14, 14, 18, 40, 14]);
+      setRowHeights(ws3, { 0: 28, 3: 28, [allocSummaryRows[0][0]?.rowIdx || 0]: 24 });
+      ws3["!merges"] = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: naHdrs.length - 1 } },
-        { s: { r: 3, c: 0 }, e: { r: 3, c: naHdrs.length - 1 } },
-        { s: { r: recSecRow, c: 0 }, e: { r: recSecRow, c: naHdrs.length - 1 } },
-        { s: { r: sumSecRow, c: 0 }, e: { r: sumSecRow, c: naHdrs.length - 1 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: naHdrs.length - 1 } },
       ];
-      XLSX.utils.book_append_sheet(wb, ws6, "New Allocation");
+      XLSX.utils.book_append_sheet(wb, ws3, "New Allocation");
 
-      // ── Sheet 8: Monthly Portfolio Value Trend ──────────────────────────
+      // ── Sheet 5: Monthly Portfolio Value Trend ──────────────────────────
       const monthlyData = (analysis.monthly_portfolio_trend || []).map((m: any) => [
         txt(m.month || "—", 0),
         num(m.portfolio_value ?? 0, '"₹"#,##0.00', 0),
@@ -1137,11 +1302,11 @@ export default function ConciseReport() {
         mtHdrs.map(h => hdr(h)),
         ...monthlyData,
       ];
-      const ws8 = XLSX.utils.aoa_to_sheet(mt);
-      setColWidths(ws8, [16, 18, 16, 14]);
-      setRowHeights(ws8, { 0: 28, 2: 24 });
-      ws8["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: mtHdrs.length - 1 } }];
-      XLSX.utils.book_append_sheet(wb, ws8, "Monthly Trend");
+      const ws5 = XLSX.utils.aoa_to_sheet(mt);
+      setColWidths(ws5, [16, 18, 16, 14]);
+      setRowHeights(ws5, { 0: 28, 2: 24 });
+      ws5["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: mtHdrs.length - 1 } }];
+      XLSX.utils.book_append_sheet(wb, ws5, "Monthly Trend");
 
       XLSX.writeFile(wb, `ConciseReport_${name}_${dateStr}.xlsx`);
     } catch (err) {
@@ -1150,6 +1315,74 @@ export default function ConciseReport() {
       setIsExporting(false);
     }
   };
+
+  // ── Hooks that MUST be above all early returns ──────────────────────────
+  const healthScore = useMemo(() => {
+    if (!report) return 0;
+    const totalV = mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
+    const aMap: Record<string, number> = {};
+    mfSnapshot.forEach((mf: any) => {
+      const cat = (mf.fund_category || "").toLowerCase();
+      const pct = totalV > 0 ? (mf.valuation / totalV) * 100 : 0;
+      let mainCat = "Others";
+      if (cat.includes("equity")) mainCat = "Equity";
+      else if (cat.includes("debt")) mainCat = "Debt";
+      else if (cat.includes("hybrid")) mainCat = "Hybrid";
+      else if (cat.includes("gold") || cat.includes("silver")) mainCat = "Gold/Silver";
+      aMap[mainCat] = (aMap[mainCat] || 0) + pct;
+    });
+    const ideal = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
+    let score = 100;
+    ["Equity","Debt","Hybrid","Gold/Silver","Others"].forEach(cat => {
+      const idealPct = parseFloat((ideal[cat] || "0").replace("%",""));
+      score -= Math.abs((aMap[cat] || 0) - idealPct) * 0.9;
+    });
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }, [report, mfSnapshot]);
+
+  const rebalancingPlan = useMemo(() => {
+    if (!report) return [];
+    const totalV = mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
+    const aMap: Record<string, number> = {};
+    mfSnapshot.forEach((mf: any) => {
+      const cat = (mf.fund_category || "").toLowerCase();
+      const pct = totalV > 0 ? (mf.valuation / totalV) * 100 : 0;
+      let mainCat = "Others";
+      if (cat.includes("equity")) mainCat = "Equity";
+      else if (cat.includes("debt")) mainCat = "Debt";
+      else if (cat.includes("hybrid")) mainCat = "Hybrid";
+      else if (cat.includes("gold") || cat.includes("silver")) mainCat = "Gold/Silver";
+      aMap[mainCat] = (aMap[mainCat] || 0) + pct;
+    });
+    const CAT_COLORS: Record<string, string> = { Equity: "#3b82f6", Debt: "#f59e0b", Hybrid: "#94a3b8", "Gold/Silver": "#d97706", Others: "#10b981" };
+    const ideal = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
+    return ["Equity","Debt","Hybrid","Gold/Silver","Others"].map(cat => {
+      const idealPct = parseFloat((ideal[cat] || "0").replace("%",""));
+      const actPct = aMap[cat] || 0;
+      const diff = actPct - idealPct;
+      return { category: cat, ideal: idealPct, actual: actPct, diff, over: diff > 0, color: CAT_COLORS[cat] || "#64748b" };
+    }).filter(r => Math.abs(r.diff) >= 1);
+  }, [report, mfSnapshot]);
+
+  const sipHealthItems = useMemo(() => {
+    return Object.entries(sipAmounts).map(([scheme, amount]) => {
+      const mf = mfSnapshot.find((m: any) => m.scheme_name === scheme);
+      const perf = mf ? storedPerformances[(mf as any).isin] : null;
+      const pv = (v: string | undefined) => parseFloat((v || "0").replace(/[^\d.-]/g, "") || "0");
+      const cagr = perf ? (perf as any).cagr?.["1y"] : null;
+      const bm1y = perf ? pv((perf as any).benchmark_returns?.["1y"]) : 0;
+      const cagr1y = perf ? pv((perf as any).cagr?.["1y"]) : 0;
+      const healthy = perf ? cagr1y >= bm1y : false;
+      return { name: scheme, amount, cagr, healthy };
+    });
+  }, [sipAmounts, mfSnapshot, storedPerformances]);
+
+  const selectedFundData = useMemo(() => {
+    if (!selectedFundIsin) return null;
+    const fund = mfSnapshot.find((m: any) => m.isin === selectedFundIsin);
+    if (!fund) return null;
+    return { fund, perf: storedPerformances[selectedFundIsin], scoring: storedScoring[selectedFundIsin] };
+  }, [selectedFundIsin, mfSnapshot, storedPerformances, storedScoring]);
 
   if (isLoading) {
     return (
@@ -1204,7 +1437,7 @@ export default function ConciseReport() {
     const key = `${tx.scheme_name}||${Math.round(tx.amount)}`;
     if (t === "sip" || (t === "purchase" && (txRepeatMap[key] || 0) >= 2)) return "SIP";
     if (t === "purchase") return null;
-    if (t === "swp" || ["systematic withdrawal", "redemption"].some(k => t.includes(k))) return "SWP";
+    if (t === "swp" || t.includes("systematic withdrawal")) return "SWP";
     if (["stp-out", "stp", "switch out", "systematic transfer"].some(k => t.includes(k)) || t === "stp-in") return "STP";
     return null;
   };
@@ -1227,7 +1460,7 @@ export default function ConciseReport() {
         if (fundCat && fundCat !== "debt") return;
       }
       txSections["STP (Systematic Transfer Plan)"].push(tx);
-    } else if (category === "SIP") txSections["SIP (Systematic Investment Plan)"].push(tx);
+    } else if (category === "SIP" && tx.scheme_name in sipAmounts) txSections["SIP (Systematic Investment Plan)"].push(tx);
     else if (category === "SWP") txSections["SWP (Systematic Withdrawal Plan)"].push(tx);
   });
 
@@ -1252,55 +1485,108 @@ export default function ConciseReport() {
     if (!latestMonthByScheme[key] || ym > latestMonthByScheme[key]) latestMonthByScheme[key] = ym;
   });
   txSections["SIP (Systematic Investment Plan)"] = sipItems.filter((tx: any) => getYearMonth(tx.date) === latestMonthByScheme[tx.scheme_name || "unknown"]);
+  const sipSectionSchemes = new Set(txSections["SIP (Systematic Investment Plan)"].map((tx: any) => tx.scheme_name));
+
+  // (hooks moved above early returns — see above)
 
   return (
-    <div className="min-h-screen font-sans pb-20 relative">
+    <div className={`min-h-screen font-sans pb-20 relative ${darkMode ? "dark" : ""}`}>
       <AnimatedBackground />
       {/* Navbar */}
       <nav className="border-b" style={{ background: "rgba(10,14,46,0.6)", backdropFilter: "blur(16px)", borderColor: "rgba(96,165,250,0.15)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110" style={{ background: "linear-gradient(135deg,#3b6fff,#9333ea)", boxShadow: "0 0 20px rgba(59,111,255,0.55)" }}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg" style={{ background: "linear-gradient(135deg,#3b6fff,#9333ea)", boxShadow: "0 0 16px rgba(59,111,255,0.5)" }}>
               <BarChart2 className="w-5 h-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight" style={{ background: "linear-gradient(90deg,#60a5fa,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              FinAnalyze
+            <span className="text-xl font-bold font-display" style={{ background: "linear-gradient(90deg,#60a5fa,#c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              CasAnalyser
             </span>
           </div>
-          <span className="hidden sm:block text-slate-500 text-xs font-semibold uppercase tracking-widest">AI-Powered Portfolio Insights</span>
+          <span className="hidden sm:block text-slate-400 text-sm font-medium">AI-Powered Portfolio Insights</span>
         </div>
       </nav>
+      {isAutoAnalyzing && (
+        <div className="sticky top-0 z-50 w-full px-4 py-2" style={{ background: "rgba(10,14,46,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>
+          <div className="max-w-6xl mx-auto flex items-center gap-3">
+            <Loader2 className="w-4 h-4 text-blue-400 animate-spin flex-shrink-0" />
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-blue-300 font-medium">Analysing risk metrics for all funds…</span>
+                <span className="text-xs text-slate-400">{analyzeProgress.done}/{analyzeProgress.total}</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full" style={{ background: "rgba(96,165,250,0.15)" }}>
+                <div
+                  className="h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${analyzeProgress.total ? (analyzeProgress.done / analyzeProgress.total) * 100 : 0}%`, background: "linear-gradient(90deg,#3b6fff,#9333ea)" }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Sticky Section Tab Bar ──────────────────────────────────────── */}
+      <div className="sticky top-0 z-40 w-full" style={{ background: "rgba(7,10,18,0.93)", backdropFilter: "blur(14px)", borderBottom: "1px solid rgba(96,165,250,0.13)" }}>
+        <div className="max-w-6xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-1.5 no-scrollbar">
+          {([
+            { id: "overview", label: "Overview", ref: overviewRef },
+            { id: "benchmark", label: "Benchmark", ref: benchmarkRef },
+            { id: "allocation", label: "Allocation", ref: allocationRef },
+            { id: "sip", label: "SIP Health", ref: sipHealthRef },
+            { id: "performance", label: "Performance", ref: performanceRef },
+            { id: "snapshot", label: "Snapshot", ref: snapshotRef },
+          ] as Array<{ id: string; label: string; ref: React.RefObject<HTMLDivElement> }>).map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id); tab.ref.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+              className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
+              style={activeTab === tab.id
+                ? { background: "linear-gradient(135deg,#4f46e5,#7c3aed)", color: "#fff", boxShadow: "0 2px 10px rgba(99,102,241,0.4)" }
+                : { color: "rgba(148,163,184,0.85)" }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-4 relative z-10">
-        {/* Top bar: Back + Download */}
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        {/* Top bar: Back + title + Download */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium transition-all duration-200 hover:gap-2"
+            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Full Report
+            <span className="hidden sm:inline">Back to Full Report</span>
           </button>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDarkMode(d => !d)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+              title="Toggle dark/light mode"
+            >
+              {darkMode ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-400" />}
+            </button>
             <Button
               onClick={downloadExcel}
               disabled={isExporting}
-              className="text-white border-0 font-semibold shadow-lg hover:shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.02]"
-              style={{ background: "linear-gradient(135deg,#059669,#10b981)" }}
-              data-testid="button-download-concise-excel"
+              variant="outline"
+              className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 px-3 sm:px-4"
+              data-testid="button-download-excel"
             >
-              {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 mr-2" />}
-              {isExporting ? "Exporting..." : "Download Excel"}
+              {isExporting ? <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 sm:mr-2" />}
+              <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Excel"}</span>
             </Button>
             <Button
               onClick={downloadPDF}
               disabled={isDownloading}
-              className="text-white border border-slate-600 font-semibold shadow-lg hover:shadow-slate-500/30 transition-all duration-200 hover:scale-[1.02]"
-              style={{ background: "linear-gradient(135deg,#1e293b,#334155)" }}
+              className="bg-slate-900 text-white hover:bg-slate-700 px-3 sm:px-4"
               data-testid="button-download-concise-pdf"
             >
-              {isDownloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-              {isDownloading ? "Generating PDF..." : "Download PDF"}
+              {isDownloading ? <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" /> : <Download className="w-4 h-4 sm:mr-2" />}
+              <span className="hidden sm:inline">{isDownloading ? "Generating…" : "PDF"}</span>
             </Button>
           </div>
         </div>
@@ -1309,88 +1595,477 @@ export default function ConciseReport() {
         <div ref={reportRef} className="space-y-6">
 
           {/* Header */}
-          <div data-pdf-clip="true" data-pdf-header="true" className="relative overflow-hidden rounded-2xl px-8 py-7" style={{ background: "linear-gradient(135deg,rgba(30,42,80,0.97) 0%,rgba(17,25,58,0.99) 100%)", border: "1px solid rgba(96,165,250,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 50%,rgba(139,92,246,0.12) 0%,transparent 70%)" }} />
-            <div className="relative z-10">
-              {investorName && (
-                <h1 data-pdf-investor-name="true" className="text-4xl font-black mb-2 tracking-tight" style={{ background: "linear-gradient(90deg,#d0f70f,#a3e635)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  {investorName}
-                </h1>
-              )}
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-1.5 text-slate-400 text-sm">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
-                </div>
+          <div className="pb-4 border-b border-slate-200/20">
+            {investorName && (
+              <div className="flex items-center flex-wrap gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-[#d0f70f]">{investorName}</h1>
                 {report.investorType && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(99,102,241,0.15)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.3)" }}>
-                    {report.investorType}
-                  </span>
-                )}
-                {report.ageGroup && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full" style={{ background: "rgba(20,184,166,0.12)", color: "#5eead4", border: "1px solid rgba(20,184,166,0.25)" }}>
-                    Age {report.ageGroup}
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                    report.investorType.toLowerCase().includes("aggressive")
+                      ? "bg-rose-500/20 text-rose-300 border-rose-400/30"
+                      : report.investorType.toLowerCase().includes("moderate")
+                      ? "bg-amber-500/20 text-amber-300 border-amber-400/30"
+                      : "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
+                  }`}>
+                    <Shield className="w-3 h-3" />
+                    {report.investorType}{report.ageGroup ? ` · ${report.ageGroup}` : ""}
                   </span>
                 )}
               </div>
+            )}
+            <div className="flex items-center gap-2 text-slate-400">
+              <Calendar className="w-4 h-4" />
+              <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
             </div>
           </div>
 
           {/* 1. Portfolio Overview */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
-            <div className="px-6 pt-4 pb-3 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#6366f1,#8b5cf6)" }} />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                Portfolio Overview&nbsp;&nbsp;·&nbsp;&nbsp;{format(new Date(), "MMM d, yyyy")}
-              </p>
-            </div>
-            <div className="p-5">
-              {(() => {
-                const absoluteReturn = totalValuation - totalInvested;
-                const absoluteReturnPct = totalInvested > 0 ? (absoluteReturn / totalInvested) * 100 : 0;
-                const approxCagr = totalInvested > 0 ? ((Math.pow(totalValuation / totalInvested, 1 / 2) - 1) * 100) : 0;
-                const accounts = analysis.account_summaries || [];
-                const totalSchemes = mfSnapshot.length;
-                return (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {/* Total Value */}
-                    <div className="p-4 rounded-xl border border-indigo-100/70 bg-gradient-to-br from-indigo-50 to-blue-50 hover:shadow-md hover:border-indigo-200 transition-all duration-200 cursor-default">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-400 mb-1.5">Total Value</p>
-                      <p className="text-xl font-black text-indigo-900">{formatLakh(totalValuation)}</p>
-                      <p className={`text-xs font-semibold mt-1 ${absoluteReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {absoluteReturn >= 0 ? '+' : ''}{absoluteReturnPct.toFixed(1)}% overall return
-                      </p>
-                    </div>
-                    {/* CAGR */}
-                    <div className="p-4 rounded-xl border border-violet-100/70 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-md hover:border-violet-200 transition-all duration-200 cursor-default">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-violet-400 mb-1.5">Approx. CAGR</p>
-                      <p className="text-xl font-black text-violet-900">{approxCagr.toFixed(1)}%</p>
-                      <p className="text-xs text-violet-400 mt-1 font-medium">estimated 2-year</p>
-                    </div>
-                    {/* Absolute Gain */}
-                    <div className={`p-4 rounded-xl border transition-all duration-200 cursor-default hover:shadow-md ${absoluteReturn >= 0 ? 'border-emerald-100/70 bg-gradient-to-br from-emerald-50 to-teal-50 hover:border-emerald-200' : 'border-rose-100/70 bg-gradient-to-br from-rose-50 to-pink-50 hover:border-rose-200'}`}>
-                      <p className={`text-[9px] font-bold uppercase tracking-widest mb-1.5 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-400'}`}>Absolute Gain</p>
-                      <p className={`text-xl font-black ${absoluteReturn >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                        {absoluteReturn >= 0 ? '+' : ''}{formatLakh(Math.abs(absoluteReturn))}
-                      </p>
-                      <p className={`text-xs font-semibold mt-1 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        on ₹{(totalInvested / 100000).toFixed(2)} L invested
-                      </p>
-                    </div>
-                    {/* Total Schemes */}
-                    <div className="p-4 rounded-xl border border-amber-100/70 bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-default">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-amber-500 mb-1.5">Total Schemes</p>
-                      <p className="text-xl font-black text-amber-900">{totalSchemes}</p>
-                      <p className="text-xs text-amber-400 mt-1 font-medium">across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+          <div ref={overviewRef} className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden" data-testid="card-portfolio-overview">
+            {(() => {
+              const absoluteReturn = totalValuation - totalInvested;
+              const absoluteReturnPct = totalInvested > 0 ? (absoluteReturn / totalInvested) * 100 : 0;
+              const approxCagr = totalInvested > 0 ? ((Math.pow(totalValuation / totalInvested, 1 / 2) - 1) * 100) : 0;
+              const accounts = analysis.account_summaries || [];
+              const totalSchemes = mfSnapshot.length;
+              const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'];
+              const pieData = accounts.map((a: any) => ({ name: a.type, value: a.value || 0 }));
+              const pieTotal = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
+              const isPositive = absoluteReturn >= 0;
+              return (
+                <>
+                  {/* Hero Header */}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-indigo-700 to-purple-800 px-5 sm:px-7 py-6 sm:py-7 text-white">
+                    {/* Decorative blobs */}
+                    <div className="absolute -top-20 -right-20 w-60 h-60 bg-fuchsia-500/30 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute -bottom-16 -left-10 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl" />
+                    {/* Grid pattern */}
+                    <div
+                      className="absolute inset-0 opacity-[0.08] pointer-events-none"
+                      style={{
+                        backgroundImage:
+                          'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+                        backgroundSize: '24px 24px',
+                      }}
+                    />
+
+                    <div className="relative flex items-start justify-between gap-4 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm mb-3">
+                          <Sparkles className="w-3 h-3 text-amber-300" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-white/95">Snapshot</span>
+                        </div>
+                        <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">Portfolio Overview</h3>
+                        <div className="flex items-center gap-1.5 mt-2 text-violet-100 text-xs">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{format(new Date(), "MMMM d, yyyy")}</span>
+                        </div>
+                      </div>
+
+                      {/* Hero number */}
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-violet-200 mb-1">Current Value</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white leading-none" data-testid="text-hero-value">
+                          {formatLakh(totalValuation)}
+                        </p>
+                        <div
+                          className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                            isPositive
+                              ? 'bg-emerald-400/25 text-emerald-100 border-emerald-300/40'
+                              : 'bg-rose-400/25 text-rose-100 border-rose-300/40'
+                          }`}
+                          data-testid="badge-hero-return"
+                        >
+                          {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                          <span>
+                            {isPositive ? '+' : ''}
+                            {absoluteReturnPct.toFixed(2)}% · {isPositive ? '+' : '-'}
+                            {formatLakh(Math.abs(absoluteReturn))}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Health Gauge */}
+                      <div className="hidden sm:block">
+                        <HealthGauge score={healthScore} />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Stats grid */}
+                  <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+                      {/* Cost Value */}
+                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-cost">
+                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-blue-400/10 rounded-full blur-xl group-hover:bg-blue-400/20 transition-colors" />
+                        <div className="relative flex items-center justify-between mb-2">
+                          <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                            <Wallet className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/80">Cost</span>
+                        </div>
+                        <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight">
+                          <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
+                        </p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Invested</p>
+                      </div>
+
+                      {/* Market Value */}
+                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-market">
+                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-emerald-400/10 rounded-full blur-xl group-hover:bg-emerald-400/20 transition-colors" />
+                        <div className="relative flex items-center justify-between mb-2">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                            <IndianRupee className="w-4 h-4 text-emerald-600" />
+                          </div>
+                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-600/80">
+                            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                            Live
+                          </span>
+                        </div>
+                        <p className="relative text-base sm:text-xl font-bold text-emerald-700 leading-tight">
+                          <AnimatedCounter value={totalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
+                        </p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Market Value</p>
+                      </div>
+
+                      {/* Returns */}
+                      <div
+                        className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${
+                          isPositive
+                            ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
+                            : 'from-rose-50 to-rose-100/60 border-rose-200/70'
+                        }`}
+                        data-testid="stat-returns"
+                      >
+                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
+                        <div className="relative flex items-center justify-between mb-2">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
+                            {isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
+                          </div>
+                          <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
+                            {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
+                          </span>
+                        </div>
+                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
+                          {isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
+                        </p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Returns</p>
+                      </div>
+
+                      {/* Schemes */}
+                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100/60 border border-violet-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-schemes">
+                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-violet-400/10 rounded-full blur-xl group-hover:bg-violet-400/20 transition-colors" />
+                        <div className="relative flex items-center justify-between mb-2">
+                          <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
+                            <Layers className="w-4 h-4 text-violet-600" />
+                          </div>
+                          <span className="text-[8px] font-bold uppercase tracking-widest text-violet-600/80">Funds</span>
+                        </div>
+                        <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight"><AnimatedCounter value={totalSchemes} /></p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+                    {analysis.cas_source !== 'CAMS' && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Allocation Donut */}
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Allocation</p>
+                        {accounts.length > 0 ? (
+                          <div className="flex items-center gap-4">
+                            <PieChart width={130} height={130}>
+                              <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={3} dataKey="value">
+                                {pieData.map((_: any, idx: number) => <Cell key={idx} fill={COLORS[idx % COLORS.length]} />)}
+                              </Pie>
+                              <RechartsTooltip formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, '']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+                            </PieChart>
+                            <div className="flex flex-col gap-2 flex-1">
+                              {accounts.map((a: any, idx: number) => {
+                                const pct = pieTotal > 0 ? ((a.value / pieTotal) * 100).toFixed(1) : '0.0';
+                                return (
+                                  <div key={idx} className="flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                                    <span className="text-xs text-slate-600 flex-1 leading-tight">{a.type}</span>
+                                    <span className="text-xs font-bold text-slate-700">{pct}%</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No allocation data</div>}
+                      </div>
+                      {/* Accounts */}
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Accounts</p>
+                        <div className="space-y-2">
+                          {accounts.map((acc: any, idx: number) => {
+                            const initials = (acc.type || '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+                            const pct = pieTotal > 0 ? ((acc.value / pieTotal) * 100).toFixed(1) : '0.0';
+                            return (
+                              <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}>
+                                  {initials}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold text-slate-800 leading-tight truncate">{acc.type}</p>
+                                  <p className="text-[10px] text-slate-400 leading-tight truncate">{acc.count} scheme{acc.count !== 1 ? 's' : ''}{acc.details ? ` · ${acc.details}` : ''}</p>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-xs font-bold text-slate-800">{formatLakh(acc.value || 0)}</p>
+                                  <p className="text-[10px] text-slate-400">{pct}%</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>}
+                  </div>
+                  </>
                 );
               })()}
-            </div>
           </div>
 
+          {/* benchmark anchor */}
+          <div ref={benchmarkRef} />
+          {/* 1b. My Portfolio vs Nifty 500 */}
+          {(() => {
+            const NIFTY500_1Y = 7.98;
+            const NIFTY500_3Y = 14.66;
+            const is3Y = benchmarkPeriod === "3y";
+            const cagrKey = is3Y ? "3y" : "1y";
+            const niftyBenchmark = is3Y ? NIFTY500_3Y : NIFTY500_1Y;
+
+            const fundsWithPerf = mfSnapshot.filter((mf: any) => {
+              const cagr = storedPerformances[mf.isin]?.cagr?.[cagrKey];
+              return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
+            });
+
+            const fundsWithPerf1Y = mfSnapshot.filter((mf: any) => {
+              const cagr = storedPerformances[mf.isin]?.cagr?.["1y"];
+              return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
+            });
+
+            if (fundsWithPerf1Y.length === 0) return null;
+            if (fundsWithPerf.length === 0 && is3Y) return null;
+
+            const activeList = fundsWithPerf.length > 0 ? fundsWithPerf : fundsWithPerf1Y;
+
+            const eligibleTotalInvested = activeList.reduce((s: number, mf: any) => s + (mf.invested_amount || 0), 0);
+            if (eligibleTotalInvested <= 0) return null;
+
+            const weightedReturn = activeList.reduce((sum: number, mf: any) => {
+              const cagr = parseFloat(String(storedPerformances[mf.isin]?.cagr?.[cagrKey]));
+              const weight = (mf.invested_amount || 0) / eligibleTotalInvested;
+              return sum + cagr * weight;
+            }, 0);
+
+            const alpha = weightedReturn - niftyBenchmark;
+            const niftyAbsoluteReturn = (niftyBenchmark / 100) * eligibleTotalInvested;
+            const portfolioAbsoluteReturn = (weightedReturn / 100) * eligibleTotalInvested;
+            const alphaAbsolute = portfolioAbsoluteReturn - niftyAbsoluteReturn;
+
+            const isBeating = alpha >= 0;
+
+            const fmt2 = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
+            const fmtRs = (n: number) => {
+              const abs = Math.abs(n);
+              const sign = n >= 0 ? "+" : "-";
+              if (abs >= 100000) return `${sign}₹${(abs / 100000).toFixed(2)} L`;
+              return `${sign}₹${abs.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+            };
+
+            const periodLabel = is3Y ? "3Y" : "1Y";
+
+            return (
+              <div className="rounded-2xl overflow-hidden shadow-lg border border-slate-200">
+                {/* Gradient header */}
+                <div className="relative px-4 sm:px-7 pt-5 sm:pt-6 pb-5 sm:pb-7 overflow-hidden" style={{ background: "linear-gradient(to right, #7c3aed 0%, #4338ca 100%)" }}>
+                  <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #818cf8, transparent)" }} />
+                  <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #34d399, transparent)" }} />
+
+                  {/* Top row: label + period toggle on right */}
+                  <div className="relative flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">Performance Benchmark</p>
+                    {/* 1Y / 3Y toggle — prominent pill */}
+                    <div className="flex items-center rounded-xl overflow-hidden p-0.5" style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.18)" }}>
+                      <button
+                        data-testid="toggle-1y"
+                        onClick={() => setBenchmarkPeriod("1y")}
+                        className="px-4 py-1.5 text-xs font-black rounded-lg transition-all"
+                        style={{
+                          background: !is3Y ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "transparent",
+                          color: !is3Y ? "#fff" : "rgba(255,255,255,0.45)",
+                          boxShadow: !is3Y ? "0 2px 8px rgba(99,102,241,0.5)" : "none",
+                        }}
+                      >1Y</button>
+                      <button
+                        data-testid="toggle-3y"
+                        onClick={() => setBenchmarkPeriod("3y")}
+                        className="px-4 py-1.5 text-xs font-black rounded-lg transition-all"
+                        style={{
+                          background: is3Y ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "transparent",
+                          color: is3Y ? "#fff" : "rgba(255,255,255,0.45)",
+                          boxShadow: is3Y ? "0 2px 8px rgba(99,102,241,0.5)" : "none",
+                        }}
+                      >3Y</button>
+                    </div>
+                  </div>
+
+                  {/* Title row */}
+                  <div className="relative">
+                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">My Portfolio <span className="text-[#fca5e8]">vs</span> Nifty 500</h3>
+                  </div>
+
+                  {/* Side-by-side big numbers */}
+                  <div className="relative mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="col-span-1 rounded-xl px-3 sm:px-4 py-3" style={{ background: "rgba(99,102,241,0.2)", border: "1px solid rgba(129,140,248,0.3)" }}>
+                      <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-indigo-300 mb-1">Portfolio</p>
+                      <p className="text-xl sm:text-3xl font-black text-white">{weightedReturn.toFixed(2)}<span className="text-sm sm:text-lg">%</span></p>
+                      <p className="text-[9px] sm:text-[10px] text-indigo-300 mt-0.5 hidden sm:block">Weighted {periodLabel} CAGR</p>
+                    </div>
+                    <div className="col-span-1 rounded-xl px-3 sm:px-4 py-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                      <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Nifty 500</p>
+                      <p className="text-xl sm:text-3xl font-black text-slate-300">{niftyBenchmark.toFixed(2)}<span className="text-sm sm:text-lg">%</span></p>
+                      <p className="sm:text-[10px] mt-0.5 hidden sm:block text-[#00c8ff] text-[10px]">Benchmark {periodLabel} CAGR</p>
+                    </div>
+                    <div className="col-span-1 rounded-xl px-3 sm:px-4 py-3" style={{ background: isBeating ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.12)", border: `1px solid ${isBeating ? "rgba(52,211,153,0.3)" : "rgba(252,165,165,0.3)"}` }}>
+                      <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>Alpha</p>
+                      <p className="text-xl sm:text-3xl font-black" style={{ color: isBeating ? "#34d399" : "#f87171" }}>{fmt2(alpha)}</p>
+                      <p className="text-[9px] sm:text-[10px] mt-0.5 hidden sm:block" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>vs benchmark</p>
+                    </div>
+                  </div>
+                </div>
+                {/* White body */}
+                <div className="bg-white px-4 sm:px-7 py-5 space-y-5">
+
+                  {/* Line chart */}
+                  {(() => {
+                    const BASE = 100000;
+                    const portMonthly = Math.pow(1 + weightedReturn / 100, 1 / 12) - 1;
+                    const niftyMonthly = Math.pow(1 + niftyBenchmark / 100, 1 / 12) - 1;
+                    const totalPoints = is3Y ? 37 : 13;
+                    const monthNames = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+                    const chartData = Array.from({ length: totalPoints }, (_, i) => {
+                      let label = "";
+                      if (!is3Y) {
+                        label = monthNames[i % 12];
+                      } else {
+                        if (i === 0) label = "Start";
+                        else if (i === 12) label = "Yr 1";
+                        else if (i === 24) label = "Yr 2";
+                        else if (i === 36) label = "Yr 3";
+                        else label = "";
+                      }
+                      return {
+                        month: label,
+                        portfolio: parseFloat((BASE * Math.pow(1 + portMonthly, i)).toFixed(0)),
+                        nifty: parseFloat((BASE * Math.pow(1 + niftyMonthly, i)).toFixed(0)),
+                      };
+                    });
+
+                    const allVals = chartData.flatMap(d => [d.portfolio, d.nifty]);
+                    const minVal = Math.min(...allVals);
+                    const maxVal = Math.max(...allVals);
+                    const pad = (maxVal - minVal) * 0.1 || 500;
+                    const yMin = Math.floor((minVal - pad) / 1000) * 1000;
+                    const yMax = Math.ceil((maxVal + pad) / 1000) * 1000;
+                    const fmtY = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v / 1000).toFixed(0)}K`;
+
+                    return (
+                      <div>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                            Simulated Growth of ₹1 Lakh · {is3Y ? "36 Months" : "12 Months"}
+                          </p>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-5 h-0.5 rounded-full bg-indigo-500 inline-block" />
+                              <span className="text-[10px] font-semibold text-slate-500">Your Portfolio</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-5 h-0.5 rounded-full bg-slate-400 inline-block" style={{ borderStyle: "dashed" }} />
+                              <span className="text-[10px] font-semibold text-slate-500">Nifty 500</span>
+                            </div>
+                          </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="portfolioGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.18} />
+                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="niftyGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.12} />
+                                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                            <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                            <YAxis domain={[yMin, yMax]} tickFormatter={fmtY} tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 }} axisLine={false} tickLine={false} width={46} />
+                            <RechartsTooltip
+                              contentStyle={{ fontSize: 11, borderRadius: 10, border: "1px solid #e2e8f0", background: "#fff", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
+                              formatter={(value: any, name: string) => [`₹${Number(value).toLocaleString("en-IN")}`, name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI"]}
+                              labelStyle={{ fontWeight: 700, color: "#334155", marginBottom: 4 }}
+                            />
+                            <Area type="monotone" dataKey="nifty" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 4" fill="url(#niftyGrad)" dot={false} activeDot={{ r: 4, fill: "#94a3b8" }} />
+                            <Area type="monotone" dataKey="portfolio" stroke="#6366f1" strokeWidth={2.5} fill="url(#portfolioGrad)" dot={false} activeDot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        <div className="flex items-center justify-end gap-5 mt-1 pr-1">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-indigo-500 font-bold">
+                              Portfolio end: {chartData[chartData.length - 1].portfolio >= 100000
+                                ? `₹${(chartData[chartData.length - 1].portfolio / 100000).toFixed(2)}L`
+                                : `₹${(chartData[chartData.length - 1].portfolio / 1000).toFixed(2)}K`}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-slate-400 font-semibold">
+                              Nifty 500 end: {chartData[chartData.length - 1].nifty >= 100000
+                                ? `₹${(chartData[chartData.length - 1].nifty / 100000).toFixed(2)}L`
+                                : `₹${(chartData[chartData.length - 1].nifty / 1000).toFixed(2)}K`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Divider */}
+                  <div className="border-t border-slate-100" />
+
+                  {/* Absolute return section */}
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Absolute Return · On Invested Value ({periodLabel})</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="rounded-xl p-3.5 bg-indigo-50 border border-indigo-100 text-center">
+                        <p className="text-[10px] text-indigo-400 font-semibold mb-1">Your Portfolio Earned</p>
+                        <p className="text-base font-black text-indigo-600">{fmtRs(portfolioAbsoluteReturn)}</p>
+                      </div>
+                      <div className="rounded-xl p-3.5 bg-slate-50 border border-slate-100 text-center">
+                        <p className="text-[10px] text-slate-400 font-semibold mb-1">Nifty 500 Would Earn</p>
+                        <p className="text-base font-black text-slate-600">{fmtRs(niftyAbsoluteReturn)}</p>
+                      </div>
+                      <div
+                        className="rounded-xl p-3.5 text-center border"
+                        style={{ backgroundColor: isBeating ? "#ecfdf5" : "#fef2f2", borderColor: isBeating ? "#d1fae5" : "#fee2e2" }}
+                      >
+                        <p className="text-[10px] font-semibold mb-1" style={{ color: isBeating ? "#059669" : "#dc2626" }}>Extra {isBeating ? "Earned" : "Missed"}</p>
+                        <p className="text-base font-black" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>{fmtRs(alphaAbsolute)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400">
+                    * Based on {activeList.length} of {mfSnapshot.length} fund{mfSnapshot.length !== 1 ? "s" : ""} with available {periodLabel} CAGR data.{activeList.length < mfSnapshot.length ? ` ${mfSnapshot.length - activeList.length} fund(s) excluded due to unavailable data.` : ""}{" "}Nifty 500 TRI {periodLabel} return used as benchmark ({niftyBenchmark}%).
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* allocation anchor */}
+          <div ref={allocationRef} />
           {/* 2. Asset Allocation Check */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             {(() => {
               const idealMap: Record<string, number> = {};
               allCategories.forEach(c => { idealMap[c] = parseIdeal(idealRaw[c]); });
@@ -1420,83 +2095,140 @@ export default function ConciseReport() {
               const debtIdeal = idealMap["Debt"] || 0;
               return (
                 <>
-                  <div className="px-6 pt-5 pb-4 flex items-start justify-between border-b border-slate-100">
-                    <div className="flex items-start gap-3">
-                      <div className="w-1 h-full min-h-[40px] rounded-full flex-shrink-0 mt-0.5" style={{ background: "linear-gradient(180deg,#3b82f6,#6366f1)" }} />
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-800 mb-2">Asset allocation check</h3>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-100">{report.investorType || "—"}</span>
-                          <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1 rounded-full">Age {report.ageGroup || "—"}</span>
-                        </div>
+                  <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-4 sm:px-6 py-5 flex items-start justify-between gap-3 flex-wrap text-white">
+                    <div>
+                      <h3 className="text-[20px] text-left text-[#fff5f5] font-semibold">Asset allocation check</h3>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-violet-100 text-xs font-semibold">{report.investorType || "—"}</span>
+                        <span className="text-violet-100 text-xs font-semibold">Age {report.ageGroup || "—"}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-400 font-medium mb-0.5 uppercase tracking-widest">Overall health</div>
-                      <div className="text-4xl font-black" style={{ color: healthColor }}>{healthScore}<span className="text-base font-semibold text-slate-400">/100</span></div>
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${healthColor}18`, color: healthColor, border: `1px solid ${healthColor}30` }}>{healthLabel}</span>
+                      <div className="text-[11px] text-violet-200 font-medium mb-0.5 uppercase tracking-wider">Overall health</div>
+                      <div className="text-3xl font-bold text-white">{healthScore}<span className="text-base font-semibold text-violet-200">/100</span></div>
+                      <span className="text-xs font-semibold text-white">{healthLabel}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
-                    <div className="px-6 py-4 border-r border-slate-100">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Equity Exposure</div>
-                      <div className="text-2xl font-bold text-blue-600">{equityActual.toFixed(2)}%</div>
-                      <div className="text-xs mt-0.5" style={{ color: equityActual > equityIdeal ? "#ef4444" : "#10b981" }}>{fmtDiff(equityActual, equityIdeal)}</div>
+                    <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Equity</div>
+                      <div className="text-xl sm:text-2xl font-bold text-blue-600">{equityActual.toFixed(2)}%</div>
+                      <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: equityActual > equityIdeal ? "#ef4444" : "#10b981" }}>{fmtDiff(equityActual, equityIdeal)}</div>
                     </div>
-                    <div className="px-6 py-4 border-r border-slate-100">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Debt Exposure</div>
-                      <div className="text-2xl font-bold text-amber-500">{debtActual.toFixed(2)}%</div>
-                      <div className="text-xs mt-0.5" style={{ color: debtActual > debtIdeal ? "#ef4444" : "#10b981" }}>{fmtDiff(debtActual, debtIdeal)}</div>
+                    <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Debt</div>
+                      <div className="text-xl sm:text-2xl font-bold text-amber-500">{debtActual.toFixed(2)}%</div>
+                      <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: debtActual > debtIdeal ? "#ef4444" : "#10b981" }}>{fmtDiff(debtActual, debtIdeal)}</div>
                     </div>
-                    <div className="px-6 py-4">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Missing Allocation</div>
+                    <div className="px-3 sm:px-6 py-4">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Missing</div>
                       {missingCategories.length === 0 ? (
-                        <div className="text-2xl font-bold text-emerald-500">None</div>
+                        <div className="text-xl sm:text-2xl font-bold text-emerald-500">None</div>
                       ) : (
                         <>
-                          <div className="text-2xl font-bold text-red-500">{missingCategories.length} categories</div>
-                          <div className="text-xs text-slate-400 mt-0.5">{missingCategories.join(", ")}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-red-500">{missingCategories.length}</div>
+                          <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">{missingCategories.join(", ")}</div>
                         </>
                       )}
                     </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                  {/* Dual Pie Charts */}
+                  {(() => {
+                    const renderPieLabel = ({ cx, cy, midAngle, outerRadius, value }: any) => {
+                      if (!value || value < 2) return null;
+                      const RADIAN = Math.PI / 180;
+                      const radius = outerRadius + 28;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text x={x} y={y} fill="#374151" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11} fontWeight={700}>
+                          {`${Number(value).toFixed(1)}%`}
+                        </text>
+                      );
+                    };
+                    const idealPieData = allCategories
+                      .map(c => ({ name: c, value: idealMap[c] || 0, color: CATEGORY_META[c]?.color || "#64748b" }))
+                      .filter(d => d.value > 0);
+                    const actualPieData = allCategories
+                      .map(c => ({ name: c, value: parseFloat((actMap[c] || 0).toFixed(2)), color: CATEGORY_META[c]?.color || "#64748b" }))
+                      .filter(d => d.value > 0);
+                    return (
+                      <div className="px-2 sm:px-6 pt-6 pb-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                          <div className="flex flex-col items-center">
+                            <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">Ideal Allocation</div>
+                            <ResponsiveContainer width="100%" height={240}>
+                              <PieChart>
+                                <Pie data={idealPieData} cx="50%" cy="50%" outerRadius={88} dataKey="value" label={renderPieLabel} labelLine={false} strokeWidth={2} stroke="#fff">
+                                  {idealPieData.map((entry) => (<Cell key={entry.name} fill={entry.color} />))}
+                                </Pie>
+                                <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">Current Allocation</div>
+                            <ResponsiveContainer width="100%" height={240}>
+                              <PieChart>
+                                <Pie
+                                  data={actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]}
+                                  cx="50%" cy="50%" outerRadius={88} dataKey="value"
+                                  label={actualPieData.length > 0 ? renderPieLabel : undefined}
+                                  labelLine={false} strokeWidth={2} stroke="#fff"
+                                >
+                                  {(actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]).map((entry) => (<Cell key={entry.name} fill={entry.color} />))}
+                                </Pie>
+                                <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                        {/* Shared Legend */}
+                        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-1 mb-5">
+                          {allCategories.map(cat => (
+                            <div key={cat} className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }} />
+                              <span className="text-xs font-medium text-slate-600">{cat}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  {/* Compact Category Comparison Table */}
+                  <div className="border-t border-slate-100 overflow-x-auto">
+                    <table className="w-full text-sm min-w-[360px]">
                       <thead>
-                        <tr className="border-b border-slate-100">
-                          <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
-                          <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Actual</th>
-                          <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Ideal</th>
-                          <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                        <tr className="bg-slate-50">
+                          <th className="px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
+                          <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Deviation</th>
+                          <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
                         </tr>
                       </thead>
                       <tbody>
                         {allCategories.map(cat => {
                           const actual = actMap[cat] || 0;
                           const ideal = idealMap[cat] || 0;
-                          const meta = CATEGORY_META[cat] || { color: "#64748b" };
                           const diff = actual - ideal;
-                          let statusColor = "#10b981";
-                          if (Math.abs(diff) >= 1) statusColor = diff > 0 ? "#ef4444" : "#f59e0b";
+                          const isOnTarget = Math.abs(diff) < 1;
+                          const isOver = diff > 0;
+                          const statusColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
+                          const statusLabel = isOnTarget ? "On target" : isOver ? "Over" : "Under";
                           return (
-                            <tr key={cat} className="border-b border-slate-100 last:border-0">
-                              <td className="px-5 py-3.5">
-                                <div className="flex items-center gap-2.5">
-                                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: meta.color }} />
-                                  <span className="font-semibold text-slate-800 text-sm">{cat}</span>
+                            <tr key={cat} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                              <td className="px-5 py-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }} />
+                                  <span className="font-semibold text-slate-700 text-sm">{cat}</span>
                                 </div>
                               </td>
-                              <td className="px-5 py-3.5 text-sm font-semibold" style={{ color: actual === 0 ? "#ef4444" : "#1e293b" }}>{actual.toFixed(2)}%</td>
-                              <td className="px-5 py-3.5 text-sm text-slate-600 font-medium">{ideal.toFixed(0)}%</td>
-                              <td className="px-5 py-3.5">
-                                <div className="flex items-center gap-1.5">
-                                  <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden" style={{ maxWidth: 120 }}>
-                                    <div className="h-2 rounded-full" style={{ width: `${Math.min(actual, 100)}%`, backgroundColor: meta.color }} />
-                                  </div>
-                                  <span className="text-xs font-semibold" style={{ color: statusColor }}>
-                                    {Math.abs(diff) < 1 ? "On target" : diff > 0 ? "Over" : "Under"}
-                                  </span>
-                                </div>
+                              <td className="px-5 py-3 text-center text-sm font-semibold" style={{ color: isOnTarget ? "#64748b" : statusColor }}>
+                                {isOnTarget ? "—" : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`}
+                              </td>
+                              <td className="px-5 py-3 text-center">
+                                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>
+                                  {statusLabel}
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1504,84 +2236,126 @@ export default function ConciseReport() {
                       </tbody>
                     </table>
                   </div>
+                  {/* Category Wise Distribution */}
+                  <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">
+                      Portfolio Weightage by Fund Category
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {allCategories.filter(c => (actualMap[c] || 0) > 0.01).map(cat => {
+                        const meta = { Equity:{color:"#3b82f6",abbr:"EQ",label:"Equity"}, Debt:{color:"#f59e0b",abbr:"DB",label:"Debt"}, Hybrid:{color:"#94a3b8",abbr:"HB",label:"Hybrid"}, "Gold/Silver":{color:"#d97706",abbr:"GS",label:"Gold / Silver"}, Others:{color:"#10b981",abbr:"OT",label:"Others"} }[cat] || {color:"#64748b",abbr:"OT",label:cat};
+                        const pct = actualMap[cat] || 0;
+                        const subs = Object.entries(typeMap[cat] || {}).sort((a, b) => b[1] - a[1]);
+                        return (
+                          <div key={cat} className="bg-slate-50 rounded-xl border border-slate-100 p-5">
+                            <div className="flex items-center gap-2.5 mb-3">
+                              <span className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: meta.color }}>{meta.abbr}</span>
+                              <div>
+                                <div className="font-bold text-slate-800 text-sm">{meta.label}</div>
+                                <div className="text-xs text-slate-400">{pct.toFixed(2)}% of portfolio</div>
+                              </div>
+                            </div>
+                            <div className="h-2 rounded-full mb-4 overflow-hidden bg-slate-200">
+                              <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: meta.color }} />
+                            </div>
+                            <div className="space-y-2">
+                              {subs.map(([type, subPct]) => (
+                                <div key={type} className="flex items-center gap-3">
+                                  <span className="text-xs text-slate-600 w-28 flex-shrink-0 truncate">{type}</span>
+                                  <div className="flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                    <div className="h-full rounded-full" style={{ width: `${Math.min(subPct, 100)}%`, backgroundColor: meta.color }} />
+                                  </div>
+                                  <span className="text-xs font-semibold text-slate-700 w-12 text-right">{subPct.toFixed(2)}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </>
               );
             })()}
           </div>
 
-          {/* 3. Category Wise Distribution */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
-            <div className="px-6 pt-4 pb-3 border-b border-slate-100 flex items-center gap-3" style={{ background: "linear-gradient(90deg,#fafaf7 0%,#f5f0e8 100%)" }}>
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#f59e0b,#d97706)" }} />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                Category Wise Distribution · Portfolio Weightage by Fund Category
-              </p>
-            </div>
-            <div className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              {["Equity","Debt","Hybrid","Gold/Silver"].map(cat => {
-                const meta = { Equity: { color:"#3b82f6",label:"Equity" }, Debt: { color:"#f59e0b",label:"Debt" }, Hybrid: { color:"#94a3b8",label:"Hybrid" }, "Gold/Silver": { color:"#d97706",label:"Gold / Silver" } }[cat]!;
-                const pct = actualMap[cat] || 0;
-                const subCount = Object.keys(typeMap[cat] || {}).length;
-                return (
-                  <div key={cat} className="bg-white rounded-xl p-4 border hover:shadow-md transition-all duration-200 cursor-default" style={{ borderColor: `${meta.color}30`, borderTopWidth: 3, borderTopColor: meta.color }}>
-                    <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: meta.color }}>{meta.label}</div>
-                    <div className="text-2xl font-bold text-slate-800">{pct.toFixed(2)}%</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{subCount > 0 ? `${subCount} sub-categor${subCount === 1 ? "y" : "ies"}` : "No data"}</div>
+          {/* ── SIP Health Panel ──────────────────────────────────────────── */}
+          <div ref={sipHealthRef} />
+          {sipHealthItems.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-cyan-600 to-teal-600 px-6 py-5 text-white">
+                <div className="flex items-center gap-2 mb-1">
+                  <Activity className="w-4 h-4" />
+                  <h3 className="text-lg font-bold">SIP Health Check</h3>
+                </div>
+                <p className="text-cyan-100 text-xs">How your SIP funds are performing vs benchmark</p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {sipHealthItems.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center gap-3 px-5 py-3.5" data-testid={`row-sip-health-${i}`}>
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.healthy ? "bg-emerald-400" : "bg-rose-400"}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
+                      <p className="text-xs text-slate-500">SIP ₹{item.amount?.toLocaleString("en-IN")} / mo</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-bold ${item.healthy ? "text-emerald-600" : "text-rose-500"}`}>
+                        {item.cagr !== null ? `${Number(item.cagr).toFixed(2)}%` : "—"}
+                      </p>
+                      <p className="text-[10px] text-slate-400">1Y CAGR</p>
+                    </div>
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border flex-shrink-0 ${item.healthy ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-600 border-rose-200"}`}>
+                      {item.healthy ? "Healthy" : "Review"}
+                    </span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {allCategories.filter(c => (actualMap[c] || 0) > 0.01).map(cat => {
-                const meta = { Equity:{color:"#3b82f6",abbr:"EQ",label:"Equity"}, Debt:{color:"#f59e0b",abbr:"DB",label:"Debt"}, Hybrid:{color:"#94a3b8",abbr:"HB",label:"Hybrid"}, "Gold/Silver":{color:"#d97706",abbr:"GS",label:"Gold / Silver"}, Others:{color:"#10b981",abbr:"OT",label:"Others"} }[cat] || {color:"#64748b",abbr:"OT",label:cat};
-                const pct = actualMap[cat] || 0;
-                const subs = Object.entries(typeMap[cat] || {}).sort((a, b) => b[1] - a[1]);
-                return (
-                  <div key={cat} className="bg-white rounded-xl border border-slate-100 p-5">
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <span className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: meta.color }}>{meta.abbr}</span>
-                      <div>
-                        <div className="font-bold text-slate-800 text-sm">{meta.label}</div>
-                        <div className="text-xs text-slate-400">{pct.toFixed(2)}% of portfolio</div>
+          )}
+
+          {/* ── Rebalancing Action Plan ────────────────────────────────────── */}
+          {rebalancingPlan.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-white">
+                <div className="flex items-center gap-2 mb-1">
+                  <Target className="w-4 h-4" />
+                  <h3 className="text-lg font-bold">Rebalancing Action Plan</h3>
+                </div>
+                <p className="text-amber-100 text-xs">{rebalancingPlan.length} categories need attention</p>
+              </div>
+              <div className="p-5 space-y-3">
+                {rebalancingPlan.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl border" style={{ backgroundColor: item.over ? "#fef2f2" : "#fffbeb", borderColor: item.over ? "#fecaca" : "#fde68a" }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                        <p className="text-sm font-bold text-slate-800">{item.category}</p>
+                      </div>
+                      <div className="flex items-center gap-4 mt-1.5">
+                        <span className="text-xs text-slate-500">Current: <strong>{item.actual.toFixed(1)}%</strong></span>
+                        <span className="text-xs text-slate-500">Target: <strong>{item.ideal.toFixed(1)}%</strong></span>
+                        <span className="text-xs font-bold" style={{ color: item.over ? "#ef4444" : "#f59e0b" }}>
+                          {item.over ? `↓ Reduce by ${item.diff.toFixed(1)}%` : `↑ Increase by ${Math.abs(item.diff).toFixed(1)}%`}
+                        </span>
                       </div>
                     </div>
-                    <div data-pdf-clip="true" className="h-2 rounded-full mb-4 overflow-hidden bg-slate-100">
-                      <div className="h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: meta.color }} />
-                    </div>
-                    <div className="space-y-2">
-                      {subs.map(([type, subPct]) => (
-                        <div key={type} className="flex items-start gap-3">
-                          <span className="text-xs text-slate-600 w-36 flex-shrink-0 break-words leading-tight">{type}</span>
-                          <div data-pdf-clip="true" className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-1">
-                            <div className="h-full rounded-full" style={{ width: `${Math.min(subPct, 100)}%`, backgroundColor: meta.color }} />
-                          </div>
-                          <span className="text-xs font-semibold text-slate-700 w-12 text-right">{subPct.toFixed(2)}%</span>
-                        </div>
-                      ))}
-                    </div>
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: item.over ? "#ef4444" : "#f59e0b" }} />
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-            </div>
-          </div>
+          )}
 
+          {/* performance anchor */}
+          <div ref={performanceRef} />
           {/* 4. Concise Performance Check */}
           {Object.keys(storedPerformances).length > 0 && (() => {
-            const RATING_META: Record<string, { pill: string; bar: string; dot: string; accent: string }> = {
-              "Excellent": { pill: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-1 ring-emerald-100", bar: "#10b981", dot: "#10b981", accent: "border-l-emerald-400" },
-              "Good":      { pill: "bg-blue-50 text-blue-700 border-blue-200 ring-1 ring-blue-100",             bar: "#3b82f6", dot: "#3b82f6", accent: "border-l-blue-400" },
-              "Average":   { pill: "bg-amber-50 text-amber-700 border-amber-200 ring-1 ring-amber-100",         bar: "#f59e0b", dot: "#f59e0b", accent: "border-l-amber-400" },
-              "Poor":      { pill: "bg-rose-50 text-rose-600 border-rose-200 ring-1 ring-rose-100",             bar: "#ef4444", dot: "#ef4444", accent: "border-l-rose-400" },
+            const scoreToRating = (pct: number) => pct >= 80 ? "Excellent" : pct >= 60 ? "Good" : "Poor";
+            const RATING_STYLE: Record<string, { pill: string; bar: string }> = {
+              "Excellent": { pill: "bg-emerald-100 text-emerald-700 border-emerald-200", bar: "#10b981" },
+              "Good":      { pill: "bg-blue-100 text-blue-700 border-blue-200",          bar: "#3b82f6" },
+              "Poor":      { pill: "bg-rose-100 text-rose-600 border-rose-200",          bar: "#ef4444" },
             };
-            const getRatingLabel = (score: number) => {
-              if (score >= 71) return "Excellent";
-              if (score >= 51) return "Good";
-              if (score >= 26) return "Average";
-              return "Poor";
-            };
-
             const rows = mfSnapshot
               .filter((mf: any) => storedPerformances[mf.isin])
               .map((mf: any) => {
@@ -1591,8 +2365,8 @@ export default function ConciseReport() {
                 const scoringTotal = sc?.totalScore ?? 0;
                 const combined = scoringTotal + perfScore.total;
                 const maxScore = perf ? 80 : 40;
-                const rating: string = getRatingLabel(combined);
                 const pct = maxScore > 0 ? Math.round((combined / maxScore) * 100) : 0;
+                const rating: string = scoreToRating(pct);
                 const cagr1y = perf?.cagr?.["1y"] ?? "—";
                 const cagr3y = perf?.cagr?.["3y"] ?? "—";
                 const cagr5y = perf?.cagr?.["5y"] ?? "—";
@@ -1602,395 +2376,377 @@ export default function ConciseReport() {
                 return { mf, perf, sc, perfScore, combined, maxScore, rating, pct, cagr1y, cagr3y, cagr5y, bm1y, bm3y, bm5y };
               });
 
-            const fmtCagr = (v: string, bm: string | null) => {
-              const val = parseFloat(v?.replace(/[^\d.-]/g, "") || "");
-              const bmVal = parseFloat(bm?.replace(/[^\d.-]/g, "") ?? "");
-              const isAvail = !isNaN(val);
-              const isGood = isAvail && !isNaN(bmVal) && val >= bmVal;
-              const diff = isAvail && !isNaN(bmVal) ? val - bmVal : null;
-              return (
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className={`text-[12px] font-bold leading-none ${!isAvail ? "text-slate-300" : isGood ? "text-emerald-600" : "text-rose-500"}`}>
-                    {isAvail ? `${val.toFixed(1)}%` : "—"}
-                  </span>
-                  {isAvail && !isNaN(bmVal) && (
-                    <span className="text-[9px] text-slate-400 leading-none">BM: {bmVal.toFixed(1)}%</span>
-                  )}
-                  {diff !== null && (
-                    <span className={`text-[8px] font-semibold leading-none ${diff >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
-                      {diff >= 0 ? "+" : ""}{diff.toFixed(1)}%
-                    </span>
-                  )}
-                </div>
-              );
-            };
+            const ratingCounts: Record<string, number> = { Excellent: 0, Good: 0, Poor: 0 };
+            rows.forEach((r: { rating: string }) => { if (r.rating in ratingCounts) ratingCounts[r.rating]++; });
 
-            const ACTION_META: Record<string, { label: string; cls: string; dot: string }> = {
-              hold:   { label: "Hold",   cls: "bg-blue-50 text-blue-700 border-blue-200",     dot: "#3b82f6" },
-              switch: { label: "Switch", cls: "bg-amber-50 text-amber-700 border-amber-200",   dot: "#f59e0b" },
-              merge:  { label: "Merge",  cls: "bg-violet-50 text-violet-700 border-violet-200", dot: "#7c3aed" },
-              sell:   { label: "Sell",   cls: "bg-rose-50 text-rose-600 border-rose-200",       dot: "#ef4444" },
-            };
+            const RATING_CONFIG = [
+              { key: "Excellent", label: "Excellent", color: "#10b981", bg: "#ecfdf5", border: "#6ee7b7" },
+              { key: "Good",      label: "Good",      color: "#3b82f6", bg: "#eff6ff", border: "#93c5fd" },
+              { key: "Poor",      label: "Poor",      color: "#ef4444", bg: "#fef2f2", border: "#fca5a5" },
+            ];
 
             return (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-violet-700 via-indigo-700 to-blue-700 px-6 py-5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold text-white tracking-tight">Concise Performance Check</h3>
-                      <p className="text-violet-200 text-xs mt-1 font-medium">Fund-level scores vs benchmark · Risk Metrics Summary</p>
-                    </div>
-                    <div className="flex gap-3">
-                      {(["Excellent","Good","Average","Poor"] as const).map(r => (
-                        <div key={r} className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: RATING_META[r].dot }} />
-                          <span className="text-[10px] text-white/70 font-medium">{r}</span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-6 py-5 text-white">
+                  <h3 className="text-lg font-bold text-[#ffffff]">Concise Performance Check</h3>
+                  <p className="text-violet-200 text-xs mt-0.5">{rows.length} fund{rows.length !== 1 ? "s" : ""} analysed · Rating overview</p>
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    {[
+                      { label: "Poor",      range: "< 60%",    color: "#fca5a5" },
+                      { label: "Good",      range: "60 – 79%", color: "#93c5fd" },
+                      { label: "Excellent", range: "80 – 100%",color: "#6ee7b7" },
+                    ].map(b => (
+                      <span key={b.label} className="inline-flex items-center gap-1.5 text-[11px] font-medium" style={{ color: b.color }}>
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: b.color }} />
+                        {b.label} · {b.range}
+                      </span>
+                    ))}
                   </div>
                 </div>
+                <div className="p-4 sm:p-8">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                    {RATING_CONFIG.map(({ key, label, color, bg, border }) => {
+                      const count = ratingCounts[key] || 0;
+                      return (
+                        <div
+                          key={key}
+                          className="flex flex-col items-center justify-center rounded-2xl py-5 sm:py-8 px-2 sm:px-4"
+                          style={{ backgroundColor: bg, border: `2px solid ${border}` }}
+                        >
+                          <div
+                            className="w-14 h-14 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-3 sm:mb-4"
+                            style={{ backgroundColor: color + "22", border: `3px solid ${color}` }}
+                          >
+                            <span className="text-3xl sm:text-4xl font-black" style={{ color }}>{count}</span>
+                          </div>
+                          <span className="text-xs sm:text-sm font-bold tracking-wide" style={{ color }}>{label}</span>
+                          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1">{count === 1 ? "fund" : "funds"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      {/* Column group labels — 8 main columns */}
-                      <tr className="bg-slate-50 border-b border-slate-100">
-                        <th colSpan={4} className="px-4 py-1.5" />
-                        <th colSpan={3} className="px-4 py-1.5 text-center">
-                          <span className="text-[8px] font-bold uppercase tracking-widest text-indigo-500 bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5">CAGR vs Benchmark</span>
-                        </th>
-                        <th className="px-4 py-1.5" />
-                      </tr>
-                      {/* 8 column headers */}
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 w-8">#</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 min-w-[220px]">Fund Name</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Risk Type</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">SIP Amt</th>
-                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50">1Y</th>
-                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50">3Y</th>
-                        <th className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center bg-indigo-50/50 border-r border-indigo-100">5Y</th>
-                        <th className="px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center">Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows.map((r, idx) => {
-                        const meta = RATING_META[r.rating] ?? { pill: "bg-slate-100 text-slate-500 border-slate-200", bar: "#94a3b8", dot: "#94a3b8", accent: "border-l-slate-300" };
-                        const sn = `${r.mf.isin || r.mf.scheme_name}_${r.mf.folio_no || ''}`;
-                        const action = actionSelections[sn] || "hold";
-                        const aMeta = ACTION_META[action] ?? ACTION_META.hold;
-                        const tCat = targetCategory[sn] || "";
-                        const tSubCat = targetSubCategory[sn] || "";
-                        const tFund = targetFund[sn] || "";
-                        const subCatOptions = tCat ? recommendedRowsByCategory(tCat) : [];
-                        const fundOptions = tCat && tSubCat ? recommendedFundsBySelection(tCat, tSubCat) : [];
-                        const sipAmt = sipAmounts[r.mf.scheme_name];
-                        const rowKey = `${r.mf.isin || idx}_${r.mf.folio_no || idx}`;
-
-                        return (
-                          <Fragment key={rowKey}>
-                            {/* ── Main data row (8 cols) ── */}
-                            <tr
-                              className={`border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/50`}
+                  {/* Ranked fund list */}
+                  {rows.length > 0 && (
+                    <div className="mt-2 px-4 sm:px-8 pb-6">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Fund Rankings</p>
+                      <div className="space-y-2">
+                        {[...rows].sort((a, b) => b.pct - a.pct).map((r, i) => {
+                          const style = RATING_STYLE[r.rating];
+                          return (
+                            <div
+                              key={i}
+                              className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 rounded-xl px-3 py-2.5 transition-colors"
+                              onClick={() => setSelectedFundIsin(r.mf.isin)}
+                              data-testid={`row-perf-fund-${i}`}
                             >
-                              {/* # */}
-                              <td className="px-4 pt-4 pb-1 text-[10px] text-slate-400 font-mono align-top">{idx + 1}</td>
-
-                              {/* Fund Name */}
-                              <td className="px-4 pt-4 pb-1 align-top">
-                                <div className="flex flex-col gap-1 min-w-[200px] max-w-[280px]">
-                                  <span className="text-[12px] font-semibold text-slate-800 leading-snug">{r.mf.scheme_name}</span>
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wide border ${
-                                      (r.mf.fund_category || "").toLowerCase().includes("equity") ? "bg-blue-50 text-blue-600 border-blue-100" :
-                                      (r.mf.fund_category || "").toLowerCase().includes("debt") ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                      "bg-slate-100 text-slate-500 border-slate-200"
-                                    }`}>{r.mf.fund_category || "—"}</span>
-                                    <span className="text-[9px] text-slate-400 font-mono">{r.mf.isin}</span>
-                                    {r.mf.folio_no && <span className="text-[9px] text-slate-400">· {r.mf.folio_no}</span>}
+                              <span className="text-[11px] font-black text-slate-400 w-4 flex-shrink-0">{i + 1}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-700 truncate">{r.mf.scheme_name}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                    <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: style.bar }} />
                                   </div>
+                                  <span className="text-[10px] font-bold text-slate-500">{r.pct}%</span>
                                 </div>
-                              </td>
-
-                              {/* Risk Type */}
-                              <td className="px-4 pt-4 pb-1 text-center align-top">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
-                                  {r.mf.fund_type || "—"}
-                                </span>
-                              </td>
-
-                              {/* SIP Amount */}
-                              <td className="px-4 pt-4 pb-1 text-center align-top">
-                                {sipAmt != null ? (
-                                  <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
-                                    ₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-300 text-[11px]">—</span>
-                                )}
-                              </td>
-
-                              {/* CAGR columns */}
-                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30">{fmtCagr(r.cagr1y, r.bm1y)}</td>
-                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30">{fmtCagr(r.cagr3y, r.bm3y)}</td>
-                              <td className="px-3 pt-4 pb-1 text-center align-top bg-indigo-50/30 border-r border-indigo-100">{fmtCagr(r.cagr5y, r.bm5y)}</td>
-
-                              {/* Score */}
-                              <td className="px-4 pt-4 pb-1 text-center align-top">
-                                <div className="flex flex-col items-center gap-1.5">
-                                  <div className="flex items-baseline gap-0.5">
-                                    <span className="text-[18px] font-black leading-none" style={{ color: meta.dot }}>{r.combined}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium">/{r.maxScore}</span>
-                                  </div>
-                                  <div data-pdf-clip="true" className="w-14 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                    <div className="h-full rounded-full transition-all" style={{ width: `${r.pct}%`, backgroundColor: meta.dot }} />
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-
-                            {/* ── Sub-row: Rating + Action side by side ── */}
-                            <tr
-                              key={`sub-${rowKey}`}
-                              className={`border-b border-slate-100 border-l-4 ${meta.accent} transition-colors hover:bg-slate-50/50`}
-                            >
-                              <td colSpan={8} className="px-4 pt-1 pb-4">
-                                <div className="flex items-start gap-4">
-                                  {/* Rating pill */}
-                                  <div className="flex-shrink-0 flex flex-col items-start gap-1 pt-0.5">
-                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Rating</span>
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${meta.pill}`}>
-                                      {r.rating}
-                                    </span>
-                                  </div>
-
-                                  {/* Divider */}
-                                  <div className="w-px self-stretch bg-slate-200 flex-shrink-0" />
-
-                                  {/* Action panel */}
-                                  <div
-                                    className="flex-1 flex flex-wrap items-start gap-3"
-                                    data-action-block="true"
-                                    data-scheme-name={sn}
-                                  >
-                                    <div className="flex flex-col gap-1 flex-shrink-0">
-                                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Action</span>
-                                      <select
-                                        value={action}
-                                        onChange={(e) => updateAction(sn, e.target.value)}
-                                        className={`text-[10px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-1 w-[120px] ${aMeta.cls}`}
-                                        data-testid={`concise-action-select-${idx}`}
-                                      >
-                                        <option value="">Select</option>
-                                        <option value="hold">Hold</option>
-                                        <option value="switch">Switch</option>
-                                        <option value="merge">Merge</option>
-                                        <option value="sell">Sell</option>
-                                      </select>
-                                    </div>
-
-                                    {action !== "hold" && (
-                                      <div className="flex items-end gap-2 flex-wrap">
-                                        <div className="flex flex-col gap-1">
-                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Category</span>
-                                          <select
-                                            value={tCat}
-                                            onChange={(e) => updateTargetCategory(sn, e.target.value)}
-                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[140px]"
-                                            data-testid={`target-cat-${idx}`}
-                                          >
-                                            <option value="">Category…</option>
-                                            {recommendedOptions.map(opt => (
-                                              <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                          </select>
-                                        </div>
-                                        <div className="flex flex-col gap-1">
-                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Sub Category</span>
-                                          <select
-                                            value={tSubCat}
-                                            onChange={(e) => updateTargetSubCategory(sn, e.target.value)}
-                                            disabled={!tCat}
-                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[140px] disabled:opacity-40"
-                                            data-testid={`target-subcat-${idx}`}
-                                          >
-                                            <option value="">Sub Category…</option>
-                                            {subCatOptions.map(opt => (
-                                              <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                          </select>
-                                        </div>
-                                        <div className="flex flex-col gap-1">
-                                          <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Target Fund</span>
-                                          <select
-                                            value={tFund}
-                                            onChange={(e) => updateTargetFund(sn, e.target.value)}
-                                            disabled={!tSubCat}
-                                            className="text-[9px] border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-[160px] disabled:opacity-40"
-                                            data-testid={`target-fund-${idx}`}
-                                          >
-                                            <option value="">Fund…</option>
-                                            {fundOptions.map(opt => (
-                                              <option key={opt} value={opt}>{opt}</option>
-                                            ))}
-                                          </select>
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {/* Remarks always visible, right side */}
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
-                                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Remarks</span>
-                                      <textarea
-                                        value={remarks[sn] || ""}
-                                        onChange={(e) => updateRemark(sn, e.target.value)}
-                                        placeholder="Add remarks…"
-                                        rows={2}
-                                        className="text-[9px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-400 bg-white text-slate-700 w-full resize-none placeholder:text-slate-300"
-                                        data-testid={`remark-${idx}`}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                              </div>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${style.pill}`}>{r.rating}</span>
+                              <Eye className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })()}
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-5 text-white flex items-center justify-between" style={{ background: "linear-gradient(135deg,#059669 0%,#0d9488 50%,#0891b2 100%)" }}>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold tracking-tight">Recommended Funds</h3>
-                  <p className="text-emerald-100 text-xs font-medium">Curated fund suggestions for your portfolio</p>
-                </div>
-              </div>
-              <Button type="button" size="sm" onClick={addRecommendedFund} className="bg-white/20 hover:bg-white/30 text-white border-white/30 border font-semibold transition-all duration-200" data-testid="button-add-recommended-fund">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Fund
-              </Button>
-            </div>
-            <div className="p-4 space-y-3">
-              {recommendedFunds.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-10 text-center" data-testid="text-no-recommended-funds">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                    <Plus className="w-5 h-5 text-slate-400" />
-                  </div>
-                  <p className="text-sm font-semibold text-slate-500">No recommended funds added yet</p>
-                  <p className="text-xs text-slate-400 mt-1">Click "Add Fund" to get started</p>
-                </div>
-              )}
-              {recommendedFunds.map((row, idx) => {
-                const subCategories = row.category ? recommendedRowsByCategory(row.category) : [];
-                const fundNames = row.category && row.subCategory ? recommendedFundsBySelection(row.category, row.subCategory) : [];
-                return (
-                  <div key={row.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end border border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all duration-200" data-testid={`card-recommended-fund-${row.id}`}>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.category} onChange={(e) => updateRecommendedFund(row.id, { category: e.target.value, subCategory: "", fundName: "" })} data-testid={`select-recommended-category-${idx}`}>
-                        <option value="">Select category</option>
-                        {recommendedOptions.map(option => <option key={option} value={option}>{option}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Sub category</label>
-                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.subCategory} onChange={(e) => updateRecommendedFund(row.id, { subCategory: e.target.value, fundName: "" })} disabled={!row.category} data-testid={`select-recommended-subcategory-${idx}`}>
-                        <option value="">Select sub category</option>
-                        {subCategories.map(option => <option key={option} value={option}>{option}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Fund name</label>
-                      <select className="w-full border border-slate-300 rounded-md px-2 py-2 text-sm bg-white" value={row.fundName} onChange={(e) => updateRecommendedFund(row.id, { fundName: e.target.value })} disabled={!row.subCategory} data-testid={`select-recommended-fund-${idx}`}>
-                        <option value="">Select fund</option>
-                        {fundNames.map(option => <option key={option} value={option}>{option}</option>)}
-                      </select>
-                    </div>
-                    <div className="flex justify-end">
-                      <Button type="button" variant="outline" size="sm" onClick={() => removeRecommendedFund(row.id)} data-testid={`button-delete-recommended-fund-${idx}`}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
+          {/* snapshot anchor */}
+          <div ref={snapshotRef} />
           {/* 5. Portfolio Snapshot - Mutual Fund Units */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden" style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
-            <div className="p-5 text-white flex items-center gap-3" style={{ background: "linear-gradient(135deg,#1d4ed8 0%,#4f46e5 50%,#7c3aed 100%)" }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold tracking-tight">Portfolio Snapshot</h3>
-                <p className="text-blue-200 text-xs font-medium">Mutual Fund Units &amp; Valuation</p>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-[11px] text-left">
-                <thead className="bg-slate-50 text-slate-400 font-semibold border-b border-slate-100 uppercase tracking-wide text-[9px]">
-                  <tr>
-                    <th className="px-3 py-2">Scheme</th>
-                    <th className="px-3 py-2">Category</th>
-                    <th className="px-3 py-2 text-right">Units</th>
-                    <th className="px-3 py-2 text-right">NAV (₹)</th>
-                    <th className="px-3 py-2 text-right">Invested (₹)</th>
-                    <th className="px-3 py-2 text-right">Value (₹)</th>
-                    <th className="px-3 py-2 text-right">P/L (₹)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {mfSnapshot.map((mf: any, i: number) => {
-                    const name = (mf.scheme_name || "")
-                      .replace(/\s*\(Erstwhile[^)]*\)/gi, "")
-                      .replace(/\s*-\s*(Regular|Direct) Plan\s*-?\s*/gi, " ")
-                      .replace(/\s*Growth (Option|Plan)?\s*/gi, "")
-                      .replace(/\s*-\s*Growth\s*$/i, "")
-                      .replace(/\s+/g, " ").trim();
-                    const shortName = name.length > 52 ? name.slice(0, 50) + "…" : name;
-                    return (
-                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-3 py-2 font-semibold text-slate-700 max-w-[240px] whitespace-normal leading-snug" title={mf.scheme_name}>{shortName}</td>
-                        <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{mf.fund_category || '—'}</td>
-                        <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">{(mf.units || mf.closing_balance)?.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
-                        <td className="px-3 py-2 text-right font-mono whitespace-nowrap">{mf.nav?.toFixed(4)}</td>
-                        <td className="px-3 py-2 text-right text-slate-600 whitespace-nowrap">{mf.invested_amount?.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right font-bold text-slate-900 whitespace-nowrap">{mf.valuation?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                        <td className={`px-3 py-2 text-right font-semibold ${mf.unrealised_profit_loss >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {mf.unrealised_profit_loss?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                        </td>
+          {mfSnapshot.length > 0 && (() => {
+            const inr = (n: number, dp = 2) =>
+              n.toLocaleString("en-IN", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+            const totalInvestedSnap = mfSnapshot.reduce((s: number, mf: any) => s + (mf.invested_amount || 0), 0);
+            const totalValueSnap = mfSnapshot.reduce((s: number, mf: any) => s + (mf.valuation || 0), 0);
+            const totalPLSnap = totalValueSnap - totalInvestedSnap;
+
+            const filtered = mfSnapshot.filter((mf: any) =>
+              !snapshotSearch || (mf.scheme_name || "").toLowerCase().includes(snapshotSearch.toLowerCase())
+            );
+
+            const sortKey = snapshotSort.col;
+            const sortDir = snapshotSort.dir;
+            const sorted = [...filtered].sort((a: any, b: any) => {
+              let av: number, bv: number;
+              if (sortKey === "name") {
+                av = (a.scheme_name || "").charCodeAt(0);
+                bv = (b.scheme_name || "").charCodeAt(0);
+              } else if (sortKey === "value") {
+                av = a.valuation || 0; bv = b.valuation || 0;
+              } else if (sortKey === "pl") {
+                av = (a.valuation || 0) - (a.invested_amount || 0);
+                bv = (b.valuation || 0) - (b.invested_amount || 0);
+              } else {
+                av = a.invested_amount || 0; bv = b.invested_amount || 0;
+              }
+              return sortDir === "asc" ? av - bv : bv - av;
+            });
+
+            const toggleSort = (key: string) => setSnapshotSort(s => ({ col: key, dir: s.col === key && s.dir === "desc" ? "asc" : "desc" }));
+            const SortIcon = ({ col }: { col: string }) => snapshotSort.col === col
+              ? (snapshotSort.dir === "asc" ? <ChevronUp className="w-3 h-3 inline ml-1" /> : <ChevronDown className="w-3 h-3 inline ml-1" />)
+              : <ChevronDown className="w-3 h-3 inline ml-1 opacity-30" />;
+
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 px-6 py-5 text-white">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-white" data-testid="text-snapshot-heading">Portfolio Snapshot</h3>
+                      <p className="text-violet-200 text-xs mt-0.5">{mfSnapshot.length} funds · click a row for details</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-violet-300 pointer-events-none" />
+                        <input
+                          type="text"
+                          placeholder="Search fund…"
+                          value={snapshotSearch}
+                          onChange={e => setSnapshotSearch(e.target.value)}
+                          className="pl-8 pr-3 py-1.5 rounded-lg text-xs bg-white/15 border border-white/25 text-white placeholder-violet-300 outline-none focus:bg-white/25 w-40"
+                          data-testid="input-snapshot-search"
+                        />
+                        {snapshotSearch && (
+                          <button onClick={() => setSnapshotSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2">
+                            <X className="w-3 h-3 text-violet-300" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[600px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort("name")}>
+                          Scheme <SortIcon col="name" />
+                        </th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Units</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">NAV</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort("invested")}>
+                          Invested <SortIcon col="invested" />
+                        </th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort("value")}>
+                          Value <SortIcon col="value" />
+                        </th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort("pl")}>
+                          P/L <SortIcon col="pl" />
+                        </th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">% Portfolio</th>
                       </tr>
-                    );
-                  })}
-                  <tr className="bg-slate-800 text-white font-bold text-[10px]">
-                    <td colSpan={4} className="px-3 py-2 text-right uppercase tracking-wider text-[9px]">Grand Total</td>
-                    <td className="px-3 py-2 text-right">₹{totalInvested.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-3 py-2 text-right">₹{totalValuation.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-3 py-2 text-right">₹{totalUnrealised.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                  </tr>
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {sorted.map((mf: any, idx: number) => {
+                        const units = mf.units ?? mf.closing_balance ?? 0;
+                        const nav = mf.nav ?? (units > 0 && mf.valuation ? mf.valuation / units : 0);
+                        const invested = mf.invested_amount ?? 0;
+                        const value = mf.valuation ?? 0;
+                        const pl = value - invested;
+                        const plColor = pl >= 0 ? "text-emerald-600" : "text-rose-600";
+                        const portfolioPct = totalValueSnap > 0 ? ((value / totalValueSnap) * 100).toFixed(1) : "0.0";
+                        const hasPerf = !!storedPerformances[mf.isin];
+                        return (
+                          <tr
+                            key={idx}
+                            className={`border-b border-slate-100 transition-colors ${hasPerf ? "cursor-pointer hover:bg-violet-50" : "hover:bg-slate-50"}`}
+                            onClick={() => hasPerf && setSelectedFundIsin(mf.isin)}
+                            data-testid={`row-snapshot-${idx}`}
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div>
+                                  <p className="font-semibold text-slate-800 text-xs leading-tight">{mf.scheme_name || "—"}</p>
+                                  {mf.fund_category && <p className="text-[10px] text-slate-400 mt-0.5">{mf.fund_category}</p>}
+                                </div>
+                                {hasPerf && <Eye className="w-3.5 h-3.5 text-violet-300 flex-shrink-0 ml-auto" />}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(units, 3)}</td>
+                            <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(nav, 4)}</td>
+                            <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(invested, 2)}</td>
+                            <td className="px-4 py-3 text-right font-semibold text-slate-900 tabular-nums text-xs">{inr(value, 2)}</td>
+                            <td className={`px-4 py-3 text-right font-semibold tabular-nums text-xs ${plColor}`}>
+                              {pl >= 0 ? "+" : "-"}{inr(Math.abs(pl), 2)}
+                            </td>
+                            <td className="px-4 py-3 text-right text-xs">
+                              <div className="flex items-center justify-end gap-2">
+                                <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-violet-400 rounded-full" style={{ width: `${Math.min(parseFloat(portfolioPct), 100)}%` }} />
+                                </div>
+                                <span className="text-slate-600 tabular-nums font-medium w-8 text-right">{portfolioPct}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-900 text-white">
+                        <td colSpan={3} className="px-4 py-3 text-right text-xs uppercase tracking-wider text-[#3aded1] font-bold">Grand Total</td>
+                        <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalInvestedSnap, 2)}</td>
+                        <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalValueSnap, 2)}</td>
+                        <td className={`px-4 py-3 text-right font-bold tabular-nums text-xs ${totalPLSnap >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                          {totalPLSnap >= 0 ? "+" : "-"}₹{inr(Math.abs(totalPLSnap), 2)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-slate-400">100%</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                {filtered.length === 0 && (
+                  <div className="py-12 text-center text-slate-400 text-sm">No funds match "{snapshotSearch}"</div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Detailed report CTA */}
+          <div className="mt-12 mb-4 w-full" data-testid="section-detailed-report-cta">
+            <div
+              className="relative w-full overflow-hidden rounded-2xl border px-6 py-8 md:px-10 md:py-10"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(6,78,59,0.35) 50%, rgba(2,44,34,0.55) 100%)",
+                borderColor: "rgba(51, 242, 137, 0.35)",
+                boxShadow:
+                  "0 10px 40px -10px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+              }}
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl opacity-40"
+                style={{ background: "radial-gradient(circle, #33f289 0%, transparent 70%)" }}
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl opacity-30"
+                style={{ background: "radial-gradient(circle, #10b981 0%, transparent 70%)" }}
+              />
+
+              <div className="relative flex flex-col items-center text-center gap-5">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase"
+                  style={{
+                    background: "rgba(51, 242, 137, 0.15)",
+                    border: "1px solid rgba(51, 242, 137, 0.4)",
+                    color: "#33f289",
+                  }}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  Personalised Advisory
+                </div>
+
+                <h3
+                  className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-white max-w-3xl"
+                  data-testid="text-detailed-report-cta"
+                >
+                  Want a <span className="text-[#33f289]">detailed report</span> and advisory for your portfolio?
+                </h3>
+
+                <p className="text-sm md:text-base text-white/70 max-w-2xl">
+                  Connect with our experts at Financial Friend for a deep-dive analysis,
+                  rebalancing recommendations, and a tailored investment roadmap built for your goals.
+                </p>
+
+                <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 w-full max-w-2xl">
+                  <a
+                    href={(() => {
+                      const nav = analysis.summary?.net_asset_value;
+                      const formattedNav = nav
+                        ? `₹${Number(nav).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`
+                        : "—";
+                      const msg = [
+                        `Hi Financial Friend! 👋`,
+                        ``,
+                        `I just reviewed my portfolio analysis on CasAnalyser.`,
+                        ``,
+                        `Name: ${investorName || "—"}`,
+                        `Portfolio Value: ${formattedNav}`,
+                        `Risk Profile: ${report?.investorType || "—"} | Age Group: ${report?.ageGroup || "—"}`,
+                        ``,
+                        `I'd love to get a detailed advisory and rebalancing recommendations. Please connect with me!`,
+                      ].join("\n");
+                      return `https://wa.me/919351104008?text=${encodeURIComponent(msg)}`;
+                    })()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-[200px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] hover:shadow-xl"
+                    style={{
+                      background: "linear-gradient(135deg, #33f289 0%, #10b981 100%)",
+                      color: "#022c22",
+                      boxShadow: "0 8px 24px -6px rgba(51, 242, 137, 0.5)",
+                    }}
+                    data-testid="link-cta-whatsapp"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat on WhatsApp
+                  </a>
+                  <a
+                    href="mailto:gunjan@financialfriend.in"
+                    className="group flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-[1.02] hover:shadow-lg"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", color: "#ffffff" }}
+                    data-testid="link-cta-email"
+                  >
+                    <Mail className="w-4 h-4 text-[#33f289]" />
+                    <span className="truncate">gunjan@financialfriend.in</span>
+                  </a>
+                  <a
+                    href="tel:+919351104008"
+                    className="group flex-1 min-w-[150px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-[1.02] hover:shadow-lg"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", color: "#ffffff" }}
+                    data-testid="link-cta-call"
+                  >
+                    <Phone className="w-4 h-4 text-[#33f289]" />
+                    +91 93511 04008
+                  </a>
+                </div>
+
+                <p className="text-xs text-white/50 mt-1">
+                  Typically responds within a few hours · Mon–Sat
+                </p>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* ── Back to Top Button ───────────────────────────────────────────── */}
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110"
+          style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)", boxShadow: "0 4px 20px rgba(99,102,241,0.5)" }}
+          aria-label="Back to top"
+          data-testid="button-back-to-top"
+        >
+          <ChevronUp className="w-5 h-5 text-white" />
+        </button>
+      )}
+
+      {/* ── Fund Detail Modal ────────────────────────────────────────────── */}
+      {selectedFundData && (
+        <FundDetailModal
+          fund={selectedFundData.fund}
+          perf={selectedFundData.perf}
+          scoring={selectedFundData.scoring}
+          onClose={() => setSelectedFundIsin(null)}
+        />
+      )}
     </div>
   );
 }

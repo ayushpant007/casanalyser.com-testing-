@@ -1,20 +1,212 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Mail, CheckCircle2, Download, Loader2, HelpCircle } from "lucide-react";
 import { UploadCard } from "@/components/UploadCard";
 import { ReportView } from "@/components/ReportView";
-import { useReport, useReports } from "@/hooks/use-reports";
+import { useReport } from "@/hooks/use-reports";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, ChevronRight, BarChart2, ShieldCheck, Zap } from "lucide-react";
-import { format } from "date-fns";
+import { Upload as UploadIcon, MailPlus } from "lucide-react";
+import { ChevronRight, BarChart2, Zap } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { Button } from "@/components/ui/button";
+import { ShinyButton } from "@/components/ui/shiny-button";
+import { SiGoogle } from "react-icons/si";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { RegistrationModal } from "@/components/RegistrationModal";
+import casAnalyzerLogo from "@assets/ChatGPT_Image_Apr_23,_2026,_02_45_29_PM_1776935868469.png";
+import financialFriendLogo from "@assets/ChatGPT_Image_Apr_24__2026__02_36_06_PM-removebg-preview_1777021600827.png";
+
+interface GmailPdf {
+  messageId: string;
+  attachmentId: string;
+  filename: string;
+  size: number;
+  from: string;
+  subject: string;
+  date: string;
+}
+
+function RotatingHeadline() {
+  const phrases = [
+    {
+      icon: UploadIcon,
+      lead: "Have your CAS report?",
+      accent: "Just upload it.",
+      gradient: "linear-gradient(90deg, #60a5fa, #c084fc)",
+    },
+    {
+      icon: MailPlus,
+      lead: "Don't have one?",
+      accent: "Connect Gmail to fetch it.",
+      gradient: "linear-gradient(90deg, #34d399, #60a5fa)",
+    },
+  ];
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % phrases.length);
+    }, 3800);
+    return () => clearInterval(t);
+  }, []);
+
+  const current = phrases[idx];
+  const Icon = current.icon;
+
+  return (
+    <motion.h1
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2, duration: 0.6 }}
+      className="text-4xl md:text-6xl font-bold font-display tracking-tight leading-[1.1] min-h-[6.5rem] md:min-h-[9rem] flex items-center justify-center"
+      style={{ color: "#f1f5f9" }}
+      data-testid="text-hero-rotating"
+    >
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={idx}
+          initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -16, filter: "blur(6px)" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="block"
+        >
+          <span className="inline-flex items-center gap-3 justify-center flex-wrap">
+            <span>{current.lead}</span>
+          </span>
+          <span className="block mt-2">
+            <span
+              style={{
+                background: current.gradient,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              {current.accent}
+            </span>
+          </span>
+        </motion.span>
+      </AnimatePresence>
+    </motion.h1>
+  );
+}
 
 export default function Home() {
   const [activeReportId, setActiveReportId] = useState<number | null>(null);
+  const [externalFile, setExternalFile] = useState<File | null>(null);
+  const [loadingPdfId, setLoadingPdfId] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(true);
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const registered = localStorage.getItem("finanalyze_user_registered");
+    if (!registered) {
+      setIsRegistered(false);
+      const t = setTimeout(() => setShowRegistration(true), 400);
+      return () => clearTimeout(t);
+    }
+    const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
+    if (!onboardingSeen) {
+      const t = setTimeout(() => setShowOnboarding(true), 400);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const closeOnboarding = () => {
+    setShowOnboarding(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("finanalyze_onboarding_seen", "1");
+    }
+  };
+
+  const handleRegistrationSuccess = () => {
+    setShowRegistration(false);
+    setIsRegistered(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("finanalyze_user_registered", "1");
+      const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
+      if (!onboardingSeen) {
+        setTimeout(() => setShowOnboarding(true), 300);
+      }
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (!isRegistered) {
+      setShowRegistration(true);
+    } else {
+      scrollToUpload();
+    }
+  };
+
+  const scrollToUpload = () => {
+    setTimeout(() => {
+      document
+        .getElementById("upload-section")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  };
+
+  const handleConnectGmail = () => {
+    window.location.href = "/auth/google";
+  };
 
   const { data: activeReport, isLoading: isLoadingReport } = useReport(activeReportId);
-  const { data: reportsList } = useReports();
+
+  const { data: gmailStatus, refetch: refetchGmail } = useQuery<{
+    connected: boolean;
+    email?: string;
+    displayName?: string;
+  }>({
+    queryKey: ["/api/auth/me"],
+  });
+
+  const { data: gmailPdfsData, isLoading: isLoadingPdfs } = useQuery<{
+    pdfs: GmailPdf[];
+  }>({
+    queryKey: ["/api/gmail/cas-pdfs"],
+    enabled: !!gmailStatus?.connected,
+  });
+
+  const handleSelectGmailPdf = async (pdf: GmailPdf) => {
+    try {
+      setLoadingPdfId(pdf.messageId);
+      const res = await fetch(
+        `/api/gmail/attachment/${pdf.messageId}/${pdf.attachmentId}?filename=${encodeURIComponent(pdf.filename)}`,
+        { credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to fetch PDF");
+      const blob = await res.blob();
+      const file = new File([blob], pdf.filename || "cas.pdf", {
+        type: "application/pdf",
+      });
+      setExternalFile(file);
+      setTimeout(() => {
+        document
+          .getElementById("upload-section")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingPdfId(null);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("auth") === "success" || params.get("auth") === "failed") {
+      refetchGmail();
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [refetchGmail]);
 
   return (
-    <div className="min-h-screen font-sans pb-20 relative">
+    <div className="min-h-screen font-sans pb-20 relative overflow-x-hidden">
       <AnimatedBackground />
       {/* Navbar */}
       <nav
@@ -30,28 +222,39 @@ export default function Home() {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setActiveReportId(null)}
           >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg"
-              style={{
-                background: "linear-gradient(135deg, #3b6fff, #9333ea)",
-                boxShadow: "0 0 16px rgba(59,111,255,0.5)",
-              }}
-            >
-              <BarChart2 className="w-5 h-5" />
-            </div>
-            <span
-              className="text-xl font-bold font-display"
-              style={{
-                background: "linear-gradient(90deg, #60a5fa, #c084fc)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              FinAnalyze
-            </span>
+            <img
+              src={casAnalyzerLogo}
+              alt="Cas Analyzer"
+              className="h-20 w-auto object-contain"
+              data-testid="img-logo"
+            />
           </div>
-          <div className="text-sm font-medium" style={{ color: "rgba(148,163,184,0.9)" }}>
-            AI-Powered Portfolio Insights
+          <div className="hidden sm:flex items-center gap-3 text-sm font-medium" style={{ color: "rgba(148,163,184,0.9)" }}>
+            <span>
+              Product by{" "}
+              <a
+                href="https://www.financialfriend.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-300 transition-colors"
+                data-testid="link-financial-friend-nav"
+              >
+                Financial Friend
+              </a>
+            </span>
+            <a
+              href="https://www.financialfriend.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="link-financial-friend-logo"
+            >
+              <img
+                src={financialFriendLogo}
+                alt="Financial Friend"
+                className="h-24 w-auto object-contain"
+                data-testid="img-financial-friend-logo"
+              />
+            </a>
           </div>
         </div>
       </nav>
@@ -67,66 +270,166 @@ export default function Home() {
             >
               {/* Hero Section */}
               <div className="text-center space-y-6 max-w-3xl mx-auto">
+                <RotatingHeadline />
+              </div>
+
+              {/* Gmail Connect */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex justify-center"
+              >
+                {gmailStatus?.connected ? (
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border"
+                    style={{
+                      background: "rgba(16,185,129,0.15)",
+                      borderColor: "rgba(52,211,153,0.4)",
+                      color: "#6ee7b7",
+                    }}
+                    data-testid="status-gmail-connected"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Connected: {gmailStatus.email} ✅</span>
+                  </div>
+                ) : (
+                  <ShinyButton
+                    onClick={() => {
+                      window.location.href = "/auth/google";
+                    }}
+                    className="relative z-20"
+                    data-testid="button-connect-gmail"
+                  >
+                    <SiGoogle className="w-4 h-4" />
+                    Connect with Google
+                  </ShinyButton>
+                )}
+              </motion.div>
+
+              {/* Gmail CAS PDFs */}
+              {gmailStatus?.connected && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border mb-2"
-                  style={{
-                    background: "rgba(59,111,255,0.15)",
-                    borderColor: "rgba(59,111,255,0.4)",
-                    color: "#93c5fd",
-                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45 }}
+                  className="max-w-2xl mx-auto"
                 >
-                  <Zap className="w-4 h-4" style={{ fill: "#60a5fa", color: "#60a5fa" }} />
-                  <span>Instant Portfolio X-Ray</span>
+                  <div
+                    className="rounded-2xl p-5 border"
+                    style={{
+                      background: "rgba(15, 20, 50, 0.6)",
+                      borderColor: "rgba(96,165,250,0.2)",
+                      backdropFilter: "blur(12px)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-4">
+                      <Mail className="w-4 h-4" style={{ color: "#60a5fa" }} />
+                      <h3
+                        className="text-sm font-bold uppercase tracking-wider"
+                        style={{ color: "#e2e8f0" }}
+                      >
+                        Recent CAS PDFs from your Gmail
+                      </h3>
+                    </div>
+
+                    {isLoadingPdfs ? (
+                      <div className="flex items-center gap-2 py-4 text-sm" style={{ color: "rgba(148,163,184,0.7)" }}>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Scanning Gmail inbox...
+                      </div>
+                    ) : !gmailPdfsData?.pdfs || gmailPdfsData.pdfs.length === 0 ? (
+                      <p className="text-sm py-2" style={{ color: "rgba(148,163,184,0.7)" }}>
+                        No CAS PDF emails found from CAMS, NSDL, or CDSL.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {gmailPdfsData.pdfs.map((pdf) => {
+                          const isLoading = loadingPdfId === pdf.messageId;
+                          const fromMatch = pdf.from.match(/<([^>]+)>/);
+                          const fromEmail = fromMatch ? fromMatch[1] : pdf.from;
+                          const dateStr = pdf.date
+                            ? new Date(pdf.date).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "";
+                          return (
+                            <button
+                              key={pdf.messageId}
+                              onClick={() => handleSelectGmailPdf(pdf)}
+                              disabled={isLoading}
+                              className="w-full text-left p-3 rounded-xl border flex items-center gap-3 transition-all hover:border-blue-400/60 disabled:opacity-60"
+                              style={{
+                                background: "rgba(10, 15, 40, 0.5)",
+                                borderColor: "rgba(96,165,250,0.2)",
+                              }}
+                              data-testid={`button-gmail-pdf-${pdf.messageId}`}
+                            >
+                              <div
+                                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                                style={{
+                                  background: "rgba(59,111,255,0.15)",
+                                  color: "#60a5fa",
+                                }}
+                              >
+                                {isLoading ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p
+                                  className="text-sm font-semibold truncate"
+                                  style={{ color: "#e2e8f0" }}
+                                >
+                                  {pdf.filename}
+                                </p>
+                                <p
+                                  className="text-xs truncate"
+                                  style={{ color: "rgba(148,163,184,0.7)" }}
+                                >
+                                  {fromEmail} · {dateStr}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
+              )}
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-4xl md:text-6xl font-bold font-display tracking-tight leading-tight"
-                  style={{ color: "#f1f5f9" }}
-                >
-                  Upload your CDSL & NSDL report
-                </motion.h1>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-lg max-w-2xl mx-auto leading-relaxed"
+              {/* OR Divider */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="flex items-center justify-center gap-4 max-w-sm mx-auto"
+                data-testid="divider-or"
+              >
+                <span
+                  className="flex-1 h-px"
+                  style={{ background: "rgba(96,165,250,0.25)" }}
+                />
+                <span
+                  className="text-2xl font-black uppercase tracking-[0.2em]"
                   style={{ color: "rgba(148,163,184,0.9)" }}
                 >
-                  Upload your CAS (Consolidated Account Statement) PDF securely. Our AI analyzes
-                  your holdings, asset allocation, and provides actionable insights in seconds.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex flex-wrap justify-center gap-8 text-sm font-medium pt-4"
-                  style={{ color: "rgba(148,163,184,0.8)" }}
-                >
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5" style={{ color: "#34d399" }} />
-                    Secure Analysis
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" style={{ color: "#60a5fa" }} />
-                    PDF Support
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <BarChart2 className="w-5 h-5" style={{ color: "#c084fc" }} />
-                    Visual Reports
-                  </div>
-                </motion.div>
-              </div>
+                  OR
+                </span>
+                <span
+                  className="flex-1 h-px"
+                  style={{ background: "rgba(96,165,250,0.25)" }}
+                />
+              </motion.div>
 
               {/* Upload Component */}
               <motion.div
+                id="upload-section"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -138,80 +441,12 @@ export default function Home() {
                     background: "radial-gradient(ellipse, #3b6fff 0%, transparent 70%)",
                   }}
                 />
-                <UploadCard onSuccess={setActiveReportId} />
+                <UploadCard
+                  onSuccess={(id) => navigate(`/reports/${id}/concise`)}
+                  externalFile={externalFile}
+                />
               </motion.div>
 
-              {/* Recent Reports List */}
-              {reportsList && reportsList.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="max-w-4xl mx-auto pt-10"
-                  style={{ borderTop: "1px solid rgba(96,165,250,0.15)" }}
-                >
-                  <h3
-                    className="text-xl font-bold font-display mb-6"
-                    style={{ color: "#e2e8f0" }}
-                  >
-                    Recent Analyses
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {reportsList.map((report) => (
-                      <div
-                        key={report.id}
-                        onClick={() => setActiveReportId(report.id)}
-                        className="group p-5 rounded-xl border cursor-pointer flex items-center justify-between transition-all duration-300"
-                        style={{
-                          background: "rgba(15, 20, 50, 0.6)",
-                          borderColor: "rgba(96,165,250,0.2)",
-                          backdropFilter: "blur(12px)",
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.borderColor =
-                            "rgba(96,165,250,0.6)";
-                          (e.currentTarget as HTMLDivElement).style.boxShadow =
-                            "0 0 20px rgba(59,111,255,0.2)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.borderColor =
-                            "rgba(96,165,250,0.2)";
-                          (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-                        }}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                            style={{
-                              background: "rgba(59,111,255,0.15)",
-                              color: "#60a5fa",
-                            }}
-                          >
-                            <FileText className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <h4
-                              className="font-semibold transition-colors"
-                              style={{ color: "#e2e8f0" }}
-                            >
-                              {report.filename}
-                            </h4>
-                            <p className="text-xs" style={{ color: "rgba(148,163,184,0.7)" }}>
-                              {report.createdAt
-                                ? format(new Date(report.createdAt), "MMM d, yyyy • h:mm a")
-                                : "Unknown Date"}
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight
-                          className="w-5 h-5 transition-colors"
-                          style={{ color: "rgba(96,165,250,0.4)" }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
             </motion.div>
           ) : (
             <motion.div
@@ -256,6 +491,32 @@ export default function Home() {
           )}
         </AnimatePresence>
       </main>
+      <RegistrationModal
+        open={showRegistration}
+        onClose={() => setShowRegistration(false)}
+        onSuccess={handleRegistrationSuccess}
+        dismissible={isRegistered}
+      />
+      <OnboardingModal
+        open={showOnboarding}
+        onClose={closeOnboarding}
+        onUpload={scrollToUpload}
+        onConnectGmail={handleConnectGmail}
+      />
+      <button
+        onClick={() => setShowOnboarding(true)}
+        aria-label="Show app guide"
+        className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+        style={{
+          background: "linear-gradient(135deg, #3b6fff, #c084fc)",
+          color: "#ffffff",
+          boxShadow:
+            "0 10px 30px -8px rgba(59,111,255,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset",
+        }}
+        data-testid="button-help-onboarding"
+      >
+        <HelpCircle className="w-7 h-7" />
+      </button>
     </div>
   );
 }

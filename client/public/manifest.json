@@ -1,0 +1,47 @@
+{
+  "name": "CasAnalyser - AI Portfolio Insights",
+  "short_name": "CasAnalyser",
+  "description": "Upload your CAS PDF and get instant AI-powered portfolio analysis and insights.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e2e",
+  "theme_color": "#3b6fff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Analyze Portfolio",
+      "short_name": "Analyze",
+      "description": "Upload and analyze a new CAS statement",
+      "url": "/",
+      "icons": [{ "src": "/favicon.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "CDSL CAS Analyzer",
+      "short_name": "CDSL",
+      "description": "Open the CDSL CAS Analyzer",
+      "url": "/cdsl",
+      "icons": [{ "src": "/favicon.png", "sizes": "128x128" }]
+    }
+  ]
+}

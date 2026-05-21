@@ -1,8 +1,8 @@
-# FinAnalyze - AI Portfolio Analysis Platform
+# CasAnalyser - AI Portfolio Analysis Platform
 
 ## Overview
 
-FinAnalyze is an AI-powered financial portfolio analysis application. Users upload password-protected PDF statements, and the system extracts text using `pdftotext`, sends it to OpenAI for analysis, and returns structured insights including holdings, allocations, and recommendations. Results are stored in PostgreSQL and displayed through a premium financial dashboard interface with charts and visualizations.
+CasAnalyser is an AI-powered financial portfolio analysis application. Users upload password-protected PDF statements, and the system extracts text using `pdftotext`, sends it to OpenAI for analysis, and returns structured insights including holdings, allocations, and recommendations. Results are stored in PostgreSQL and displayed through a premium financial dashboard interface with charts and visualizations.
 
 ## User Preferences
 

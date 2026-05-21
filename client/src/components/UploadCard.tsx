@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAnalyzeReport } from "@/hooks/use-reports";
 import { Upload, FileText, Lock, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,9 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface UploadCardProps {
   onSuccess: (reportId: number) => void;
+  externalFile?: File | null;
 }
 
-export function UploadCard({ onSuccess }: UploadCardProps) {
+export function UploadCard({ onSuccess, externalFile }: UploadCardProps) {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [investorType, setInvestorType] = useState("Aggressive");
@@ -18,6 +19,10 @@ export function UploadCard({ onSuccess }: UploadCardProps) {
 
   const { mutate: analyze, isPending, error } = useAnalyzeReport();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (externalFile) setFile(externalFile);
+  }, [externalFile]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -151,93 +156,6 @@ export function UploadCard({ onSuccess }: UploadCardProps) {
                 </h2>
                 <p className="text-sm" style={{ color: "rgba(148,163,184,0.7)" }}>Upload your any 
                 NSDL/CDSL Consolidated Account Statement</p>
-              </div>
-            </motion.div>
-
-            {/* Download links */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mb-4 rounded-xl px-4 py-3 text-sm"
-              style={{
-                background: "rgba(59,111,255,0.08)",
-                border: "1px solid rgba(96,165,250,0.18)",
-              }}
-            >
-              <p className="mb-2" style={{ color: "rgba(148,163,184,0.85)" }}>
-                Don't have your CAS report? Download it from the official website:
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href="https://nsdlcas.nsdl.com/ecas/ecas.php"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all duration-200"
-                  style={{
-                    background: "rgba(59,111,255,0.18)",
-                    color: "#60a5fa",
-                    border: "1px solid rgba(96,165,250,0.3)",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(59,111,255,0.3)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(96,165,250,0.6)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(59,111,255,0.18)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(96,165,250,0.3)";
-                  }}
-                  data-testid="link-nsdl-cas"
-                >
-                  ↗ NSDL CAS
-                </a>
-                <a
-                  href="https://www.cdslindia.com/cas/logincas.aspx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all duration-200"
-                  style={{
-                    background: "rgba(147,51,234,0.18)",
-                    color: "#c084fc",
-                    border: "1px solid rgba(167,139,250,0.3)",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(147,51,234,0.3)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(167,139,250,0.6)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(147,51,234,0.18)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(167,139,250,0.3)";
-                  }}
-                  data-testid="link-cdsl-cas"
-                >
-                  ↗ CDSL CAS
-                </a>
-                <a
-                  href="https://www.camsonline.com/Investors/Statements/Consolidated-Account-Statement"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all duration-200"
-                  style={{
-                    background: "rgba(16,185,129,0.18)",
-                    color: "#34d399",
-                    border: "1px solid rgba(52,211,153,0.3)",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(16,185,129,0.3)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(52,211,153,0.6)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(16,185,129,0.18)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(52,211,153,0.3)";
-                  }}
-                  data-testid="link-cams-cas"
-                >
-                  ↗ CAMS CAS
-                </a>
               </div>
             </motion.div>
 
@@ -408,13 +326,13 @@ export function UploadCard({ onSuccess }: UploadCardProps) {
                       style={{ color: "rgba(148,163,184,0.8)" }}
                     >
                       <Lock className="w-4 h-4" style={{ color: "rgba(148,163,184,0.5)" }} />
-                      PDF Password (if protected)
+                      PAN Number (In Capital)
                     </label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password..."
+                      placeholder="Enter PAN Number..."
                       className="w-full px-4 py-3 rounded-xl outline-none transition-all"
                       style={{
                         background: "rgba(15,25,60,0.7)",

@@ -60,7 +60,7 @@ export function AnimatedBackground() {
     };
 
     const initStars = () => {
-      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      const count = Math.floor((canvas.width * canvas.height) / 5800);
       starsRef.current = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,

@@ -1,5 +1,5 @@
 import { type EnhancedReport } from "@/hooks/use-reports";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, AreaChart, Area, ComposedChart, Line, CartesianGrid } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, TrendingUp, AlertTriangle, Lightbulb, PieChart as PieChartIcon, Calendar, Activity, Loader2, Download, Flag, ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
@@ -449,9 +449,6 @@ export function ReportView({ report }: ReportViewProps) {
   const [performances, setPerformances] = useState<Record<string, PerformanceData>>({});
   const [scoringRecords, setScoringRecords] = useState<Record<string, any>>({});
   const [manualRemarks, setManualRemarks] = useState<Record<string, string>>({});
-  const [actionSelections, setActionSelections] = useState<Record<string, string>>(() => {
-    try { return JSON.parse(localStorage.getItem(`fin_actions_${report.id}`) || "{}"); } catch { return {}; }
-  });
   const [manualNavs, setManualNavs] = useState<Record<string, number>>({});
   const [isDownloading, setIsDownloading] = useState(false);
   const [isFetchingNav, setIsFetchingNav] = useState(false);
@@ -544,29 +541,6 @@ export function ReportView({ report }: ReportViewProps) {
   }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.unrealised_profit_loss || 0), 0), [mfSnapshot]);
   const mfSnapshotValuation = useMemo(() => mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.valuation || 0), 0), [mfSnapshot]);
-
-  const sipAmounts = useMemo(() => {
-    const txns: any[] = (analysis as any).transactions || [];
-    // Count occurrences of scheme+amount for repeat detection
-    const repeatCount: Record<string, number> = {};
-    txns.forEach(t => {
-      if (!t.scheme_name || !t.amount) return;
-      const type = (t.type || "").toUpperCase();
-      if (type === "SIP" || type === "PURCHASE") {
-        const key = `${t.scheme_name}||${Math.round(t.amount)}`;
-        repeatCount[key] = (repeatCount[key] || 0) + 1;
-      }
-    });
-    const map: Record<string, number> = {};
-    for (const t of txns) {
-      if (!t.scheme_name || !t.amount) continue;
-      const type = (t.type || "").toUpperCase();
-      const key = `${t.scheme_name}||${Math.round(t.amount)}`;
-      const isTrueSip = type === "SIP" || (type === "PURCHASE" && (repeatCount[key] || 0) >= 2);
-      if (isTrueSip && !(t.scheme_name in map)) map[t.scheme_name] = t.amount;
-    }
-    return map;
-  }, [(analysis as any).transactions]);
 
   const downloadPDF = async () => {
     if (!reportRef.current) return;
@@ -759,14 +733,7 @@ export function ReportView({ report }: ReportViewProps) {
   };
 
   const analyzeAll = async () => {
-    const allFunds = (analysis.mf_snapshot || []).filter((mf: any) => mf.isin);
-    // Deduplicate by ISIN — multiple folios can share the same ISIN
-    const seen = new Set<string>();
-    const funds = allFunds.filter((mf: any) => {
-      if (seen.has(mf.isin)) return false;
-      seen.add(mf.isin);
-      return true;
-    });
+    const funds = (analysis.mf_snapshot || []).filter((mf: any) => mf.isin);
     if (!funds.length) return;
     setIsAnalyzingAll(true);
     const BATCH = 3;
@@ -893,9 +860,7 @@ export function ReportView({ report }: ReportViewProps) {
     <div className="space-y-4">
       <div className="flex justify-end gap-3 py-2">
         {(() => {
-          // Count unique ISINs only — duplicate folios share the same ISIN
-          const uniqueIsins = new Set((analysis.mf_snapshot || []).map((mf: any) => mf.isin).filter(Boolean));
-          const totalFunds = uniqueIsins.size;
+          const totalFunds = (analysis.mf_snapshot || []).length;
           const allAnalyzed = totalFunds > 0 && Object.keys(performances).length >= totalFunds;
           const analyzedCount = Object.keys(performances).length;
           return (
@@ -984,171 +949,21 @@ export function ReportView({ report }: ReportViewProps) {
 
             return (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="p-4 rounded-xl bg-slate-50">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Value</p>
-                    <p className="text-xl font-bold text-slate-900">{formatLakh(totalValuation)}</p>
-                    <p className={`text-xs font-semibold mt-0.5 ${absoluteReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {absoluteReturn >= 0 ? '+' : ''}{absoluteReturnPct.toFixed(1)}% overall return
-                    </p>
+                    <p className="text-xl font-bold text-slate-900">{formatLakh(totalInvested)}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">cost value from CAS</p>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-50">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Approx. CAGR</p>
-                    <p className="text-xl font-bold text-slate-900">{approxCagr.toFixed(1)}%</p>
-                    <p className="text-xs text-slate-400 mt-0.5">estimated 2-year</p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Absolute Gain</p>
-                    <p className={`text-xl font-bold ${absoluteReturn >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                      {absoluteReturn >= 0 ? '+' : ''}{formatLakh(Math.abs(absoluteReturn))}
-                    </p>
-                    <p className={`text-xs font-semibold mt-0.5 ${absoluteReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      on ₹{(totalInvested / 100000).toFixed(2)} L invested
-                    </p>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Market Value</p>
+                    <p className="text-xl font-bold text-emerald-700">{formatLakh(totalValuation)}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">market value from CAS</p>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-50">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Schemes</p>
                     <p className="text-xl font-bold text-slate-900">{totalSchemes}</p>
                     <p className="text-xs text-slate-400 mt-0.5">across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
-                  </div>
-                </div>
-
-                {/* Charts Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* 6-Month Growth */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">6-Month Growth</p>
-                    {(analysis.historical_valuations || []).length > 0 ? (
-                      <ResponsiveContainer width="100%" height={150}>
-                        <AreaChart data={analysis.historical_valuations} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <XAxis dataKey="month_year" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                          <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} width={36} />
-                          <RechartsTooltip
-                            contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
-                            formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, 'Value']}
-                          />
-                          <Area type="monotone" dataKey="valuation" stroke="#3b82f6" strokeWidth={2} fill="url(#growthGrad)" dot={false} />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No historical data</div>
-                    )}
-                  </div>
-
-                  {/* Allocation Donut */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Allocation</p>
-                    {accounts.length > 0 ? (() => {
-                      const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
-                      const total = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
-                      const pieData = accounts.map((a: any) => ({ name: a.type, value: a.value || 0 }));
-                      return (
-                        <div className="flex items-center gap-4">
-                          <PieChart width={130} height={130}>
-                            <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={3} dataKey="value">
-                              {pieData.map((_: any, idx: number) => (
-                                <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <RechartsTooltip formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, '']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                          </PieChart>
-                          <div className="flex flex-col gap-2 flex-1">
-                            {accounts.map((a: any, idx: number) => {
-                              const pct = total > 0 ? ((a.value / total) * 100).toFixed(1) : '0.0';
-                              return (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                                  <span className="text-xs text-slate-600 flex-1 leading-tight">{a.type}</span>
-                                  <span className="text-xs font-bold text-slate-700">{pct}%</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })() : (
-                      <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No allocation data</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Bottom Row: Accounts + Top Funds */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Accounts */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Accounts</p>
-                    <div className="space-y-2">
-                      {(() => {
-                        const COLORS_ACC = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
-                        const total = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
-                        return accounts.map((acc: any, idx: number) => {
-                          const initials = (acc.type || '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
-                          const pct = total > 0 ? ((acc.value / total) * 100).toFixed(1) : '0.0';
-                          const bg = COLORS_ACC[idx % COLORS_ACC.length];
-                          return (
-                            <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: bg }}>
-                                {initials}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-slate-800 leading-tight truncate">{acc.type}</p>
-                                <p className="text-[10px] text-slate-400 leading-tight truncate">{acc.count} scheme{acc.count !== 1 ? 's' : ''}{acc.details ? ` · ${acc.details}` : ''}</p>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="text-xs font-bold text-slate-800">{formatLakh(acc.value || 0)}</p>
-                                <p className="text-[10px] text-slate-400">{pct}%</p>
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  </div>
-
-                  {/* Top 3 Mutual Funds */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Top 3 Mutual Funds</p>
-                    <div className="space-y-2">
-                      {(() => {
-                        const RANK_COLORS = ['#3b82f6', '#10b981', '#f59e0b'];
-                        const sorted = [...(analysis.mf_snapshot || [])]
-                          .filter((m: any) => m.invested_amount > 0)
-                          .sort((a: any, b: any) => {
-                            const rA = a.invested_amount > 0 ? (a.unrealised_profit_loss / a.invested_amount) : 0;
-                            const rB = b.invested_amount > 0 ? (b.unrealised_profit_loss / b.invested_amount) : 0;
-                            return rB - rA;
-                          })
-                          .slice(0, 3);
-                        return sorted.map((mf: any, idx: number) => {
-                          const retPct = mf.invested_amount > 0 ? ((mf.unrealised_profit_loss / mf.invested_amount) * 100).toFixed(1) : '0.0';
-                          const isPos = mf.unrealised_profit_loss >= 0;
-                          const shortName = mf.scheme_name?.replace(/\s*-\s*(Direct|Regular)\s*(Growth|Plan)?/i, '').trim() ?? mf.scheme_name;
-                          return (
-                            <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
-                              <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0" style={{ backgroundColor: RANK_COLORS[idx] }}>
-                                {idx + 1}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-slate-800 leading-tight line-clamp-1">{shortName}</p>
-                                <p className="text-[10px] text-slate-400 leading-tight">{mf.fund_category}</p>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className={`text-xs font-bold ${isPos ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                  {isPos ? '+' : ''}{retPct}% return
-                                </p>
-                                <p className="text-[10px] text-slate-400">{formatLakh(mf.valuation || 0)}</p>
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
                   </div>
                 </div>
               </>
@@ -1264,26 +1079,166 @@ export function ReportView({ report }: ReportViewProps) {
                 </div>
               </div>
 
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+              {/* Dual Pie Charts */}
+              {(() => {
+                const renderPieLabel = ({ cx, cy, midAngle, outerRadius, value }: any) => {
+                  if (!value || value < 2) return null;
+                  const RADIAN = Math.PI / 180;
+                  const radius = outerRadius + 28;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      fill="#374151"
+                      textAnchor={x > cx ? "start" : "end"}
+                      dominantBaseline="central"
+                      fontSize={11}
+                      fontWeight={700}
+                    >
+                      {`${Number(value).toFixed(1)}%`}
+                    </text>
+                  );
+                };
+
+                const idealPieData = categories
+                  .map(c => ({ name: c, value: idealMap[c] || 0, color: CATEGORY_META[c]?.color || "#64748b" }))
+                  .filter(d => d.value > 0);
+
+                const actualPieData = categories
+                  .map(c => ({ name: c, value: parseFloat((actualMap[c] || 0).toFixed(2)), color: CATEGORY_META[c]?.color || "#64748b" }))
+                  .filter(d => d.value > 0);
+
+                return (
+                  <div className="px-6 pt-6 pb-2">
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Ideal Allocation Chart */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">
+                          Ideal Allocation
+                        </div>
+                        <ResponsiveContainer width="100%" height={240}>
+                          <PieChart>
+                            <Pie
+                              data={idealPieData}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={88}
+                              dataKey="value"
+                              label={renderPieLabel}
+                              labelLine={false}
+                              strokeWidth={2}
+                              stroke="#fff"
+                            >
+                              {idealPieData.map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip
+                              formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]}
+                              contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Current Allocation Chart */}
+                      <div className="flex flex-col items-center">
+                        <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">
+                          Current Allocation
+                        </div>
+                        <ResponsiveContainer width="100%" height={240}>
+                          <PieChart>
+                            <Pie
+                              data={actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={88}
+                              dataKey="value"
+                              label={actualPieData.length > 0 ? renderPieLabel : undefined}
+                              labelLine={false}
+                              strokeWidth={2}
+                              stroke="#fff"
+                            >
+                              {(actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]).map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip
+                              formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]}
+                              contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    {/* Shared Legend */}
+                    <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-1 mb-5">
+                      {categories.map(cat => (
+                        <div key={cat} className="flex items-center gap-1.5">
+                          <span
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }}
+                          />
+                          <span className="text-xs font-medium text-slate-600">{cat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Compact Category Comparison Table */}
+              <div className="border-t border-slate-100">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
-                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Actual</th>
-                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Ideal</th>
-                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Comparison</th>
+                    <tr className="bg-slate-50">
+                      <th className="px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
+                      <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Ideal</th>
+                      <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Actual</th>
+                      <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Deviation</th>
+                      <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {categories.map(cat => (
-                      <AssetCategoryRow
-                        key={cat}
-                        category={cat}
-                        actual={actualMap[cat] || 0}
-                        ideal={idealMap[cat] || 0}
-                      />
-                    ))}
+                    {categories.map(cat => {
+                      const actual = actualMap[cat] || 0;
+                      const ideal = idealMap[cat] || 0;
+                      const diff = actual - ideal;
+                      const absDiff = Math.abs(diff);
+                      const isOnTarget = absDiff < 1;
+                      const isOver = diff > 0;
+                      const statusColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
+                      const statusLabel = isOnTarget ? "On target" : isOver ? "Over" : "Under";
+                      return (
+                        <tr key={cat} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }}
+                              />
+                              <span className="font-semibold text-slate-700 text-sm">{cat}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 text-center text-sm text-slate-500 font-medium">{ideal.toFixed(0)}%</td>
+                          <td className="px-5 py-3 text-center text-sm font-bold text-slate-800">{actual.toFixed(2)}%</td>
+                          <td className="px-5 py-3 text-center text-sm font-semibold" style={{ color: isOnTarget ? "#64748b" : statusColor }}>
+                            {isOnTarget ? "—" : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`}
+                          </td>
+                          <td className="px-5 py-3 text-center">
+                            <span
+                              className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                              style={{ backgroundColor: `${statusColor}18`, color: statusColor }}
+                            >
+                              {statusLabel}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1733,14 +1688,14 @@ export function ReportView({ report }: ReportViewProps) {
                     })()}
 
                     <div className="grid grid-cols-1 gap-3">
-                      {/* Returns & Basic Stats */}
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-1 gap-2">
+                    {/* Returns & Basic Stats */}
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 gap-2">
 
-                        {/* Financial Metrics Section — from Scoring files */}
-                        {(() => {
-                          const sc = scoringRecords[mf.isin];
-                          if (!sc) return null;
+                      {/* Financial Metrics Section — from Scoring files */}
+                      {(() => {
+                        const sc = scoringRecords[mf.isin];
+                        if (!sc) return null;
 
                         const fmtNum = (v: any, decimals = 2) => v != null && v !== "" ? Number(v).toFixed(decimals) : "N/A";
                         const fmtVal = (v: any) => v != null && v !== "" ? String(v) : "N/A";
@@ -1891,10 +1846,10 @@ export function ReportView({ report }: ReportViewProps) {
                             })()}
                           </div>
                         );
-                        })()}
-                      </div>
+                      })()}
                     </div>
                   </div>
+                </div>
                 </motion.div>
               )}
             </div>
@@ -1937,8 +1892,6 @@ export function ReportView({ report }: ReportViewProps) {
                 <th className="px-3 py-2.5 text-center">Score</th>
                 <th className="px-3 py-2.5 text-right">Invested (₹)</th>
                 <th className="px-3 py-2.5 text-right">Valuation (₹)</th>
-                <th className="px-3 py-2.5 text-right">SIP Amount</th>
-                <th className="px-3 py-2.5 text-center w-28">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -1957,16 +1910,6 @@ export function ReportView({ report }: ReportViewProps) {
                 };
                 const ratingCls = pillStyle[rating] ?? "bg-slate-100 text-slate-500";
                 const rowBg = i % 2 === 0 ? "bg-white" : "bg-slate-50/30";
-                const action = actionSelections[mf.scheme_name] || "hold";
-                const sipAmt = sipAmounts[mf.scheme_name];
-                const actionStyles: Record<string, string> = {
-                  hold:   "bg-blue-50 text-blue-700 border-blue-200",
-                  switch: "bg-amber-50 text-amber-700 border-amber-200",
-                  merge:  "bg-violet-50 text-violet-700 border-violet-200",
-                  sell:   "bg-rose-50 text-rose-700 border-rose-200",
-                };
-                const actionCls = actionStyles[action] ?? actionStyles.hold;
-                const remarks = manualRemarks[mf.scheme_name] || "";
                 return (
                   <Fragment key={i}>
                     {/* Line 1 — data row */}
@@ -2011,49 +1954,6 @@ export function ReportView({ report }: ReportViewProps) {
                           ? `₹${mf.valuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                           : "—"}
                       </td>
-                      {/* SIP Amount */}
-                      <td className="px-3 py-2.5 text-right align-top">
-                        {sipAmt != null ? (
-                          <span className="font-mono text-slate-700">₹{sipAmt.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                        ) : (
-                          <span className="text-slate-300 text-[10px]">—</span>
-                        )}
-                      </td>
-                      {/* Action */}
-                      <td className="px-3 py-2.5 text-center align-top">
-                        <select
-                          value={action}
-                          onChange={(e) => setActionSelections(prev => {
-                            const next = { ...prev, [mf.scheme_name]: e.target.value };
-                            localStorage.setItem(`fin_actions_${report.id}`, JSON.stringify(next));
-                            return next;
-                          })}
-                          className={`text-[10px] font-bold border rounded px-1.5 py-1 cursor-pointer uppercase tracking-wide focus:outline-none ${actionCls}`}
-                          data-testid={`action-select-${i}`}
-                        >
-                          <option value="hold">Hold</option>
-                          <option value="switch">Switch</option>
-                          <option value="merge">Merge</option>
-                          <option value="sell">Sell</option>
-                        </select>
-                      </td>
-                    </tr>
-                    {/* Line 2 — remarks row */}
-                    <tr key={`${i}-remarks`} className={`${rowBg} border-b border-slate-200`}>
-                      <td className="px-3 pb-2 text-slate-300 text-[9px] font-mono align-top pt-0">{/* empty */}</td>
-                      <td colSpan={7} className="px-3 pb-2.5 pt-0">
-                        <div className="flex items-start gap-2">
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-300 mt-1.5 shrink-0">Remarks</span>
-                          <input
-                            type="text"
-                            placeholder="Add notes, target fund for switch, reason for action…"
-                            value={remarks}
-                            onChange={(e) => setManualRemarks(prev => ({ ...prev, [mf.scheme_name]: e.target.value }))}
-                            className="flex-1 text-[11px] text-slate-600 placeholder-slate-300 bg-transparent border-b border-slate-100 focus:border-blue-300 focus:outline-none py-0.5"
-                            data-testid={`remarks-input-${i}`}
-                          />
-                        </div>
-                      </td>
                     </tr>
                   </Fragment>
                 );
@@ -2063,10 +1963,11 @@ export function ReportView({ report }: ReportViewProps) {
               <tr className="bg-slate-800 text-white font-bold text-[11px]">
                 <td colSpan={4} className="px-3 py-3 text-right text-[9px] uppercase tracking-widest text-slate-300">Grand Total</td>
                 <td className="px-3 py-3 text-right font-mono">₹{totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                <td className="px-3 py-3 text-right font-mono">₹{mfSnapshotValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                <td colSpan={2} className={`px-3 py-3 text-right font-mono ${totalUnrealised >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                  {totalUnrealised >= 0 ? "+" : ""}₹{totalUnrealised.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  {totalInvested > 0 && <span className="ml-2 text-[9px] opacity-70">({totalUnrealised >= 0 ? "+" : ""}{((totalUnrealised / totalInvested) * 100).toFixed(1)}%)</span>}
+                <td className="px-3 py-3 text-right font-mono">
+                  ₹{mfSnapshotValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className={`ml-2 text-[9px] ${totalUnrealised >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    ({totalUnrealised >= 0 ? "+" : ""}{((totalUnrealised / (totalInvested || 1)) * 100).toFixed(1)}%)
+                  </span>
                 </td>
               </tr>
             </tfoot>
@@ -2074,359 +1975,6 @@ export function ReportView({ report }: ReportViewProps) {
         </div>
       </motion.div>
 
-      {/* Historical Performance Chart */}
-      {analysis.historical_valuations && analysis.historical_valuations.length > 0 && (
-        <motion.div variants={item} className="bg-[#f5f0e8] rounded-2xl border border-slate-200 overflow-hidden p-6">
-          {(() => {
-            const hvs = analysis.historical_valuations;
-            const n = hvs.length;
-            const firstVal = hvs[0].valuation;
-            const lastVal = hvs[n - 1].valuation;
-            const peakEntry = hvs.reduce((best: any, h: any) => h.valuation > best.valuation ? h : best, hvs[0]);
-            const bestMonthEntry = hvs.slice(1).reduce((best: any, h: any) => (h.change_value || 0) > (best.change_value || 0) ? h : best, hvs[1] || hvs[0]);
-            const totalGrowthPct = ((lastVal - firstVal) / firstVal * 100).toFixed(1);
-            const totalGrowthAbs = lastVal - firstVal;
-
-            const fmtLakhs = (v: number) => `₹${(v / 100000).toFixed(1)}L`;
-            const fmtMonth = (my: string) => {
-              const parts = my.split(" ");
-              const mMap: Record<string, string> = { JAN:"Jan",FEB:"Feb",MAR:"Mar",APR:"Apr",MAY:"May",JUN:"Jun",JUL:"Jul",AUG:"Aug",SEP:"Sep",OCT:"Oct",NOV:"Nov",DEC:"Dec" };
-              return `${mMap[parts[0]] || parts[0]} ${(parts[1] || "").slice(2)}`;
-            };
-
-            const totalInvested = (analysis.mf_snapshot || []).reduce((acc: number, mf: any) => acc + (mf.invested_amount || 0), 0);
-            const investedStart = Math.min(firstVal * 0.92, totalInvested * 0.75);
-
-            const chartData = hvs.map((h: any, i: number) => ({
-              ...h,
-              label: fmtMonth(h.month_year),
-              investedAmount: investedStart + (totalInvested - investedStart) * (i / Math.max(n - 1, 1)),
-            }));
-
-            const dateRange = `${fmtMonth(hvs[0].month_year)} ${hvs[0].month_year.split(" ")[1]} — ${fmtMonth(hvs[n-1].month_year)} ${hvs[n-1].month_year.split(" ")[1]} · ${n} months`;
-
-            return (
-              <>
-                {/* Header */}
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-emerald-500" />
-                      Historical portfolio trend
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{dateRange}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-emerald-50 text-emerald-600 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-100">
-                      +{fmtLakhs(totalGrowthAbs)} growth this period
-                    </span>
-                  </div>
-                </div>
-
-                {/* Summary stat cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                  <div className="bg-white rounded-xl p-4 border border-slate-100">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Peak Value</div>
-                    <div className="text-xl font-bold text-slate-800">{fmtLakhs(peakEntry.valuation)}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{fmtMonth(peakEntry.month_year)} {peakEntry.month_year.split(" ")[1]}</div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 border border-slate-100">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Starting Value</div>
-                    <div className="text-xl font-bold text-slate-800">{fmtLakhs(firstVal)}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{fmtMonth(hvs[0].month_year)} {hvs[0].month_year.split(" ")[1]}</div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 border border-slate-100">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total Growth</div>
-                    <div className="text-xl font-bold text-emerald-500">+{totalGrowthPct}%</div>
-                    <div className="text-xs text-emerald-400 mt-0.5">+{fmtLakhs(totalGrowthAbs)}</div>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 border border-slate-100">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Best Month</div>
-                    <div className="text-xl font-bold text-slate-800">{fmtMonth(bestMonthEntry.month_year)} {bestMonthEntry.month_year.split(" ")[1]}</div>
-                    <div className="text-xs text-emerald-500 mt-0.5">+{fmtLakhs(bestMonthEntry.change_value || 0)} jump</div>
-                  </div>
-                </div>
-
-                {/* Chart card */}
-                <div className="bg-white rounded-xl border border-slate-100 p-5">
-                  {/* Legend */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-5 text-xs text-slate-500">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-sm bg-blue-500 inline-block" />
-                        Portfolio value
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block" />
-                        Invested amount
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-300 font-medium">Hover bars for details</span>
-                  </div>
-
-                  <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 10, bottom: 5 }}>
-                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-                        <XAxis
-                          dataKey="label"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 10, fill: '#94a3b8' }}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 10, fill: '#94a3b8' }}
-                          tickFormatter={(val) => `₹${(val / 100000).toFixed(0)}L`}
-                          width={40}
-                        />
-                        <RechartsTooltip
-                          cursor={{ fill: '#f8fafc' }}
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const d = payload[0]?.payload;
-                              return (
-                                <div className="bg-white border border-slate-100 rounded-xl shadow-lg p-3 text-xs">
-                                  <p className="font-bold text-slate-700 mb-2">{d.month_year}</p>
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-sm bg-blue-500 inline-block flex-shrink-0" />
-                                      <span className="text-slate-500">Portfolio:</span>
-                                      <span className="font-bold text-slate-800">{fmtLakhs(d.valuation)}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block flex-shrink-0" />
-                                      <span className="text-slate-500">Invested:</span>
-                                      <span className="font-bold text-slate-800">{fmtLakhs(d.investedAmount)}</span>
-                                    </div>
-                                    {d.change_percentage != null && (
-                                      <div className={`font-semibold mt-1 ${d.change_percentage >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                        {d.change_percentage >= 0 ? '▲' : '▼'} {Math.abs(d.change_percentage)}% vs prev
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Bar dataKey="valuation" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={32} />
-                        <Line
-                          type="monotone"
-                          dataKey="investedAmount"
-                          stroke="#34d399"
-                          strokeWidth={2}
-                          dot={{ r: 3, fill: "#34d399", strokeWidth: 0 }}
-                          activeDot={{ r: 5, fill: "#34d399" }}
-                        />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </>
-            );
-          })()}
-        </motion.div>
-      )}
-
-      {/* Date Wise Investment Amount Section */}
-      <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 text-white bg-[#1457f5]">
-          <h3 className="text-lg font-bold">Date Wise Investment Amount</h3>
-        </div>
-        
-        <div className="p-6 space-y-8">
-          {(() => {
-            const transactions = analysis.transactions || [];
-            
-            // Build a repeat-count map: "scheme||amount" -> count of occurrences
-            // Used to detect genuine SIPs (same scheme + same amount appearing 2+ times)
-            const repeatMap: Record<string, number> = {};
-            transactions.forEach((tx: any) => {
-              if (!tx.scheme_name || !tx.amount) return;
-              const type = (tx.type || "").toUpperCase();
-              if (type === "SIP" || type === "PURCHASE") {
-                const key = `${tx.scheme_name}||${Math.round(tx.amount)}`;
-                repeatMap[key] = (repeatMap[key] || 0) + 1;
-              }
-            });
-
-            const isRepeatingSip = (tx: any) => {
-              const key = `${tx.scheme_name}||${Math.round(tx.amount)}`;
-              return (repeatMap[key] || 0) >= 2;
-            };
-
-            const categorize = (type: string, tx: any) => {
-              const t = type.toLowerCase().trim();
-              // Genuine SIP: explicitly tagged as SIP by AI, OR repeating same amount for same scheme
-              if (t === "sip" || (t === "purchase" && isRepeatingSip(tx))) return "SIP";
-              // Lumpsum: one-time purchase → exclude from SIP section
-              if (t === "purchase") return null;
-              if (t === "swp" || ["systematic withdrawal", "redemption"].some(k => t.includes(k))) return "SWP";
-              // STP: switch-out / transfer-out (STP-IN is NOT a SIP)
-              if (["stp-out", "stp", "switch out", "systematic transfer"].some(k => t.includes(k)) || t === "stp-in") return "STP";
-              return null;
-            };
-
-            const sections = {
-              "STP (Systematic Transfer Plan)": [] as any[],
-              "SIP (Systematic Investment Plan)": [] as any[],
-              "SWP (Systematic Withdrawal Plan)": [] as any[]
-            };
-
-            // Build scheme -> fund_category lookup for fallback detection on older data
-            const fundCategoryMap: Record<string, string> = {};
-            (analysis.mf_snapshot || []).forEach((mf: any) => {
-              if (mf.scheme_name) fundCategoryMap[mf.scheme_name] = (mf.fund_category || "").toLowerCase();
-            });
-
-            transactions.forEach((tx: any) => {
-              const rawType = (tx.type || "").toLowerCase().trim();
-              const category = categorize(rawType, tx);
-
-              if (category === "STP") {
-                // Exclude STP-IN (money arriving into equity fund — shown in SIP section if recurring)
-                if (rawType === "stp-in") return;
-                // Old data (plain "stp"): fall back to fund_category — equity funds are switch-in destinations
-                if (rawType === "stp") {
-                  const fundCat = fundCategoryMap[tx.scheme_name] || "";
-                  if (fundCat && fundCat !== "debt") return;
-                }
-                sections["STP (Systematic Transfer Plan)"].push(tx);
-              } else if (category === "SIP") sections["SIP (Systematic Investment Plan)"].push(tx);
-              else if (category === "SWP") sections["SWP (Systematic Withdrawal Plan)"].push(tx);
-            });
-
-            const parseDate = (dateStr: string): number => {
-              if (!dateStr) return 0;
-              const parts = dateStr.split(/[-/]/);
-              if (parts.length === 3) {
-                const monthMap: Record<string, number> = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
-                const day = parseInt(parts[0]);
-                const monthRaw = parts[1];
-                const year = parseInt(parts[2]);
-                const month = isNaN(parseInt(monthRaw)) ? (monthMap[monthRaw.toLowerCase().slice(0,3)] ?? 0) : parseInt(monthRaw) - 1;
-                return new Date(year, month, day).getTime();
-              }
-              return new Date(dateStr).getTime() || 0;
-            };
-
-            return Object.entries(sections).map(([title, items]) => {
-              const isSTP = title.startsWith("STP");
-              const isSIP = title.startsWith("SIP");
-
-              let filteredItems = items;
-
-              if (isSTP && items.length > 0) {
-                const grouped: Record<string, any> = {};
-                items.forEach((tx: any) => {
-                  const sourceScheme = tx.scheme_name || "unknown";
-                  const switchTo = tx.switch_to || tx.to_scheme_name || tx.destination_scheme_name || tx.target_scheme_name || "";
-                  const amount = Number(tx.stp_amount ?? tx.amount ?? 0);
-                  const dateKey = tx.date_range || tx.date || "N/A";
-                  const key = `${sourceScheme}||${switchTo}||${amount}||${dateKey}`;
-                  if (!grouped[key]) {
-                    grouped[key] = {
-                      ...tx,
-                      source_scheme: sourceScheme,
-                      switch_to: switchTo,
-                      stp_amount: amount,
-                      total_amount: amount,
-                      date_display: dateKey
-                    };
-                  } else {
-                    grouped[key].total_amount += amount;
-                  }
-                });
-                filteredItems = Object.values(grouped).sort((a: any, b: any) => parseDate(b.date_display || b.date) - parseDate(a.date_display || a.date));
-              }
-
-              if (isSIP && items.length > 0) {
-                // Keep only the single most-recent entry per scheme
-                const latestByScheme: Record<string, any> = {};
-                items.forEach((tx: any) => {
-                  const key = tx.scheme_name || "unknown";
-                  const ts = parseDate(tx.date);
-                  if (!latestByScheme[key] || ts > parseDate(latestByScheme[key].date)) {
-                    latestByScheme[key] = tx;
-                  }
-                });
-                filteredItems = Object.values(latestByScheme);
-              }
-              
-              const totalAmount = filteredItems.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
-              const stpTotalAmount = filteredItems.reduce((sum: number, tx: any) => sum + Number(tx.total_amount || tx.amount || 0), 0);
-
-              return (
-                <div key={title} className="space-y-4">
-                  <h4 className="text-md font-bold text-slate-800 border-l-4 border-primary pl-3">{title}</h4>
-                  <div className="overflow-x-auto border border-slate-100 rounded-xl">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-50 text-slate-500 font-medium">
-                        <tr>
-                          <th className="px-6 py-3">Date</th>
-                          <th className="px-6 py-3">Scheme Name</th>
-                          {isSTP && <th className="px-6 py-3">Switch To</th>}
-                          {isSTP && <th className="px-6 py-3 text-right">STP Amount</th>}
-                          <th className="px-6 py-3 text-right">Total Amount in ₹</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {filteredItems.length > 0 ? (
-                          filteredItems.map((item: any, idx: number) => {
-                            const switchTo = item.switch_to || item.to_scheme_name || item.destination_scheme_name || item.target_scheme_name || "—";
-                            const sourceScheme = item.source_scheme || item.scheme_name || "N/A";
-                            const stpAmount = item.stp_amount ?? item.amount ?? 0;
-                            const totalDisplay = isSTP ? (item.total_amount ?? item.amount ?? stpAmount) : (item.amount ?? 0);
-                            const dateDisplay = item.date_display || item.date_range || item.date || "N/A";
-                            return (
-                              <tr key={idx} className="hover:bg-slate-50/50">
-                                <td className="px-6 py-3 text-slate-500 font-medium whitespace-nowrap">
-                                  {dateDisplay}
-                                </td>
-                                <td className="px-6 py-3 text-slate-700">{sourceScheme}</td>
-                                {isSTP && <td className="px-6 py-3 text-slate-700">{switchTo}</td>}
-                                {isSTP && (
-                                  <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
-                                    ₹{Number(stpAmount || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                  </td>
-                                )}
-                                <td className="px-6 py-3 text-right font-mono font-bold text-slate-900">
-                                  ₹{Number(totalDisplay || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        ) : (
-                          <tr>
-                            <td colSpan={isSTP ? 5 : 3} className="px-6 py-8 text-center text-slate-400 italic">
-                              No entries found for this category
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                      {filteredItems.length > 0 && (
-                        <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
-                          <tr>
-                            <td colSpan={isSTP ? 4 : 2} className="px-6 py-3 text-right text-slate-600 uppercase tracking-wider text-[10px]">
-                              {isSTP ? "STP Total" : `Total ${title.split(' ')[0]} Amount`}
-                            </td>
-                            <td className="px-6 py-3 text-right font-mono text-slate-900">
-                              ₹{(isSTP ? stpTotalAmount : totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </td>
-                          </tr>
-                        </tfoot>
-                      )}
-                    </table>
-                  </div>
-                </div>
-              );
-            });
-          })()}
-        </div>
-      </motion.div>
 
     </motion.div>
     </div>
