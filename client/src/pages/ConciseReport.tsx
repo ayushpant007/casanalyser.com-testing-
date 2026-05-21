@@ -620,10 +620,12 @@ export default function ConciseReport() {
           el.style.setProperty("padding", "32px", "important");
           el.style.setProperty("width", `${CAPTURE_WIDTH - 64}px`, "important");
           el.style.setProperty("max-width", "none", "important");
-          // Remove all overflow clipping so nothing gets cut off
+
           el.querySelectorAll<HTMLElement>("*").forEach(child => {
             const cs = doc.defaultView?.getComputedStyle(child);
             if (!cs) return;
+
+            // Fix overflow clipping
             if (cs.overflow === "hidden" || cs.overflow === "scroll" || cs.overflow === "auto") {
               child.style.setProperty("overflow", "visible", "important");
             }
@@ -633,7 +635,40 @@ export default function ConciseReport() {
             if (cs.overflowY === "hidden" || cs.overflowY === "scroll" || cs.overflowY === "auto") {
               child.style.setProperty("overflow-y", "visible", "important");
             }
+
+            // Force-write all flex/grid layout properties so html2canvas sees them
+            if (cs.display === "flex" || cs.display === "inline-flex") {
+              child.style.setProperty("display", cs.display, "important");
+              child.style.setProperty("flex-direction", cs.flexDirection, "important");
+              child.style.setProperty("align-items", cs.alignItems, "important");
+              child.style.setProperty("justify-content", cs.justifyContent, "important");
+              child.style.setProperty("flex-wrap", cs.flexWrap, "important");
+              child.style.setProperty("gap", cs.gap, "important");
+            }
+
+            // Fix badge/pill vertical alignment — spans with rounded-full lose centering in html2canvas
+            if (
+              child.tagName === "SPAN" &&
+              (child.classList.contains("rounded-full") || child.classList.contains("rounded-lg"))
+            ) {
+              child.style.setProperty("display", "inline-block", "important");
+              child.style.setProperty("line-height", "1.6", "important");
+              child.style.setProperty("vertical-align", "middle", "important");
+              child.style.setProperty("text-align", "center", "important");
+            }
+
+            // Ensure text nodes in flex children have explicit line-height
+            if (cs.display === "flex" || cs.display === "inline-flex") {
+              Array.from(child.children).forEach((fc) => {
+                const fce = fc as HTMLElement;
+                const fcs = doc.defaultView?.getComputedStyle(fce);
+                if (fcs && fcs.lineHeight === "normal") {
+                  fce.style.setProperty("line-height", "1.4", "important");
+                }
+              });
+            }
           });
+
           el.querySelectorAll<HTMLElement>("button, [role='button'], .no-print").forEach(n => { n.style.display = "none"; });
         },
       } as any);
