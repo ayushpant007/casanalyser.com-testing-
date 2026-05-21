@@ -224,11 +224,8 @@ export default function ConciseReport() {
 
   const totalInvested = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.invested_amount || 0), 0), [mfSnapshot]);
   const totalValuation = useMemo(() => {
-    const accounts: any[] = analysis.account_summaries || [];
-    const accountsTotal = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
-    if (accountsTotal > 0) return accountsTotal;
     return mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
-  }, [analysis.account_summaries, mfSnapshot]);
+  }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.unrealised_profit_loss || 0), 0), [mfSnapshot]);
   const recommendedOptions = useMemo(() => {
     const categories = Array.from(new Set(fundMasterRows.map((r: { category: string }) => r.category))).sort();
