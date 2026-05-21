@@ -1561,24 +1561,6 @@ export default function ConciseReport() {
             <span className="hidden sm:inline">Back to Full Report</span>
           </button>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDarkMode(d => !d)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
-              title="Toggle dark/light mode"
-            >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-slate-400" />}
-            </button>
-            <Button
-              onClick={downloadExcel}
-              disabled={isExporting}
-              variant="outline"
-              className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 px-3 sm:px-4"
-              data-testid="button-download-excel"
-            >
-              {isExporting ? <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 sm:mr-2" />}
-              <span className="hidden sm:inline">{isExporting ? "Exporting..." : "Excel"}</span>
-            </Button>
             <Button
               onClick={downloadPDF}
               disabled={isDownloading}
