@@ -540,11 +540,8 @@ export function ReportView({ report }: ReportViewProps) {
 
   const totalInvested = useMemo(() => mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.invested_amount || 0), 0), [mfSnapshot]);
   const totalValuation = useMemo(() => {
-    const accounts: any[] = (analysis as any).account_summaries || [];
-    const accountsTotal = accounts.reduce((s: number, a: any) => s + (a.value || 0), 0);
-    if (accountsTotal > 0) return accountsTotal;
     return mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.valuation || 0), 0);
-  }, [(analysis as any).account_summaries, mfSnapshot]);
+  }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.unrealised_profit_loss || 0), 0), [mfSnapshot]);
   const mfSnapshotValuation = useMemo(() => mfSnapshot.reduce((acc: number, curr: any) => acc + (curr.valuation || 0), 0), [mfSnapshot]);
 
