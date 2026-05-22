@@ -3,7 +3,7 @@ import { useReport } from "@/hooks/use-reports";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ArrowLeft, Calendar, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Shield, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw } from "lucide-react";
+import { Download, Loader2, ArrowLeft, Calendar, CalendarDays, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Shield, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, Area, AreaChart } from "recharts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2 } from "lucide-react";
@@ -2729,6 +2729,21 @@ export default function ConciseReport() {
                   >
                     <Phone className="w-4 h-4 text-[#33f289]" />
                     +91 93511 04008
+                  </a>
+                  <a
+                    href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-[200px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] hover:shadow-xl"
+                    style={{
+                      background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 8px 24px -6px rgba(99, 102, 241, 0.5)",
+                    }}
+                    data-testid="link-cta-calendly"
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    Book a Free Meeting
                   </a>
                 </div>
 
