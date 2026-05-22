@@ -106,6 +106,13 @@ export default function Home() {
     const registered = localStorage.getItem("finanalyze_user_registered");
     if (!registered) {
       setIsRegistered(false);
+      const t = setTimeout(() => setShowRegistration(true), 400);
+      return () => clearTimeout(t);
+    }
+    const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
+    if (!onboardingSeen) {
+      const t = setTimeout(() => setShowOnboarding(true), 400);
+      return () => clearTimeout(t);
     }
   }, []);
 
