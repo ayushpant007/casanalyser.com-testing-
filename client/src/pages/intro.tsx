@@ -413,46 +413,11 @@ export default function Intro() {
             .
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
-            className="mt-6 text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
-            style={{ color: "rgba(226,232,240,0.95)" }}
-            data-testid="text-intro-subheadline"
-          >
-            Upload your CAS (Consolidated Account Statement — your full
-            investment report). We turn it into simple insights like{" "}
-            <span className="text-white font-semibold">where your money is</span>,{" "}
-            <span className="text-white font-semibold">risks</span>, and{" "}
-            <span className="text-white font-semibold">hidden issues</span> —
-            instantly.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-4 inline-flex items-center gap-2 text-sm md:text-base px-4 py-2 rounded-full border"
-            style={{
-              background: "rgba(15,23,42,0.7)",
-              borderColor: "rgba(96,165,250,0.3)",
-              color: "rgba(226,232,240,0.95)",
-            }}
-            data-testid="text-cas-helper"
-          >
-            <HelpCircle className="w-4 h-4 text-blue-300" />
-            <span>
-              <span className="font-bold text-white">CAS</span> = All your
-              mutual funds + stocks in one PDF
-            </span>
-          </motion.div>
-
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.65, ease: "easeOut" }}
+            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
             className="mt-9 flex flex-col items-center gap-3"
           >
             <ShinyButton
@@ -462,78 +427,6 @@ export default function Intro() {
               Upload CAS &amp; See My Portfolio
               <ArrowRight className="w-4 h-4" />
             </ShinyButton>
-
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-              {[
-                { icon: Eye, label: "No signup", tint: "#60a5fa" },
-                { icon: Lock, label: "No data stored", tint: "#34d399" },
-                { icon: Activity, label: `~${seconds}s analysis`, tint: "#c084fc" },
-              ].map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <div
-                    key={i}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-xl"
-                    style={{
-                      background: "rgba(15,23,42,0.6)",
-                      borderColor: "rgba(96,165,250,0.25)",
-                      color: "#e2e8f0",
-                    }}
-                    data-testid={`hero-trust-${i}`}
-                  >
-                    <Icon className="w-3.5 h-3.5" style={{ color: s.tint }} />
-                    {s.label}
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* 3-step flow */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.85 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-4"
-            data-testid="flow-3-step"
-          >
-            {[
-              { icon: Upload, label: "Upload", tint: "#60a5fa" },
-              { icon: BarChart3, label: "Analyze", tint: "#c084fc" },
-              { icon: Lightbulb, label: "Get Insights", tint: "#34d399" },
-            ].map((s, i, arr) => {
-              const Icon = s.icon;
-              return (
-                <div key={i} className="flex items-center gap-2 md:gap-4">
-                  <div
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border backdrop-blur-xl"
-                    style={{
-                      background: "rgba(15,23,42,0.65)",
-                      borderColor: `${s.tint}55`,
-                    }}
-                  >
-                    <span
-                      className="w-7 h-7 rounded-lg flex items-center justify-center"
-                      style={{
-                        background: `${s.tint}25`,
-                        border: `1px solid ${s.tint}66`,
-                      }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: s.tint }} />
-                    </span>
-                    <span className="text-sm md:text-base font-semibold text-white">
-                      {s.label}
-                    </span>
-                  </div>
-                  {i < arr.length - 1 && (
-                    <ArrowRight
-                      className="w-4 h-4 md:w-5 md:h-5"
-                      style={{ color: "rgba(148,163,184,0.7)" }}
-                    />
-                  )}
-                </div>
-              );
-            })}
           </motion.div>
 
           {/* Scroll prompt */}
