@@ -2128,14 +2128,14 @@ export default function ConciseReport() {
                     </div>
                   </div>
                   {/* Allocation Comparison Table */}
-                  <div className="px-4 sm:px-6 pt-5 pb-6">
-                    <div className="overflow-hidden rounded-2xl border border-slate-200" style={{ boxShadow: "0 2px 16px 0 rgba(59,130,246,0.06)" }}>
-                      {/* Table header */}
-                      <div className="grid grid-cols-[1fr_120px_120px_90px] bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
+                  <div className="px-3 sm:px-6 pt-4 pb-5">
+                    <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(59,130,246,0.06)" }}>
+                      {/* Header */}
+                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
                       </div>
                       {/* Rows */}
                       {allCategories.map((cat, idx) => {
@@ -2151,35 +2151,38 @@ export default function ConciseReport() {
                         return (
                           <div
                             key={cat}
-                            className={`grid grid-cols-[1fr_120px_120px_90px] px-4 py-3.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                            className={`grid grid-cols-[2fr_1fr_1fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
                           >
                             {/* Category */}
-                            <div className="flex items-center gap-3 min-w-0">
-                              <span className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: color }}>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+                                style={{ backgroundColor: color }}
+                              >
                                 {cat.slice(0, 2).toUpperCase()}
                               </span>
-                              <span className="font-semibold text-slate-800 text-sm truncate">{cat}</span>
+                              <span className="font-semibold text-slate-800 text-xs sm:text-sm truncate">{cat}</span>
                             </div>
-                            {/* Ideal bar */}
-                            <div className="flex flex-col items-center gap-1 px-2">
-                              <span className="text-sm font-bold text-slate-600">{ideal > 0 ? `${ideal.toFixed(1)}%` : "—"}</span>
-                              <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                <div className="h-full rounded-full opacity-50" style={{ width: `${Math.min(ideal, 100)}%`, backgroundColor: color }} />
+                            {/* Ideal */}
+                            <div className="flex flex-col items-center gap-1 px-1">
+                              <span className="text-xs sm:text-sm font-bold text-slate-600 tabular-nums">{ideal > 0 ? `${ideal.toFixed(1)}%` : "—"}</span>
+                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full opacity-40" style={{ width: `${Math.min(ideal, 100)}%`, backgroundColor: color }} />
                               </div>
                             </div>
-                            {/* Current bar */}
-                            <div className="flex flex-col items-center gap-1 px-2">
-                              <span className="text-sm font-bold" style={{ color: actual > 0 ? color : "#94a3b8" }}>
+                            {/* Current */}
+                            <div className="flex flex-col items-center gap-1 px-1">
+                              <span className="text-xs sm:text-sm font-bold tabular-nums" style={{ color: actual > 0 ? color : "#94a3b8" }}>
                                 {actual > 0 ? `${actual.toFixed(1)}%` : "—"}
                               </span>
-                              <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
                                 <div className="h-full rounded-full" style={{ width: `${Math.min(actual, 100)}%`, backgroundColor: color }} />
                               </div>
                             </div>
-                            {/* Status badge */}
+                            {/* Status */}
                             <div className="flex justify-center">
                               <span
-                                className="text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+                                className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap"
                                 style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusColor}33` }}
                               >
                                 {statusLabel}
