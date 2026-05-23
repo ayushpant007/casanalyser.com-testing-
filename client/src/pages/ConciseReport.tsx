@@ -1678,27 +1678,6 @@ export default function ConciseReport() {
                         </div>
                       </div>
 
-                      {/* Hero number */}
-                      <div className="text-right">
-                        <p className="text-2xl sm:text-3xl font-bold text-white leading-none" data-testid="text-hero-value">
-                          {formatLakh(totalValuation)}
-                        </p>
-                        <div
-                          className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
-                            isPositive
-                              ? 'bg-emerald-400/25 text-emerald-100 border-emerald-300/40'
-                              : 'bg-rose-400/25 text-rose-100 border-rose-300/40'
-                          }`}
-                          data-testid="badge-hero-return"
-                        >
-                          {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                          <span>
-                            {isPositive ? '+' : ''}
-                            {absoluteReturnPct.toFixed(2)}% · {isPositive ? '+' : '-'}
-                            {formatLakh(Math.abs(absoluteReturn))}
-                          </span>
-                        </div>
-                      </div>
                       {/* Health Gauge */}
                       <div className="hidden sm:block">
                         <HealthGauge score={healthScore} />
