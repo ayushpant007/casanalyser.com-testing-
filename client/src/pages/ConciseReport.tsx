@@ -2127,109 +2127,68 @@ export default function ConciseReport() {
                       )}
                     </div>
                   </div>
-                  {/* Dual Pie Charts */}
-                  {(() => {
-                    const renderPieLabel = ({ cx, cy, midAngle, outerRadius, value }: any) => {
-                      if (!value || value < 2) return null;
-                      const RADIAN = Math.PI / 180;
-                      const radius = outerRadius + 28;
-                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                      return (
-                        <text x={x} y={y} fill="#374151" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11} fontWeight={700}>
-                          {`${Number(value).toFixed(1)}%`}
-                        </text>
-                      );
-                    };
-                    const idealPieData = allCategories
-                      .map(c => ({ name: c, value: idealMap[c] || 0, color: CATEGORY_META[c]?.color || "#64748b" }))
-                      .filter(d => d.value > 0);
-                    const actualPieData = allCategories
-                      .map(c => ({ name: c, value: parseFloat((actMap[c] || 0).toFixed(2)), color: CATEGORY_META[c]?.color || "#64748b" }))
-                      .filter(d => d.value > 0);
-                    return (
-                      <div className="px-2 sm:px-6 pt-6 pb-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                          <div className="flex flex-col items-center">
-                            <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">Ideal Allocation</div>
-                            <ResponsiveContainer width="100%" height={240}>
-                              <PieChart>
-                                <Pie data={idealPieData} cx="50%" cy="50%" outerRadius={88} dataKey="value" label={renderPieLabel} labelLine={false} strokeWidth={2} stroke="#fff">
-                                  {idealPieData.map((entry) => (<Cell key={entry.name} fill={entry.color} />))}
-                                </Pie>
-                                <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
-                          <div className="flex flex-col items-center">
-                            <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">Current Allocation</div>
-                            <ResponsiveContainer width="100%" height={240}>
-                              <PieChart>
-                                <Pie
-                                  data={actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]}
-                                  cx="50%" cy="50%" outerRadius={88} dataKey="value"
-                                  label={actualPieData.length > 0 ? renderPieLabel : undefined}
-                                  labelLine={false} strokeWidth={2} stroke="#fff"
-                                >
-                                  {(actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]).map((entry) => (<Cell key={entry.name} fill={entry.color} />))}
-                                </Pie>
-                                <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                        {/* Shared Legend */}
-                        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-1 mb-5">
-                          {allCategories.map(cat => (
-                            <div key={cat} className="flex items-center gap-1.5">
-                              <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }} />
-                              <span className="text-xs font-medium text-slate-600">{cat}</span>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Allocation Comparison Table */}
+                  <div className="px-4 sm:px-6 pt-5 pb-6">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200" style={{ boxShadow: "0 2px 16px 0 rgba(59,130,246,0.06)" }}>
+                      {/* Table header */}
+                      <div className="grid grid-cols-[1fr_120px_120px_90px] bg-gradient-to-r from-slate-800 to-slate-700 px-4 py-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
                       </div>
-                    );
-                  })()}
-                  {/* Compact Category Comparison Table */}
-                  <div className="border-t border-slate-100 overflow-x-auto">
-                    <table className="w-full text-sm min-w-[360px]">
-                      <thead>
-                        <tr className="bg-slate-50">
-                          <th className="px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
-                          <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Deviation</th>
-                          <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {allCategories.map(cat => {
-                          const actual = actMap[cat] || 0;
-                          const ideal = idealMap[cat] || 0;
-                          const diff = actual - ideal;
-                          const isOnTarget = Math.abs(diff) < 1;
-                          const isOver = diff > 0;
-                          const statusColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
-                          const statusLabel = isOnTarget ? "On target" : isOver ? "Over" : "Under";
-                          return (
-                            <tr key={cat} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
-                              <td className="px-5 py-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: CATEGORY_META[cat]?.color || "#64748b" }} />
-                                  <span className="font-semibold text-slate-700 text-sm">{cat}</span>
-                                </div>
-                              </td>
-                              <td className="px-5 py-3 text-center text-sm font-semibold" style={{ color: isOnTarget ? "#64748b" : statusColor }}>
-                                {isOnTarget ? "—" : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`}
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>
-                                  {statusLabel}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                      {/* Rows */}
+                      {allCategories.map((cat, idx) => {
+                        const actual = actMap[cat] || 0;
+                        const ideal = idealMap[cat] || 0;
+                        const diff = actual - ideal;
+                        const isOnTarget = Math.abs(diff) < 1;
+                        const isOver = diff > 0;
+                        const color = CATEGORY_META[cat]?.color || "#64748b";
+                        const statusColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
+                        const statusLabel = isOnTarget ? "On Target" : isOver ? "Over" : "Under";
+                        const statusBg = isOnTarget ? "rgba(16,185,129,0.1)" : isOver ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)";
+                        return (
+                          <div
+                            key={cat}
+                            className={`grid grid-cols-[1fr_120px_120px_90px] px-4 py-3.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                          >
+                            {/* Category */}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: color }}>
+                                {cat.slice(0, 2).toUpperCase()}
+                              </span>
+                              <span className="font-semibold text-slate-800 text-sm truncate">{cat}</span>
+                            </div>
+                            {/* Ideal bar */}
+                            <div className="flex flex-col items-center gap-1 px-2">
+                              <span className="text-sm font-bold text-slate-600">{ideal > 0 ? `${ideal.toFixed(1)}%` : "—"}</span>
+                              <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full opacity-50" style={{ width: `${Math.min(ideal, 100)}%`, backgroundColor: color }} />
+                              </div>
+                            </div>
+                            {/* Current bar */}
+                            <div className="flex flex-col items-center gap-1 px-2">
+                              <span className="text-sm font-bold" style={{ color: actual > 0 ? color : "#94a3b8" }}>
+                                {actual > 0 ? `${actual.toFixed(1)}%` : "—"}
+                              </span>
+                              <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${Math.min(actual, 100)}%`, backgroundColor: color }} />
+                              </div>
+                            </div>
+                            {/* Status badge */}
+                            <div className="flex justify-center">
+                              <span
+                                className="text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+                                style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusColor}33` }}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                   {/* Category Wise Distribution */}
                   <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
