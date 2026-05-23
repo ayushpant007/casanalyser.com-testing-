@@ -2192,6 +2192,27 @@ export default function ConciseReport() {
                         );
                       })}
                     </div>
+                    {/* Dynamic insight line */}
+                    {(() => {
+                      const dominant = allCategories.reduce((a, b) => (actMap[a] || 0) > (actMap[b] || 0) ? a : b, allCategories[0]);
+                      const missing = allCategories.filter(c => (actMap[c] || 0) < 1 && (idealMap[c] || 0) > 0);
+                      if (!dominant) return null;
+                      return (
+                        <div
+                          className="mx-3 sm:mx-0 mt-3 px-4 py-3 rounded-xl flex items-start gap-2.5"
+                          style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+                        >
+                          <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Your portfolio is currently tilted towards{" "}
+                            <span className="font-semibold text-slate-800">{dominant}</span> with limited exposure to{" "}
+                            <span className="font-semibold text-slate-800">
+                              {missing.length > 0 ? missing.join(", ") : "other asset classes"}
+                            </span>. A more balanced allocation may help improve diversification and risk management.
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                   {/* Category Wise Distribution */}
                   <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
