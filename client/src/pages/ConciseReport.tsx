@@ -1680,7 +1680,6 @@ export default function ConciseReport() {
 
                       {/* Hero number */}
                       <div className="text-right">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-violet-200 mb-1">Current Value</p>
                         <p className="text-2xl sm:text-3xl font-bold text-white leading-none" data-testid="text-hero-value">
                           {formatLakh(totalValuation)}
                         </p>
