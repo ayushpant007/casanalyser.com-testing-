@@ -34,6 +34,7 @@ import allocationImg from "@assets/image_1776920279232.png";
 import categoryImg from "@assets/image_1776920296583.png";
 import snapshotImg from "@assets/image_1776920332583.png";
 import uploadImg from "@assets/image_1776920600846.png";
+import demoVideo from "@assets/VN20260515_154759_compressed.mp4";
 import { PieChart, Layers, Table2, UploadCloud, ChevronDown } from "lucide-react";
 
 function DemoVideo() {
@@ -88,7 +89,7 @@ function DemoVideo() {
         {/* Video element — NO click handler, overlays handle everything */}
         <video
           ref={videoRef}
-          src="/demo-compressed.mp4"
+          src={demoVideo}
           className="w-full block"
           playsInline
           loop
