@@ -2682,17 +2682,13 @@ export default function ConciseReport() {
                 <div className="mt-2 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 w-full max-w-2xl">
                   <a
                     href={(() => {
-                      const nav = analysis.summary?.net_asset_value;
-                      const formattedNav = nav
-                        ? `₹${Number(nav).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`
-                        : "—";
                       const msg = [
                         `Hi Financial Friend! 👋`,
                         ``,
                         `I just reviewed my portfolio analysis on CasAnalyser.`,
                         ``,
                         `Name: ${investorName || "—"}`,
-                        `Portfolio Value: ${formattedNav}`,
+                        ``,
                         `Risk Profile: ${report?.investorType || "—"} | Age Group: ${report?.ageGroup || "—"}`,
                         ``,
                         `I'd love to get a detailed advisory and rebalancing recommendations. Please connect with me!`,
