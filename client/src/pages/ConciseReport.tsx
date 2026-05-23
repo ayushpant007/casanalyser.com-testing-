@@ -2288,6 +2288,16 @@ export default function ConciseReport() {
                   </div>
                 ))}
               </div>
+              {/* SIP disclaimer */}
+              <div
+                className="mx-4 mb-4 mt-1 px-4 py-3 rounded-xl flex items-start gap-2.5"
+                style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+              >
+                <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Your SIP health score is only an initial assessment based on recent performance trends. A detailed consultation is recommended for comprehensive portfolio evaluation and rebalancing guidance.
+                </p>
+              </div>
             </div>
           )}
 
