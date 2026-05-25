@@ -2463,6 +2463,24 @@ export default function ConciseReport() {
                       </div>
                     </div>
                   )}
+                  {/* Performance disclaimer */}
+                  <div
+                    className="mx-5 mb-5 mt-2 px-4 py-3 rounded-xl flex items-start gap-2.5"
+                    style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+                  >
+                    <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      This is a concise performance check. For a detailed analysis and personalized report,{" "}
+                      <a
+                        href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-indigo-600 underline underline-offset-2"
+                      >
+                        book a free consultation
+                      </a>.
+                    </p>
+                  </div>
                 </div>
               </div>
             );
