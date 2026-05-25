@@ -169,17 +169,6 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
               </div>
             </div>
           )}
-          {scoring && (
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Financial Score</p>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                  <div className="h-2.5 rounded-full bg-violet-500" style={{ width: `${Math.min((scoring.totalScore / 40) * 100, 100)}%` }} />
-                </div>
-                <span className="text-sm font-bold text-violet-600">{scoring.totalScore}/40</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
