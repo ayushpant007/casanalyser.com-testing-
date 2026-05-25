@@ -162,11 +162,18 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
                         <div className="h-2 rounded-full transition-all" style={{ width: `${Math.min(Math.abs(cv) * 3, 100)}%`, backgroundColor: beating ? "#10b981" : "#ef4444" }} />
                       </div>
                       <span className={`text-[11px] font-bold w-12 text-right ${beating ? "text-emerald-600" : "text-rose-600"}`}>{cv > 0 ? "+" : ""}{cv.toFixed(2)}%</span>
-                      <span className="text-[10px] text-slate-400 w-12 text-right">BM:{bv.toFixed(1)}%</span>
+                      <span className="text-[10px] text-slate-400 w-12 text-right">
+                        {(bm[period] && bm[period] !== "N/A") ? `BM:${bv.toFixed(1)}%` : "BM:N/A"}
+                      </span>
                     </div>
                   );
                 })}
               </div>
+              {(["1y", "3y", "5y"] as const).every(p => !bm[p] || bm[p] === "N/A") && (
+                <p className="mt-2.5 text-[11px] text-slate-400 italic">
+                  Benchmark data is currently unavailable for this scheme at the moment.
+                </p>
+              )}
             </div>
           )}
         </div>
