@@ -149,7 +149,7 @@ Extract:
    - "net_asset_value" MUST equal the GRAND TOTAL of the "Market Value" / "Current Value" / "Valuation" column.
 2. Account-wise summary table: [{"type": string, "details": string, "count": number, "value": number}]
 3. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
-4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string}]
+4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string, "source": string}]
    - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" column value from the statement for each scheme.
    - "invested_amount" MUST be the value in the cost/invested column for that scheme — NOT the current/market value, NOT the P/L. Use the column whose header is one of:
        • "Cumulative Amount Invested (in INR)"   ← CDSL CAS (Mutual Fund Units Held / Consolidated Account Statement)
@@ -158,6 +158,20 @@ Extract:
      Do NOT confuse this with "Valuation (₹)", "Value (₹)", "Market Value", "Current Value", or any P/L column. In CDSL statements the Cumulative Amount Invested column appears BEFORE the Valuation column — pick the correct one strictly by header text, not by column position.
    - Extract EVERY row of that table without omission so the sum of invested_amount across all rows EXACTLY equals the GRAND TOTAL shown in that table's last row (e.g. CDSL "Grand Total" row).
    - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" column for that scheme.
+   - For regular CAS folio entries, set "source": "cas".
+   - ALSO scan any CDSL / NSDL Demat Holding Statement sections (tables with columns like ISIN, Security, Current Bal, Frozen Bal, Pledge Bal, Market Price / Face Value, Value ₹). For each row where the ISIN starts with "INF" (these are mutual funds held in Demat form), add an entry to mf_snapshot with:
+       • "scheme_name": value from the Security column
+       • "units": value from the Current Bal column (free balance, not frozen)
+       • "nav": value from the "Market Price / Face Value" column
+       • "invested_amount": 0 (cost basis is not available in Demat holdings)
+       • "valuation": value from the "Value (₹)" column (or units × nav if not available)
+       • "unrealised_profit_loss": 0
+       • "isin": the INF... ISIN
+       • "source": "demat"
+       • "fund_category": infer from scheme name (e.g. Equity, Debt, Hybrid)
+       • "fund_type": infer from scheme name
+       • "folio_no": ""
+     IGNORE rows where ISIN starts with "INE" (these are equity stocks, not mutual funds).
 5. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
    - Current Category Allocation (Equity, Debt, Hybrid, Others)
    - Comparison with Category Ratio (Current % vs Target % from CSV)

@@ -1,0 +1,110 @@
+Currently, our CAS analyzer only scans mutual fund folios directly available in the CAS statement. We now want to extend the logic to also detect and process mutual funds held inside Demat accounts (CDSL / NSDL holdings).
+
+# Requirement
+
+For the **CDSL / NSDL Holding Statement** section, if the Demat holdings contain mutual fund units, those mutual funds should also appear in the **Portfolio Snapshot / Concise Report**.
+
+However, Demat holdings can contain both:
+
+* Stocks / Equities
+* Mutual Funds (held in Demat form)
+
+So we need a filtering / lookup logic to identify only mutual fund ISINs.
+
+# Proposed Logic
+
+Use the ISIN prefix to classify securities:
+
+* ISINs starting with `INF...` → Treat as **Mutual Funds**
+* ISINs starting with `INE...` → Treat as **Stocks / Equities** (ignore in MF snapshot)
+
+# Example
+
+### Ignore this (Stock)
+
+`INE118H01025`
+BSE LIMITED # NEW EQUITY SHARES WITH FV RS 2/- AFTER CONSOLIDATION
+
+### Include this (Mutual Fund)
+
+`INF179KC1GL9`
+HDFC AMC LTD#HDFC MF-HDFC DEFENCE FUND-REGULAR-GROWTH
+
+So the system should only extract and process holdings where the ISIN starts with `INF`.
+
+---
+
+# Portfolio Snapshot Mapping
+
+For Demat Mutual Fund holdings, map the CAS holding table fields as follows:
+
+| Demat Holding Column        | Portfolio Snapshot Field |
+| --------------------------- | ------------------------ |
+| `Security`                  | `Scheme Name`            |
+| `Current Bal`               | `Units`                  |
+| `Market Price / Face Value` | `Current NAV`            |
+| `Value (₹)`                 | `Current Value`          |
+
+# Snapshot Calculation Logic
+
+### Example Record
+
+From Demat Holding:
+
+* Security = `HDFC AMC LTD#HDFC MF-HDFC DEFENCE FUND-REGULAR-GROWTH`
+* Current Bal = `9999.500`
+* Market Price / Face Value = `26.632`
+
+Now in Portfolio Snapshot show:
+
+| Field    | Value                                                 |
+| -------- | ----------------------------------------------------- |
+| Scheme   | HDFC AMC LTD#HDFC MF-HDFC DEFENCE FUND-REGULAR-GROWTH |
+| Units    | 9999.500                                              |
+| NAV      | Latest Current NAV (fetched using ISIN)               |
+| Invested | `--`                                                  |
+| Value    | `Units × Current NAV`                                 |
+
+Example:
+
+* Units = `9999.500`
+* Current NAV = `7.54`
+* Value = `9999.500 × 7.54`
+
+So the portfolio snapshot should dynamically calculate:
+
+```text
+Current Value = Units * Latest NAV
+```
+
+# Important Notes
+
+* Invested value is not available in Demat holdings, so always show:
+
+```text
+Invested = --
+```
+
+* NAV should preferably come from live/latest NAV lookup using ISIN mapping instead of directly using Face Value from the holding table.
+
+* These Demat mutual fund holdings should behave exactly like normal mutual fund folios inside the Portfolio Snapshot section.
+
+# Expected Final Behavior
+
+* Scan CDSL / NSDL holding statements
+* Detect Demat mutual fund holdings using ISIN prefix (`INF`)
+* Ignore stock holdings (`INE`)
+* Add valid Demat mutual funds into Portfolio Snapshot
+* Map:
+
+  * Security → Scheme
+  * Current Bal → Units
+  * Latest NAV via ISIN lookup
+  * Value = Units × NAV
+* Show Invested as `--`
+* Include these funds seamlessly along with regular MF folios in the snapshot UI
+
+Attached screenshots show:
+
+1. Current Portfolio Snapshot UI
+2. Raw CDSL/NSDL holding table structure for reference.

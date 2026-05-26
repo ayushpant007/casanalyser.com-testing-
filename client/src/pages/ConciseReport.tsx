@@ -112,8 +112,9 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
   const pv = (v: string | undefined) => parseFloat((v || "0").replace(/[^\d.-]/g, "") || "0");
   const bm = perf?.benchmark_returns || {};
   const cagr = perf?.cagr || {};
-  const pl = (fund.valuation || 0) - (fund.invested_amount || 0);
-  const plPct = fund.invested_amount > 0 ? (pl / fund.invested_amount) * 100 : 0;
+  const isDemat = fund.source === "demat" || !fund.invested_amount;
+  const pl = isDemat ? null : (fund.valuation || 0) - (fund.invested_amount || 0);
+  const plPct = (!isDemat && fund.invested_amount > 0) ? ((pl! / fund.invested_amount) * 100) : null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -122,16 +123,19 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
           <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-white" />
           </button>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-1">{fund.fund_category || "—"} · {fund.fund_type || "—"}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-1">
+            {fund.fund_category || "—"} · {fund.fund_type || "—"}
+            {isDemat && <span className="ml-2 px-1.5 py-0.5 rounded bg-white/15 text-[9px] font-bold tracking-wider">DEMAT</span>}
+          </p>
           <h3 className="text-sm font-bold text-white leading-tight pr-8">{fund.scheme_name}</h3>
           <p className="text-[10px] text-violet-300 mt-0.5 font-mono">{fund.isin}</p>
         </div>
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: "Invested", value: `₹${(fund.invested_amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: "text-slate-800" },
+              { label: "Invested", value: isDemat ? "—" : `₹${(fund.invested_amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: "text-slate-800" },
               { label: "Current Value", value: `₹${(fund.valuation || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: "text-slate-800" },
-              { label: `P/L (${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}%)`, value: `${pl >= 0 ? "+" : "-"}₹${Math.abs(pl).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, cls: pl >= 0 ? "text-emerald-600" : "text-rose-600" },
+              { label: plPct != null ? `P/L (${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}%)` : "P/L", value: pl != null ? `${pl >= 0 ? "+" : "-"}₹${Math.abs(pl).toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—", cls: pl != null ? (pl >= 0 ? "text-emerald-600" : "text-rose-600") : "text-slate-400" },
             ].map(item => (
               <div key={item.label} className="bg-slate-50 rounded-xl p-2.5 text-center border border-slate-100">
                 <p className="text-[9px] text-slate-400 font-semibold mb-1 uppercase tracking-wide">{item.label}</p>
@@ -2578,8 +2582,9 @@ export default function ConciseReport() {
                         const nav = mf.nav ?? (units > 0 && mf.valuation ? mf.valuation / units : 0);
                         const invested = mf.invested_amount ?? 0;
                         const value = mf.valuation ?? 0;
-                        const pl = value - invested;
-                        const plColor = pl >= 0 ? "text-emerald-600" : "text-rose-600";
+                        const isDemat = mf.source === "demat" || !mf.invested_amount;
+                        const pl = isDemat ? null : value - invested;
+                        const plColor = pl == null ? "text-slate-400" : pl >= 0 ? "text-emerald-600" : "text-rose-600";
                         const portfolioPct = totalValueSnap > 0 ? ((value / totalValueSnap) * 100).toFixed(1) : "0.0";
                         const hasPerf = !!storedPerformances[mf.isin];
                         return (
@@ -2593,17 +2598,20 @@ export default function ConciseReport() {
                               <div className="flex items-center gap-2">
                                 <div>
                                   <p className="font-semibold text-slate-800 text-xs leading-tight">{mf.scheme_name || "—"}</p>
-                                  {mf.fund_category && <p className="text-[10px] text-slate-400 mt-0.5">{mf.fund_category}</p>}
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    {mf.fund_category && <p className="text-[10px] text-slate-400">{mf.fund_category}</p>}
+                                    {isDemat && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-violet-100 text-violet-600">DEMAT</span>}
+                                  </div>
                                 </div>
                                 {hasPerf && <Eye className="w-3.5 h-3.5 text-violet-300 flex-shrink-0 ml-auto" />}
                               </div>
                             </td>
                             <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(units, 3)}</td>
                             <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(nav, 4)}</td>
-                            <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{inr(invested, 2)}</td>
+                            <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs">{isDemat ? <span className="text-slate-400">—</span> : inr(invested, 2)}</td>
                             <td className="px-4 py-3 text-right font-semibold text-slate-900 tabular-nums text-xs">{inr(value, 2)}</td>
                             <td className={`px-4 py-3 text-right font-semibold tabular-nums text-xs ${plColor}`}>
-                              {pl >= 0 ? "+" : "-"}{inr(Math.abs(pl), 2)}
+                              {pl == null ? "—" : `${pl >= 0 ? "+" : "-"}${inr(Math.abs(pl), 2)}`}
                             </td>
                             <td className="px-4 py-3 text-right text-xs">
                               <div className="flex items-center justify-end gap-2">
