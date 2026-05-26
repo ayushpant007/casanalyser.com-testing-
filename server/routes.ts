@@ -12,7 +12,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { insertUserSchema, insertContactMessageSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat/routes";
 import { registerImageRoutes } from "./replit_integrations/image/routes";
-import { fetchNavForScheme, fetchNavByISIN, findSchemeCode, searchSchemeCodes } from "./mfapi";
+import { fetchNavForScheme, fetchNavByISIN, findSchemeCode, findSchemeCodeByISIN, searchSchemeCodes } from "./mfapi";
 import { extractMetricsFromFactsheet } from "./factsheet";
 import { getMetricsFromJson } from "./json_factsheet";
 import { getBenchmarkReturns } from "./benchmarks";
@@ -306,10 +306,19 @@ ${text}`;
             nav = nums.length > 1 ? nums[1] : 0;
           }
 
-          const { fund_category, fund_type } = inferCategory(schemeName);
+          // If name extraction failed, look up scheme name from MFAPI
+          let resolvedName = schemeName;
+          if (!schemeName || schemeName === isin || schemeName.length < 6) {
+            try {
+              const lookup = await findSchemeCodeByISIN(isin);
+              if (lookup?.name) resolvedName = lookup.name;
+            } catch (_) {}
+          }
+
+          const { fund_category, fund_type } = inferCategory(resolvedName);
           (analysis.mf_snapshot = analysis.mf_snapshot || []).push({
             isin,
-            scheme_name: schemeName,
+            scheme_name: resolvedName,
             folio_no: "",
             units,
             nav,
@@ -321,10 +330,27 @@ ${text}`;
             source: "demat",
           });
           existingIsins.add(isin);
-          console.log(`[Demat] Added: ${isin} | ${schemeName} | units=${units.toFixed(3)} nav=${nav.toFixed(4)} value=${value}`);
+          console.log(`[Demat] Added: ${isin} | ${resolvedName} | units=${units.toFixed(3)} nav=${nav.toFixed(4)} value=${value}`);
         }
       } catch (dematErr) {
         console.error("[Demat] Extraction error:", dematErr);
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
+      // ── Fix any entries where AI stored ISIN as scheme_name ───────────────
+      if (Array.isArray(analysis.mf_snapshot)) {
+        await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
+          const name: string = (entry.scheme_name || "").trim();
+          if (!name || name === entry.isin || name.length < 6 || /^INF[A-Z0-9]{9}$/.test(name)) {
+            try {
+              const lookup = await findSchemeCodeByISIN(entry.isin);
+              if (lookup?.name) {
+                console.log(`[NameFix] ${entry.isin}: "${name}" → "${lookup.name}"`);
+                entry.scheme_name = lookup.name;
+              }
+            } catch (_) {}
+          }
+        }));
       }
       // ─────────────────────────────────────────────────────────────────────
 
