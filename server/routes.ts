@@ -151,13 +151,16 @@ Extract:
 3. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
 4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string, "source": string}]
    - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" column value from the statement for each scheme.
-   - "invested_amount" MUST be the value in the cost/invested column for that scheme — NOT the current/market value, NOT the P/L. Use the column whose header is one of:
+   - "nav" MUST be the per-unit NAV value from the "NAV (₹)" column ONLY. This is a per-unit price, NOT a total amount.
+   - "invested_amount" MUST be the TOTAL INVESTED amount from the cost column for that scheme — NOT the NAV, NOT the current/market value, NOT the P/L. Use the column whose header is one of:
        • "Cumulative Amount Invested (in INR)"   ← CDSL CAS (Mutual Fund Units Held / Consolidated Account Statement)
        • "Invested (₹)" / "Invested Amount"      ← CAMS / KFinTech CAS
        • "Cost Value" / "Cost"                   ← NSDL CAS
+     CRITICAL: NAV and invested_amount are DIFFERENT columns. NAV (₹) is the price per unit (e.g. 410.36). Cumulative Amount Invested is the total cost paid (e.g. 0.59). Do NOT swap them.
+     Example: If NAV column shows 410.3636 and Cumulative Amount Invested shows 0.59, then nav=410.3636 and invested_amount=0.59. NEVER put the NAV value in invested_amount.
      Do NOT confuse this with "Valuation (₹)", "Value (₹)", "Market Value", "Current Value", or any P/L column. In CDSL statements the Cumulative Amount Invested column appears BEFORE the Valuation column — pick the correct one strictly by header text, not by column position.
    - Extract EVERY row of that table without omission so the sum of invested_amount across all rows EXACTLY equals the GRAND TOTAL shown in that table's last row (e.g. CDSL "Grand Total" row).
-   - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" column for that scheme.
+   - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" column for that scheme. This equals units × NAV (e.g. 0.002 × 410.3636 = 0.82).
    - For regular CAS folio entries, set "source": "cas".
    - ALSO scan any CDSL / NSDL Demat Holding Statement sections (tables with columns like ISIN, Security, Current Bal, Frozen Bal, Pledge Bal, Market Price / Face Value, Value ₹). For each row where the ISIN starts with "INF" (these are mutual funds held in Demat form), add an entry to mf_snapshot with:
        • "scheme_name": value from the Security column
@@ -338,8 +341,10 @@ ${text}`;
       // ─────────────────────────────────────────────────────────────────────
 
       // ── Fix any entries where AI stored ISIN as scheme_name ───────────────
+      // Also detects and corrects swapped nav / invested_amount values.
       if (Array.isArray(analysis.mf_snapshot)) {
         await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
+          // 1. Fix scheme name if it's just the ISIN
           const name: string = (entry.scheme_name || "").trim();
           if (!name || name === entry.isin || name.length < 6 || /^INF[A-Z0-9]{9}$/.test(name)) {
             try {
@@ -349,6 +354,24 @@ ${text}`;
                 entry.scheme_name = lookup.name;
               }
             } catch (_) {}
+          }
+
+          // 2. Detect swapped nav / invested_amount for CAS folio entries
+          // Heuristic: valuation = units × nav (by accounting definition).
+          // If units × nav is near-zero but units × invested_amount ≈ valuation → they're swapped.
+          if (entry.source === "cas" && entry.units > 0 && entry.nav > 0 && entry.invested_amount > 0 && entry.valuation > 0) {
+            const navImplied  = entry.units * entry.nav;
+            const invImplied  = entry.units * entry.invested_amount;
+            const val         = entry.valuation;
+            const navErrRatio = Math.abs(navImplied - val) / val;
+            const invErrRatio = Math.abs(invImplied - val) / val;
+            // If invested_amount produces valuation much better than nav does, they're swapped
+            if (invErrRatio < 0.05 && navErrRatio > 0.5) {
+              console.log(`[NavFix] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount})`);
+              const tmp = entry.nav;
+              entry.nav = entry.invested_amount;
+              entry.invested_amount = tmp;
+            }
           }
         }));
       }
