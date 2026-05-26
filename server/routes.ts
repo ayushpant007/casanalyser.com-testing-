@@ -344,33 +344,42 @@ ${text}`;
       // Also detects and corrects swapped nav / invested_amount values.
       if (Array.isArray(analysis.mf_snapshot)) {
         await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
-          // 1. Fix scheme name if it's just the ISIN
+          // 1. Fix scheme name if it's just the ISIN or empty
           const name: string = (entry.scheme_name || "").trim();
-          if (!name || name === entry.isin || name.length < 6 || /^INF[A-Z0-9]{9}$/.test(name)) {
+          const isinPattern = /^INF[A-Z0-9]{9}$/;
+          if (!name || name === entry.isin || name.length < 6 || isinPattern.test(name)) {
             try {
+              // Try findSchemeCodeByISIN first (fast, local map)
+              let resolvedName = "";
               const lookup = await findSchemeCodeByISIN(entry.isin);
-              if (lookup?.name) {
-                console.log(`[NameFix] ${entry.isin}: "${name}" → "${lookup.name}"`);
-                entry.scheme_name = lookup.name;
+              if (lookup?.name && lookup.name.length > 5) {
+                resolvedName = lookup.name;
+              } else {
+                // Fallback: fetchNavByISIN resolves via MFAPI search
+                const navData = await fetchNavByISIN(entry.isin, entry.isin);
+                if (navData?.scheme_name && navData.scheme_name.length > 5 && !isinPattern.test(navData.scheme_name)) {
+                  resolvedName = navData.scheme_name;
+                }
+              }
+              if (resolvedName) {
+                console.log(`[NameFix] ${entry.isin}: "${name}" → "${resolvedName}"`);
+                entry.scheme_name = resolvedName;
               }
             } catch (_) {}
           }
 
-          // 2. Detect swapped nav / invested_amount for CAS folio entries
-          // Heuristic: valuation = units × nav (by accounting definition).
-          // If units × nav is near-zero but units × invested_amount ≈ valuation → they're swapped.
-          if (entry.source === "cas" && entry.units > 0 && entry.nav > 0 && entry.invested_amount > 0 && entry.valuation > 0) {
-            const navImplied  = entry.units * entry.nav;
-            const invImplied  = entry.units * entry.invested_amount;
-            const val         = entry.valuation;
-            const navErrRatio = Math.abs(navImplied - val) / val;
-            const invErrRatio = Math.abs(invImplied - val) / val;
-            // If invested_amount produces valuation much better than nav does, they're swapped
-            if (invErrRatio < 0.05 && navErrRatio > 0.5) {
-              console.log(`[NavFix] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount})`);
+          // 2. Detect swapped nav / invested_amount for CAS folio entries.
+          // For Indian MFs, NAV per unit is almost always ≥ ₹1. If the stored nav
+          // produces a near-zero product with units (< ₹1) but invested_amount is
+          // large (looks like a NAV), the AI has swapped the two columns.
+          if (entry.source === "cas" && entry.units > 0 && entry.nav > 0 && entry.invested_amount > 0) {
+            const navProduct = entry.units * entry.nav;
+            if (navProduct < 1.0 && entry.nav < 10 && entry.invested_amount > 50) {
+              console.log(`[NavFix] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount}), navProduct was ${navProduct}`);
               const tmp = entry.nav;
               entry.nav = entry.invested_amount;
               entry.invested_amount = tmp;
+              entry.valuation = entry.units * entry.nav; // recalculate
             }
           }
         }));
