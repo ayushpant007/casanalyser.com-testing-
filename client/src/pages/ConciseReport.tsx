@@ -1737,9 +1737,9 @@ export default function ConciseReport() {
                           <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/80">Cost</span>
                         </div>
                         <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight">
-                          <AnimatedCounter value={effectiveTotalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
+                          {hasMissingDematMf ? <span className="text-slate-400">—</span> : <AnimatedCounter value={effectiveTotalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />}
                         </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Invested</p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{hasMissingDematMf ? "Re-upload for cost data" : "Total Invested"}</p>
                       </div>
 
                       {/* Market Value */}
@@ -1763,25 +1763,27 @@ export default function ConciseReport() {
                       {/* Returns */}
                       <div
                         className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${
-                          isPositive
-                            ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
+                          hasMissingDematMf ? 'from-slate-50 to-slate-100/60 border-slate-200/70'
+                            : isPositive ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
                             : 'from-rose-50 to-rose-100/60 border-rose-200/70'
                         }`}
                         data-testid="stat-returns"
                       >
-                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
+                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${hasMissingDematMf ? 'bg-slate-400/10' : isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
                         <div className="relative flex items-center justify-between mb-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
-                            {isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${hasMissingDematMf ? 'bg-slate-500/15' : isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
+                            {hasMissingDematMf ? <TrendingUp className="w-4 h-4 text-slate-400" /> : isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
                           </div>
-                          <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
-                            {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
-                          </span>
+                          {!hasMissingDematMf && (
+                            <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
+                              {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
+                            </span>
+                          )}
                         </div>
-                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
-                          {isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
+                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${hasMissingDematMf ? 'text-slate-400' : isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
+                          {hasMissingDematMf ? '—' : <>{isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} /></>}
                         </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Returns</p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{hasMissingDematMf ? "Re-upload for returns" : "Total Returns"}</p>
                       </div>
 
                       {/* Schemes */}
