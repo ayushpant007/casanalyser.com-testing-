@@ -150,29 +150,14 @@ Extract:
 2. Account-wise summary table: [{"type": string, "details": string, "count": number, "value": number}]
 3. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
 4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string}]
-   - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" or "Balance" or "Quantity" column value from the statement for each scheme.
+   - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" column value from the statement for each scheme.
    - "invested_amount" MUST be the value in the cost/invested column for that scheme — NOT the current/market value, NOT the P/L. Use the column whose header is one of:
        • "Cumulative Amount Invested (in INR)"   ← CDSL CAS (Mutual Fund Units Held / Consolidated Account Statement)
        • "Invested (₹)" / "Invested Amount"      ← CAMS / KFinTech CAS
-       • "Cost Value" / "Cost" / "Purchase Value" / "Cost of Holding"  ← NSDL CAS or Demat holdings
+       • "Cost Value" / "Cost"                   ← NSDL CAS
      Do NOT confuse this with "Valuation (₹)", "Value (₹)", "Market Value", "Current Value", or any P/L column. In CDSL statements the Cumulative Amount Invested column appears BEFORE the Valuation column — pick the correct one strictly by header text, not by column position.
    - Extract EVERY row of that table without omission so the sum of invested_amount across all rows EXACTLY equals the GRAND TOTAL shown in that table's last row (e.g. CDSL "Grand Total" row).
-   - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" / "Current Market Value" column for that scheme.
-   - DEMAT HOLDINGS — ISIN-BASED FILTERING (CRITICAL):
-       • CDSL and NSDL statements may contain a demat holdings section listing both Mutual Funds AND Equity Shares.
-       • You MUST scan ALL demat holding rows and apply ISIN prefix filtering:
-           - ISIN starts with "INF" → This is a Mutual Fund. INCLUDE it in mf_snapshot.
-           - ISIN starts with "INE" or any other prefix → This is a Stock/Equity. EXCLUDE it from mf_snapshot entirely.
-       • For demat MF holdings (INF ISINs), map columns as follows:
-           - scheme_name  ← "Security Name" / "Scheme Name" / "Scrip Name"
-           - isin         ← "ISIN"
-           - units        ← "Current Balance" / "Balance" / "Quantity" / "No. of Units"
-           - nav          ← "Current Market Price" / "Market Price" / "NAV" / "Face Value" (prefer market price over face value)
-           - invested_amount ← "Cost Value" / "Purchase Value" / "Cost of Holding" / "Average Cost" × units (if a per-unit cost is given, multiply by units)
-           - valuation    ← "Current Market Value" / "Market Value" / units × current market price (compute if not directly given)
-           - unrealised_profit_loss ← valuation − invested_amount
-           - folio_no     ← "DP ID" / "Client ID" / "Account No." (use what is available; empty string if none)
-       • Do NOT include equity shares, ETFs tracking equities (INE ISINs), bonds, or any non-INF ISIN in mf_snapshot.
+   - "valuation" MUST be the "Valuation (₹)" / "Value (₹)" / "Market Value" / "Current Value" column for that scheme.
 5. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
    - Current Category Allocation (Equity, Debt, Hybrid, Others)
    - Comparison with Category Ratio (Current % vs Target % from CSV)
@@ -199,7 +184,7 @@ For mf_snapshot, ensure you accurately identify:
 - fund_type: e.g. Flexi Cap, Bluechip, Large Cap, Mid Cap, Small Cap, Sectoral, Gold ETF FoF, etc.
 - isin: The 12-character International Securities Identification Number for the fund.
 
-Ensure ALL funds and folios are extracted comprehensively without omission, including Gold ETF Fund of Fund, Silver ETF, and any commodity/alternative fund schemes. Also scan demat holding sections: include every row whose ISIN starts with "INF" (Mutual Fund) and exclude every row whose ISIN starts with "INE" (Equity/Stock) or any other non-INF prefix. Ensure all numerical values are numbers (not strings).
+Ensure ALL funds and folios are extracted comprehensively without omission, including Gold ETF Fund of Fund, Silver ETF, and any commodity/alternative fund schemes. Ensure all numerical values are numbers.
 
 Text content:
 ${text}`;

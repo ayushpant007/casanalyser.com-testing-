@@ -484,35 +484,6 @@ export default function ConciseReport() {
   }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.unrealised_profit_loss || 0), 0), [mfSnapshot]);
 
-  // Detect demat MF holdings that weren't captured in mf_snapshot
-  const dematMfAllocation = useMemo(() => {
-    const alloc: any[] = analysis.asset_allocation || [];
-    return alloc.find((a: any) =>
-      typeof a.asset_class === "string" &&
-      (a.asset_class.toLowerCase().includes("demat") || a.asset_class.toLowerCase().includes("held in demat"))
-    );
-  }, [analysis.asset_allocation]);
-
-  const hasMissingDematMf = useMemo(() => {
-    if (!dematMfAllocation) return false;
-    const dematVal = dematMfAllocation.value || 0;
-    return dematVal > 10000 && totalValuation < dematVal * 0.5;
-  }, [dematMfAllocation, totalValuation]);
-
-  // When demat MF holdings are missing from snapshot, use asset_allocation totals for display
-  const effectiveTotalValuation = useMemo(() => {
-    if (!hasMissingDematMf) return totalValuation;
-    const alloc: any[] = analysis.asset_allocation || [];
-    return alloc
-      .filter((a: any) => typeof a.asset_class === "string" && a.asset_class.toLowerCase().includes("mutual fund"))
-      .reduce((sum: number, a: any) => sum + (a.value || 0), 0) || (analysis.summary?.net_asset_value || totalValuation);
-  }, [hasMissingDematMf, totalValuation, analysis.asset_allocation, analysis.summary]);
-
-  const effectiveTotalInvested = useMemo(() => {
-    if (!hasMissingDematMf) return totalInvested;
-    return analysis.summary?.total_cost || totalInvested;
-  }, [hasMissingDematMf, totalInvested, analysis.summary]);
-
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];
     if (!txns.length) return {};
@@ -1664,9 +1635,9 @@ export default function ConciseReport() {
           {/* 1. Portfolio Overview */}
           <div ref={overviewRef} className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden" data-testid="card-portfolio-overview">
             {(() => {
-              const absoluteReturn = effectiveTotalValuation - effectiveTotalInvested;
-              const absoluteReturnPct = effectiveTotalInvested > 0 ? (absoluteReturn / effectiveTotalInvested) * 100 : 0;
-              const approxCagr = effectiveTotalInvested > 0 ? ((Math.pow(effectiveTotalValuation / effectiveTotalInvested, 1 / 2) - 1) * 100) : 0;
+              const absoluteReturn = totalValuation - totalInvested;
+              const absoluteReturnPct = totalInvested > 0 ? (absoluteReturn / totalInvested) * 100 : 0;
+              const approxCagr = totalInvested > 0 ? ((Math.pow(totalValuation / totalInvested, 1 / 2) - 1) * 100) : 0;
               const accounts = analysis.account_summaries || [];
               const totalSchemes = mfSnapshot.length;
               const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'];
@@ -1712,20 +1683,6 @@ export default function ConciseReport() {
 
                   {/* Stats grid */}
                   <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
-                    {hasMissingDematMf && (
-                      <div
-                        className="flex items-start gap-3 px-4 py-3 rounded-xl border"
-                        style={{ background: "rgba(245,158,11,0.07)", borderColor: "rgba(245,158,11,0.35)" }}
-                      >
-                        <span className="text-amber-500 text-base flex-shrink-0 mt-0.5">⚠️</span>
-                        <div>
-                          <p className="text-xs font-semibold text-amber-800">Demat MF holdings detected but not fully extracted</p>
-                          <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                            Values shown are estimated from your statement totals. For fund-level breakdown, please <span className="font-semibold text-amber-700">re-upload your PDF</span> — the system has been updated to extract demat mutual fund holdings individually.
-                          </p>
-                        </div>
-                      </div>
-                    )}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                       {/* Cost Value */}
                       <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-cost">
@@ -1737,9 +1694,9 @@ export default function ConciseReport() {
                           <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/80">Cost</span>
                         </div>
                         <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight">
-                          {hasMissingDematMf ? <span className="text-slate-400">—</span> : <AnimatedCounter value={effectiveTotalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />}
+                          <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
                         </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{hasMissingDematMf ? "Re-upload for cost data" : "Total Invested"}</p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Invested</p>
                       </div>
 
                       {/* Market Value */}
@@ -1755,7 +1712,7 @@ export default function ConciseReport() {
                           </span>
                         </div>
                         <p className="relative text-base sm:text-xl font-bold text-emerald-700 leading-tight">
-                          <AnimatedCounter value={effectiveTotalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
+                          <AnimatedCounter value={totalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
                         </p>
                         <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Market Value</p>
                       </div>
@@ -1763,27 +1720,25 @@ export default function ConciseReport() {
                       {/* Returns */}
                       <div
                         className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${
-                          hasMissingDematMf ? 'from-slate-50 to-slate-100/60 border-slate-200/70'
-                            : isPositive ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
+                          isPositive
+                            ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
                             : 'from-rose-50 to-rose-100/60 border-rose-200/70'
                         }`}
                         data-testid="stat-returns"
                       >
-                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${hasMissingDematMf ? 'bg-slate-400/10' : isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
+                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
                         <div className="relative flex items-center justify-between mb-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${hasMissingDematMf ? 'bg-slate-500/15' : isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
-                            {hasMissingDematMf ? <TrendingUp className="w-4 h-4 text-slate-400" /> : isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
+                            {isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
                           </div>
-                          {!hasMissingDematMf && (
-                            <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
-                              {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
-                            </span>
-                          )}
+                          <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
+                            {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
+                          </span>
                         </div>
-                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${hasMissingDematMf ? 'text-slate-400' : isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
-                          {hasMissingDematMf ? '—' : <>{isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} /></>}
+                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
+                          {isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
                         </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{hasMissingDematMf ? "Re-upload for returns" : "Total Returns"}</p>
+                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Returns</p>
                       </div>
 
                       {/* Schemes */}
