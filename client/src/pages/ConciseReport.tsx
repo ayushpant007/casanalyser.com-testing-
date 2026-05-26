@@ -112,7 +112,7 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
   const pv = (v: string | undefined) => parseFloat((v || "0").replace(/[^\d.-]/g, "") || "0");
   const bm = perf?.benchmark_returns || {};
   const cagr = perf?.cagr || {};
-  const isDemat = fund.source === "demat" || !fund.invested_amount;
+  const isDemat = fund.source === "demat";
   const pl = isDemat ? null : (fund.valuation || 0) - (fund.invested_amount || 0);
   const plPct = (!isDemat && fund.invested_amount > 0) ? ((pl! / fund.invested_amount) * 100) : null;
   return (
@@ -2582,7 +2582,7 @@ export default function ConciseReport() {
                         const nav = mf.nav ?? (units > 0 && mf.valuation ? mf.valuation / units : 0);
                         const invested = mf.invested_amount ?? 0;
                         const value = mf.valuation ?? 0;
-                        const isDemat = mf.source === "demat" || !mf.invested_amount;
+                        const isDemat = mf.source === "demat";
                         const pl = isDemat ? null : value - invested;
                         const plColor = pl == null ? "text-slate-400" : pl >= 0 ? "text-emerald-600" : "text-rose-600";
                         const portfolioPct = totalValueSnap > 0 ? ((value / totalValueSnap) * 100).toFixed(1) : "0.0";
