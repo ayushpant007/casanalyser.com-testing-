@@ -210,6 +210,124 @@ ${text}`;
       // Detect CAS source (CAMS / NSDL / CDSL) from raw text
       analysis.cas_source = detectCasSource(text);
 
+      // ── Server-side Demat MF extraction ───────────────────────────────────
+      // Directly scans raw PDF text for INF... ISINs in Demat holding sections.
+      // Handles both single-line and multi-line table layouts from pdftotext.
+      try {
+        const existingIsins = new Set<string>(
+          (analysis.mf_snapshot || []).map((m: any) => m.isin).filter(Boolean)
+        );
+
+        const inferCategory = (name: string): { fund_category: string; fund_type: string } => {
+          const n = name.toLowerCase();
+          if (/liquid|overnight|money market|ultra short|low dur|short dur|medium dur|long dur|gilt|bond|income|debt|dynamic bond|banking and psu|credit risk|corporate bond|floater/.test(n))
+            return { fund_category: "Debt", fund_type: "Debt" };
+          if (/hybrid|balanced|aggressive|conservative|multi asset|equity savings|arbitrage/.test(n))
+            return { fund_category: "Hybrid", fund_type: "Hybrid" };
+          if (/gold|silver|commodity/.test(n))
+            return { fund_category: "Gold/Silver", fund_type: "Gold/Commodity" };
+          if (/large cap|bluechip|top 100|nifty 50|sensex/.test(n))
+            return { fund_category: "Equity", fund_type: "Large Cap" };
+          if (/mid cap|midcap/.test(n))
+            return { fund_category: "Equity", fund_type: "Mid Cap" };
+          if (/small cap|smallcap/.test(n))
+            return { fund_category: "Equity", fund_type: "Small Cap" };
+          if (/flexi|multi cap|diversified/.test(n))
+            return { fund_category: "Equity", fund_type: "Flexi Cap" };
+          if (/elss|tax saver|tax saving/.test(n))
+            return { fund_category: "Equity", fund_type: "ELSS" };
+          if (/index|etf|nifty|bse|sensex/.test(n))
+            return { fund_category: "Equity", fund_type: "Index/ETF" };
+          if (/sectoral|thematic|pharma|bank|infra|defence|it fund|technology/.test(n))
+            return { fund_category: "Equity", fund_type: "Sectoral/Thematic" };
+          return { fund_category: "Equity", fund_type: "Equity" };
+        };
+
+        const parseNum = (s: string) => parseFloat(s.replace(/,/g, "")) || 0;
+
+        const lines = text.split(/\r?\n/);
+
+        // Build: isin → { lineIdx, context block (lines around it) }
+        const isinLineIndex: Record<string, number> = {};
+        for (let i = 0; i < lines.length; i++) {
+          const m = lines[i].match(/\b(INF[A-Z0-9]{9})\b/);
+          if (m && !isinLineIndex[m[1]]) isinLineIndex[m[1]] = i;
+        }
+
+        console.log(`[Demat] Found ${Object.keys(isinLineIndex).length} total INF ISINs in PDF, existing in snapshot: ${existingIsins.size}`);
+
+        for (const [isin, lineIdx] of Object.entries(isinLineIndex)) {
+          if (existingIsins.has(isin)) continue;
+
+          // Collect a context window: the ISIN line ± 4 lines
+          const ctxLines = lines.slice(Math.max(0, lineIdx - 1), lineIdx + 6);
+          const block = ctxLines.join(" ");
+
+          // Extract all positive numbers from the block
+          const nums = [...block.matchAll(/([\d,]+\.?\d*)/g)]
+            .map(m => parseNum(m[1]))
+            .filter(n => n > 0 && n < 1e10);
+
+          // Extract scheme name from lines[lineIdx]: strip ISIN and leading/trailing spaces
+          // Also check lineIdx+1 if current line is just the ISIN
+          let schemeLine = lines[lineIdx].replace(/\b(INF[A-Z0-9]{9})\b/, "").trim();
+          if (schemeLine.length < 5 && lines[lineIdx + 1]) {
+            schemeLine = lines[lineIdx + 1].trim();
+          }
+          // Remove any trailing numbers from scheme name
+          const schemeName = schemeLine.replace(/[\s\d,.]+$/, "").trim().replace(/\s+/g, " ") || isin;
+
+          // Need at least 2 positive numbers to determine units/value
+          if (nums.length < 2) {
+            console.log(`[Demat] Skipping ${isin} — not enough numbers in context (found ${nums.length})`);
+            continue;
+          }
+
+          // Heuristic mapping:
+          // - Units = largest number that, when multiplied by another, approximates the last (largest) number
+          // - Value = typically the largest number in the block
+          // - NAV = value / units
+          const sortedNums = [...nums].sort((a, b) => b - a);
+          const value = sortedNums[0]; // likely the market value (largest)
+          // Find units: a number where units × some_price ≈ value
+          let units = 0, nav = 0;
+          for (const u of nums) {
+            if (u === value) continue;
+            const impliedNav = value / u;
+            // Reasonable NAV range: 0.1 to 10000
+            if (impliedNav >= 0.1 && impliedNav <= 10000) {
+              units = u;
+              nav = impliedNav;
+              break;
+            }
+          }
+          if (units <= 0) {
+            units = nums[0];
+            nav = nums.length > 1 ? nums[1] : 0;
+          }
+
+          const { fund_category, fund_type } = inferCategory(schemeName);
+          (analysis.mf_snapshot = analysis.mf_snapshot || []).push({
+            isin,
+            scheme_name: schemeName,
+            folio_no: "",
+            units,
+            nav,
+            invested_amount: 0,
+            valuation: value,
+            unrealised_profit_loss: 0,
+            fund_category,
+            fund_type,
+            source: "demat",
+          });
+          existingIsins.add(isin);
+          console.log(`[Demat] Added: ${isin} | ${schemeName} | units=${units.toFixed(3)} nav=${nav.toFixed(4)} value=${value}`);
+        }
+      } catch (dematErr) {
+        console.error("[Demat] Extraction error:", dematErr);
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       const report = await storage.createReport({
         filename: req.file.originalname,
         investorType,
