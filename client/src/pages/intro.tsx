@@ -394,11 +394,8 @@ export default function Intro() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
             className="text-5xl md:text-7xl font-bold font-display tracking-tight leading-[1.05]"
-            style={{ color: "#ffffff" }}
             data-testid="text-intro-headline"
           >
-            Understand your entire investment portfolio in
-            <br />
             <span
               className="bg-clip-text text-transparent animate-gradient-shift"
               style={{
@@ -408,9 +405,8 @@ export default function Intro() {
                 WebkitBackgroundClip: "text",
               }}
             >
-              10 seconds
+              Analyse My Portfolio Now
             </span>
-            .
           </motion.h1>
 
           {/* CTA */}
