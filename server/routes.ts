@@ -213,6 +213,20 @@ ${text}`;
       // Detect CAS source (CAMS / NSDL / CDSL) from raw text
       analysis.cas_source = detectCasSource(text);
 
+      // ── Strip equity stocks (INE ISINs) from mf_snapshot ─────────────────
+      // The AI sometimes adds equity shares (INE... ISINs) from Demat sections
+      // to mf_snapshot despite the prompt instruction. Remove them server-side.
+      if (Array.isArray(analysis.mf_snapshot)) {
+        const before = analysis.mf_snapshot.length;
+        analysis.mf_snapshot = analysis.mf_snapshot.filter((m: any) => {
+          const isin: string = (m.isin || "").trim().toUpperCase();
+          return !isin.startsWith("INE");
+        });
+        const removed = before - analysis.mf_snapshot.length;
+        if (removed > 0) console.log(`[Filter] Removed ${removed} equity stock(s) (INE ISINs) from mf_snapshot`);
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       // ── Server-side Demat MF extraction ───────────────────────────────────
       // Directly scans raw PDF text for INF... ISINs in Demat holding sections.
       // Handles both single-line and multi-line table layouts from pdftotext.
