@@ -369,17 +369,29 @@ ${text}`;
           }
 
           // 2. Detect swapped nav / invested_amount for CAS folio entries.
-          // For Indian MFs, NAV per unit is almost always ≥ ₹1. If the stored nav
-          // produces a near-zero product with units (< ₹1) but invested_amount is
-          // large (looks like a NAV), the AI has swapped the two columns.
-          if (entry.source === "cas" && entry.units > 0 && entry.nav > 0 && entry.invested_amount > 0) {
-            const navProduct = entry.units * entry.nav;
-            if (navProduct < 1.0 && entry.nav < 10 && entry.invested_amount > 50) {
-              console.log(`[NavFix] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount}), navProduct was ${navProduct}`);
-              const tmp = entry.nav;
-              entry.nav = entry.invested_amount;
-              entry.invested_amount = tmp;
-              entry.valuation = entry.units * entry.nav; // recalculate
+          if (entry.source === "cas" && entry.units > 0) {
+
+            // Case A: nav is tiny (< ₹1) but invested_amount looks like a NAV value (> ₹50).
+            // For Indian MFs, NAV per unit is almost always ≥ ₹1.
+            if (entry.nav > 0 && entry.invested_amount > 0) {
+              const navProduct = entry.units * entry.nav;
+              if (navProduct < 1.0 && entry.nav < 10 && entry.invested_amount > 50) {
+                console.log(`[NavFix-A] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount})`);
+                const tmp = entry.nav;
+                entry.nav = entry.invested_amount;
+                entry.invested_amount = tmp;
+                entry.valuation = entry.units * entry.nav;
+              }
+            }
+
+            // Case B: valuation=0 and invested_amount=0 but nav > 0.
+            // This happens for segregated/wound-down portfolios where CAS shows NAV=0
+            // and the "Cumulative Amount Invested" column holds the cost (e.g. 454.98),
+            // but the AI mistakenly put that cost into the nav field.
+            if (entry.nav > 0 && (entry.invested_amount === 0 || entry.invested_amount == null) && (entry.valuation === 0 || entry.valuation == null)) {
+              console.log(`[NavFix-B] ${entry.isin}: moving nav(${entry.nav}) → invested_amount, setting nav=0`);
+              entry.invested_amount = entry.nav;
+              entry.nav = 0;
             }
           }
         }));
