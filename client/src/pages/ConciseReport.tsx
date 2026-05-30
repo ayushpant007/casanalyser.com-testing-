@@ -977,7 +977,9 @@ export default function ConciseReport() {
           const finScore = sc?.totalScore ?? 0;
           const total = finScore + perfScore;
           const pctXl = Math.round((total / 80) * 100);
-          const rating = pctXl >= 80 ? "Excellent" : pctXl >= 60 ? "Good" : "Poor";
+          const isIdx = /\betf\b|\bindex\b/i.test(mf.scheme_name || "") || /\bindex\b|\betf\b/i.test(sc?.category || "");
+          const ratingRaw = pctXl >= 80 ? "Excellent" : pctXl >= 60 ? "Good" : pctXl >= 45 ? "Average" : "Poor";
+          const rating = isIdx && ratingRaw === "Poor" ? "Average" : ratingRaw;
           const action = (actionSelections[mf.scheme_name] || "hold").toUpperCase();
           const sip = sipAmounts[mf.scheme_name];
           const c1 = pv(cagr["1y"]), c3 = pv(cagr["3y"]), c5 = pv(cagr["5y"]);
@@ -986,7 +988,7 @@ export default function ConciseReport() {
           const ratingStyle = (r: string) => {
             const map: Record<string, [string, string]> = {
               "Excellent": [C.GREEN, C.GREENL], "Good": [C.BLUE, C.LTBLUE],
-              "Poor": [C.RED, C.REDL],
+              "Average": [C.AMBER, C.AMBERL], "Poor": [C.RED, C.REDL],
             };
             const [fg, bg] = map[r] || [C.SLATE, C.SLATEL];
             return { v: r, t: "s", s: { font: { bold: true, sz: 9, color: { rgb: fg }, name: "Calibri" }, fill: { fgColor: { rgb: bg } }, alignment: { horizontal: "center" }, border } };
@@ -2359,10 +2361,13 @@ export default function ConciseReport() {
           <div ref={performanceRef} />
           {/* 4. Concise Performance Check */}
           {Object.keys(storedPerformances).length > 0 && (() => {
-            const scoreToRating = (pct: number) => pct >= 80 ? "Excellent" : pct >= 60 ? "Good" : "Poor";
+            const scoreToRating = (pct: number) => pct >= 80 ? "Excellent" : pct >= 60 ? "Good" : pct >= 45 ? "Average" : "Poor";
+            const isIndexFund = (mf: any, sc: any) =>
+              /\betf\b|\bindex\b/i.test(mf.scheme_name || "") || /\bindex\b|\betf\b/i.test(sc?.category || "");
             const RATING_STYLE: Record<string, { pill: string; bar: string }> = {
               "Excellent": { pill: "bg-emerald-100 text-emerald-700 border-emerald-200", bar: "#10b981" },
               "Good":      { pill: "bg-blue-100 text-blue-700 border-blue-200",          bar: "#3b82f6" },
+              "Average":   { pill: "bg-amber-100 text-amber-700 border-amber-200",       bar: "#f59e0b" },
               "Poor":      { pill: "bg-rose-100 text-rose-600 border-rose-200",          bar: "#ef4444" },
             };
             const rows = mfSnapshot
@@ -2375,7 +2380,8 @@ export default function ConciseReport() {
                 const combined = scoringTotal + perfScore.total;
                 const maxScore = perf ? 80 : 40;
                 const pct = maxScore > 0 ? Math.round((combined / maxScore) * 100) : 0;
-                const rating: string = scoreToRating(pct);
+                const ratingRaw: string = scoreToRating(pct);
+                const rating: string = isIndexFund(mf, sc) && ratingRaw === "Poor" ? "Average" : ratingRaw;
                 const cagr1y = perf?.cagr?.["1y"] ?? "—";
                 const cagr3y = perf?.cagr?.["3y"] ?? "—";
                 const cagr5y = perf?.cagr?.["5y"] ?? "—";
@@ -2385,12 +2391,13 @@ export default function ConciseReport() {
                 return { mf, perf, sc, perfScore, combined, maxScore, rating, pct, cagr1y, cagr3y, cagr5y, bm1y, bm3y, bm5y };
               });
 
-            const ratingCounts: Record<string, number> = { Excellent: 0, Good: 0, Poor: 0 };
+            const ratingCounts: Record<string, number> = { Excellent: 0, Good: 0, Average: 0, Poor: 0 };
             rows.forEach((r: { rating: string }) => { if (r.rating in ratingCounts) ratingCounts[r.rating]++; });
 
             const RATING_CONFIG = [
               { key: "Excellent", label: "Excellent", color: "#10b981", bg: "#ecfdf5", border: "#6ee7b7" },
               { key: "Good",      label: "Good",      color: "#3b82f6", bg: "#eff6ff", border: "#93c5fd" },
+              { key: "Average",   label: "Average",   color: "#f59e0b", bg: "#fffbeb", border: "#fcd34d" },
               { key: "Poor",      label: "Poor",      color: "#ef4444", bg: "#fef2f2", border: "#fca5a5" },
             ];
 
@@ -2401,7 +2408,8 @@ export default function ConciseReport() {
                   <p className="text-indigo-200 text-xs mt-0.5">{rows.length} fund{rows.length !== 1 ? "s" : ""} analysed · Rating overview</p>
                   <div className="flex flex-wrap gap-3 mt-3">
                     {[
-                      { label: "Poor",      range: "< 60%",    color: "#fca5a5" },
+                      { label: "Poor",      range: "< 45%",    color: "#fca5a5" },
+                      { label: "Average",   range: "45 – 59%", color: "#fcd34d" },
                       { label: "Good",      range: "60 – 79%", color: "#93c5fd" },
                       { label: "Excellent", range: "80 – 100%",color: "#6ee7b7" },
                     ].map(b => (
@@ -2413,7 +2421,7 @@ export default function ConciseReport() {
                   </div>
                 </div>
                 <div className="p-4 sm:p-8">
-                  <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
                     {RATING_CONFIG.map(({ key, label, color, bg, border }) => {
                       const count = ratingCounts[key] || 0;
                       return (
