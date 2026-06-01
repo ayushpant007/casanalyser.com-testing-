@@ -55,9 +55,36 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
   throw lastError || new Error("All Gemini API keys failed");
 }
 
+// ── Create nifty500_benchmark table and seed initial data on startup ──────────
+async function initNiftyBenchmarkTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS nifty500_benchmark (
+        id SERIAL PRIMARY KEY,
+        as_of_date DATE NOT NULL UNIQUE,
+        return_1y NUMERIC(8,4) NOT NULL,
+        return_3y NUMERIC(8,4) NOT NULL,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    // Seed with calculated values from CSV (June 2025→Jun 2026 for 1Y, Jun 2023→Jun 2026 for 3Y)
+    await pool.query(`
+      INSERT INTO nifty500_benchmark (as_of_date, return_1y, return_3y)
+      VALUES ('2026-06-01', -1.7366, 12.3758)
+      ON CONFLICT (as_of_date) DO NOTHING
+    `);
+    console.log("✅ nifty500_benchmark table ready");
+  } catch (err: any) {
+    console.error("⚠️  nifty500_benchmark init error:", err.message);
+  }
+}
+
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerImageRoutes(app);
+
+  // Initialize benchmark table in background (non-blocking)
+  initNiftyBenchmarkTable();
 
   app.post("/api/users", async (req, res) => {
     try {
