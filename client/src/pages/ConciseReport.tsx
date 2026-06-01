@@ -479,14 +479,12 @@ export default function ConciseReport() {
     });
   }, [analysis.mf_snapshot, storedPerformances]);
 
-  const totalInvested = useMemo(() => {
-    // Prefer the grand-total cost extracted directly from the CAS Grand Total row.
-    // This matches exactly what is shown in the "Grand Total" of the Portfolio Snapshot invested column.
-    const grandTotal = Number((analysis as any)?.summary?.total_cost) || 0;
-    if (grandTotal > 0) return grandTotal;
-    // Fallback: sum per-fund invested_amount (may be 0 for demat holdings)
-    return mfSnapshot.reduce((a: number, m: any) => a + (m.invested_amount || 0), 0);
-  }, [analysis, mfSnapshot]);
+  // Total Invested = exact sum of invested_amount across all funds in mfSnapshot.
+  // This matches the "Grand Total" invested column shown at the bottom of the Portfolio Snapshot table.
+  const totalInvested = useMemo(
+    () => mfSnapshot.reduce((a: number, m: any) => a + (m.invested_amount || 0), 0),
+    [mfSnapshot]
+  );
   const totalValuation = useMemo(() => {
     return mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
   }, [mfSnapshot]);
