@@ -2001,11 +2001,12 @@ export default function ConciseReport() {
                     const portMonthly = Math.pow(1 + weightedReturn / 100, 1 / 12) - 1;
                     const niftyMonthly = Math.pow(1 + niftyBenchmark / 100, 1 / 12) - 1;
                     const totalPoints = is3Y ? 37 : 13;
-                    const monthNames = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+                    const ALL_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    const currentMonthIdx = new Date().getMonth(); // 0 = Jan
                     const chartData = Array.from({ length: totalPoints }, (_, i) => {
                       let label = "";
                       if (!is3Y) {
-                        label = monthNames[i % 12];
+                        label = ALL_MONTHS[(currentMonthIdx + i) % 12];
                       } else {
                         if (i === 0) label = "Start";
                         else if (i === 12) label = "Yr 1";
