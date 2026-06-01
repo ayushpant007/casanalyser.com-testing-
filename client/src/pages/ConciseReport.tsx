@@ -1704,7 +1704,10 @@ export default function ConciseReport() {
                           <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/80">Cost</span>
                         </div>
                         <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight">
-                          <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
+                          {totalInvested >= 100000
+                            ? <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
+                            : <span>₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
+                          }
                         </p>
                         <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Invested</p>
                       </div>
