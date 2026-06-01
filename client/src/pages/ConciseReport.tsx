@@ -360,6 +360,15 @@ export default function ConciseReport() {
   const [benchmarkPeriod, setBenchmarkPeriod] = useState<"1y" | "3y">("1y");
   const hasAutoStarted = useRef(false);
 
+  // ── Live Nifty 500 benchmark from Supabase ────────────────────────────────
+  const [niftyLive, setNiftyLive] = useState<{ return_1y: number; return_3y: number; as_of_date: string | null; source: string } | null>(null);
+  useEffect(() => {
+    fetch("/api/nifty-benchmark")
+      .then(r => r.json())
+      .then(data => setNiftyLive(data))
+      .catch(() => {}); // silently fall back to hardcoded
+  }, []);
+
   // ── New UI state ──────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("overview");
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -1879,11 +1888,13 @@ export default function ConciseReport() {
           <div ref={benchmarkRef} />
           {/* 1b. My Portfolio vs Nifty 500 */}
           {(() => {
-            const NIFTY500_1Y = 7.98;
-            const NIFTY500_3Y = 14.66;
+            const NIFTY500_1Y_FALLBACK = 7.98;
+            const NIFTY500_3Y_FALLBACK = 14.66;
             const is3Y = benchmarkPeriod === "3y";
             const cagrKey = is3Y ? "3y" : "1y";
-            const niftyBenchmark = is3Y ? NIFTY500_3Y : NIFTY500_1Y;
+            const niftyBenchmark = is3Y
+              ? (niftyLive?.return_3y ?? NIFTY500_3Y_FALLBACK)
+              : (niftyLive?.return_1y ?? NIFTY500_1Y_FALLBACK);
 
             const fundsWithPerf = mfSnapshot.filter((mf: any) => {
               const cagr = storedPerformances[mf.isin]?.cagr?.[cagrKey];
@@ -2108,7 +2119,11 @@ export default function ConciseReport() {
                   </div>
 
                   <p className="text-[10px] text-slate-400">
-                    * Based on {activeList.length} of {mfSnapshot.length} fund{mfSnapshot.length !== 1 ? "s" : ""} with available {periodLabel} CAGR data.{activeList.length < mfSnapshot.length ? ` ${mfSnapshot.length - activeList.length} fund(s) excluded due to unavailable data.` : ""}{" "}Nifty 500 TRI {periodLabel} return used as benchmark ({niftyBenchmark}%).
+                    * Based on {activeList.length} of {mfSnapshot.length} fund{mfSnapshot.length !== 1 ? "s" : ""} with available {periodLabel} CAGR data.{activeList.length < mfSnapshot.length ? ` ${mfSnapshot.length - activeList.length} fund(s) excluded due to unavailable data.` : ""}{" "}
+                    Nifty 500 TRI {periodLabel} return used as benchmark ({niftyBenchmark}%
+                    {niftyLive?.source === "supabase" && niftyLive.as_of_date
+                      ? ` · updated ${new Date(niftyLive.as_of_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
+                      : " · fallback value"}).
                   </p>
                 </div>
               </div>

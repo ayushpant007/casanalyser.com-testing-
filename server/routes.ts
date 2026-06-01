@@ -19,6 +19,7 @@ import { getBenchmarkReturns } from "./benchmarks";
 import { lookupByIsinOrName } from "./scoring";
 import { detectCasSource, calculateFundVsBenchmark } from "./fund-benchmark";
 import { uploadCasToDrive } from "./gdrive";
+import { pool } from "./db";
 
 const execAsync = promisify(exec);
 const upload = multer({ storage: multer.memoryStorage() });
@@ -792,6 +793,31 @@ ${text}`;
     }
 
     res.json(results);
+  });
+
+  // ── Nifty 500 benchmark from Supabase ──────────────────────────────────────
+  app.get("/api/nifty-benchmark", async (_req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT return_1y, return_3y, as_of_date
+         FROM nifty500_benchmark
+         ORDER BY as_of_date DESC
+         LIMIT 1`
+      );
+      if (result.rows.length === 0) {
+        return res.json({ return_1y: 7.98, return_3y: 14.66, as_of_date: null, source: "fallback" });
+      }
+      const row = result.rows[0];
+      return res.json({
+        return_1y: parseFloat(row.return_1y),
+        return_3y: parseFloat(row.return_3y),
+        as_of_date: row.as_of_date,
+        source: "supabase",
+      });
+    } catch (err: any) {
+      console.error("nifty-benchmark fetch error:", err.message);
+      return res.json({ return_1y: 7.98, return_3y: 14.66, as_of_date: null, source: "fallback" });
+    }
   });
 
   return httpServer;
