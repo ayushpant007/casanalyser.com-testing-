@@ -1691,10 +1691,6 @@ export default function ConciseReport() {
                         </div>
                       </div>
 
-                      {/* Health Gauge */}
-                      <div className="hidden sm:block">
-                        <HealthGauge score={healthScore} />
-                      </div>
                     </div>
                   </div>
 
