@@ -1690,154 +1690,182 @@ export default function ConciseReport() {
                   </div>
 
                   {/* Stats grid */}
-                  <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
+                  <div className="p-3 sm:p-5 space-y-5">
                     {(() => {
-                      const withData    = mfSnapshot.filter((m: any) => (m.invested_amount || 0) > 0);
-                      const withoutData = mfSnapshot.filter((m: any) => !(m.invested_amount > 0));
+                      const withData     = mfSnapshot.filter((m: any) => (m.invested_amount || 0) > 0);
+                      const withoutData  = mfSnapshot.filter((m: any) => !(m.invested_amount > 0));
                       const withMarket   = withData.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
                       const withReturn   = withData.reduce((s: number, m: any) => s + (m.unrealised_profit_loss || 0), 0);
-                      const withoutMarket = withoutData.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
-                      const withReturnPct = totalInvested > 0 ? (withReturn / totalInvested) * 100 : 0;
-                      const fmtAmt = (v: number) => v >= 100000
+                      const withoutMarket= withoutData.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
+                      const withReturnPct= totalInvested > 0 ? (withReturn / totalInvested) * 100 : 0;
+                      const isGain       = withReturn >= 0;
+                      const fmtL = (v: number) => v >= 100000
                         ? `₹${(v / 100000).toFixed(2)} L`
                         : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+                      // progress bar: how much your money grew (capped 0–200%)
+                      const growthPct = totalInvested > 0
+                        ? Math.min(200, (withMarket / totalInvested) * 100)
+                        : 0;
+
                       return (
                         <>
-                          {/* ── Summary header bar ── */}
-                          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                            <div>
-                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Total Invested (from CAS)</p>
-                              <p className="text-2xl sm:text-3xl font-bold text-slate-900">
+                          {/* ── ROW 1: Hero numbers ── */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+                            {/* You put in */}
+                            <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-5" data-testid="stat-invested">
+                              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/10 rounded-full -translate-y-6 translate-x-6 blur-2xl" />
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center">
+                                  <Wallet className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <span className="text-xs font-semibold text-blue-600">You put in</span>
+                              </div>
+                              <p className="text-2xl font-bold text-slate-900 leading-none">
                                 {totalInvested >= 100000
                                   ? <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
-                                  : <span>₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
-                                }
+                                  : <span>₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>}
                               </p>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                                {withData.length} scheme{withData.length !== 1 ? 's' : ''} with cost data
-                              </div>
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-500">
-                                <span className="w-2 h-2 rounded-full bg-slate-400" />
-                                {withoutData.length} scheme{withoutData.length !== 1 ? 's' : ''} without cost data
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* ── Two category cards ── */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* Section A — With invested data */}
-                            <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50/60 p-4" data-testid="card-with-data">
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-300/60 flex items-center justify-center">
-                                  <Wallet className="w-3.5 h-3.5 text-emerald-600" />
-                                </div>
-                                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Schemes With Investment Data</span>
-                              </div>
-                              <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Market Value</p>
-                                  <p className="text-sm font-bold text-slate-800">{fmtAmt(withMarket)}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Returns</p>
-                                  <p className={`text-sm font-bold ${withReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {withReturn >= 0 ? '+' : ''}{fmtAmt(Math.abs(withReturn))}
-                                    <span className="text-[10px] font-medium ml-1">({withReturnPct >= 0 ? '+' : ''}{withReturnPct.toFixed(1)}%)</span>
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Schemes</p>
-                                  <p className="text-sm font-bold text-slate-800">{withData.length}</p>
-                                </div>
-                              </div>
+                              <p className="text-xs text-slate-500 mt-1">Total amount you invested</p>
                             </div>
 
-                            {/* Section B — Without invested data */}
-                            <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-violet-50/40 p-4" data-testid="card-without-data">
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-200/60 flex items-center justify-center">
-                                  <Layers className="w-3.5 h-3.5 text-violet-500" />
+                            {/* Worth today */}
+                            <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 sm:p-5" data-testid="stat-market">
+                              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-400/10 rounded-full -translate-y-6 translate-x-6 blur-2xl" />
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center">
+                                    <IndianRupee className="w-4 h-4 text-emerald-600" />
+                                  </div>
+                                  <span className="text-xs font-semibold text-emerald-600">Worth today</span>
                                 </div>
-                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Schemes Without Investment Data</span>
-                              </div>
-                              <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Market Value</p>
-                                  <p className="text-sm font-bold text-slate-700">{fmtAmt(withoutMarket)}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Returns</p>
-                                  <p className="text-sm font-bold text-slate-400">—</p>
-                                  <p className="text-[9px] text-slate-400">Not available</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] text-slate-400 mb-0.5">Schemes</p>
-                                  <p className="text-sm font-bold text-slate-700">{withoutData.length}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* ── Total portfolio row ── */}
-                          <div className="grid grid-cols-3 gap-2">
-                            {/* Total Market Value */}
-                            <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-market">
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                                  <IndianRupee className="w-3.5 h-3.5 text-emerald-600" />
-                                </div>
-                                <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-600/80">
-                                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />Live
+                                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-500 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />LIVE
                                 </span>
                               </div>
-                              <p className="text-base sm:text-xl font-bold text-emerald-700 leading-tight">
+                              <p className="text-2xl font-bold text-emerald-700 leading-none">
                                 <AnimatedCounter value={totalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
                               </p>
-                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Market Value</p>
+                              <p className="text-xs text-slate-500 mt-1">Current market value of all funds</p>
                             </div>
-                            {/* Returns (only from schemes with data) */}
-                            <div className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${withReturn >= 0 ? 'from-teal-50 to-teal-100/60 border-teal-200/70' : 'from-rose-50 to-rose-100/60 border-rose-200/70'}`} data-testid="stat-returns">
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${withReturn >= 0 ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
-                                  {withReturn >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-teal-600" /> : <TrendingDown className="w-3.5 h-3.5 text-rose-600" />}
+
+                            {/* Your profit / loss */}
+                            <div className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 ${isGain ? 'border-teal-100 bg-gradient-to-br from-teal-50 to-emerald-50' : 'border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50'}`} data-testid="stat-returns">
+                              <div className={`absolute top-0 right-0 w-20 h-20 rounded-full -translate-y-6 translate-x-6 blur-2xl ${isGain ? 'bg-teal-400/10' : 'bg-rose-400/10'}`} />
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${isGain ? 'bg-teal-100 border-teal-200' : 'bg-rose-100 border-rose-200'}`}>
+                                    {isGain ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
+                                  </div>
+                                  <span className={`text-xs font-semibold ${isGain ? 'text-teal-600' : 'text-rose-600'}`}>
+                                    {isGain ? 'Your profit' : 'Your loss'}
+                                  </span>
                                 </div>
-                                <span className={`text-[8px] font-bold uppercase tracking-widest ${withReturn >= 0 ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
-                                  {withReturn >= 0 ? '+' : ''}{withReturnPct.toFixed(1)}%
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isGain ? 'bg-teal-100 text-teal-700' : 'bg-rose-100 text-rose-700'}`}>
+                                  {isGain ? '+' : ''}{withReturnPct.toFixed(1)}%
                                 </span>
                               </div>
-                              <p className={`text-base sm:text-xl font-bold leading-tight ${withReturn >= 0 ? 'text-teal-700' : 'text-rose-700'}`}>
-                                {withReturn >= 0 ? '+' : '-'}<AnimatedCounter value={Math.abs(withReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
+                              <p className={`text-2xl font-bold leading-none ${isGain ? 'text-teal-700' : 'text-rose-700'}`}>
+                                {isGain ? '+' : '-'}<AnimatedCounter value={Math.abs(withReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
                               </p>
-                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Returns (cost-tracked)</p>
-                            </div>
-                            {/* Schemes total */}
-                            <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100/60 border border-violet-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-schemes">
-                              <div className="flex items-center justify-between mb-1.5">
-                                <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
-                                  <Layers className="w-3.5 h-3.5 text-violet-600" />
-                                </div>
-                                <span className="text-[8px] font-bold uppercase tracking-widest text-violet-600/80">Funds</span>
-                              </div>
-                              <p className="text-base sm:text-xl font-bold text-slate-900 leading-tight"><AnimatedCounter value={totalSchemes} /></p>
-                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {totalInvested > 0 ? `Based on ${withData.length} fund${withData.length !== 1 ? 's' : ''} with cost data` : 'No cost data available'}
+                              </p>
                             </div>
                           </div>
 
-                          {/* ── Info banner ── */}
-                          {withoutData.length > 0 && (
-                            <div className="flex gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
-                              <div className="shrink-0 mt-0.5">
-                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                          {/* ── ROW 2: Growth visual bar ── */}
+                          {totalInvested > 0 && (
+                            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold text-slate-600">How your money has grown</span>
+                                <span className={`text-xs font-bold ${isGain ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                  {isGain ? '📈' : '📉'} {isGain ? '+' : ''}{withReturnPct.toFixed(1)}% overall
+                                </span>
                               </div>
-                              <p className="text-xs text-amber-800 leading-relaxed">
-                                <span className="font-bold">Why are {withoutData.length} scheme{withoutData.length !== 1 ? 's' : ''} missing investment cost?</span>
-                                {" "}Some mutual fund schemes in your CAS do not contain historical investment transaction data — this is common for Demat-held units (CDSL/NSDL) and certain legacy folios where the cost basis isn't included in the statement. Returns can only be calculated for the <span className="font-semibold">{withData.length} scheme{withData.length !== 1 ? 's' : ''}</span> where invested amounts are available.
-                              </p>
+                              <div className="relative h-4 rounded-full bg-slate-200 overflow-hidden">
+                                {/* Invested baseline */}
+                                <div className="absolute inset-0 w-1/2 bg-blue-300/60 rounded-full" style={{ width: '50%' }} />
+                                {/* Growth fill */}
+                                <div
+                                  className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${isGain ? 'bg-gradient-to-r from-blue-400 to-emerald-400' : 'bg-gradient-to-r from-blue-400 to-rose-400'}`}
+                                  style={{ width: `${Math.min(100, growthPct / 2)}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between mt-1.5 text-[10px] text-slate-400">
+                                <span>You put in: {fmtL(totalInvested)}</span>
+                                <span>Now worth: {fmtL(withMarket)}</span>
+                              </div>
                             </div>
                           )}
+
+                          {/* ── ROW 3: Funds breakdown ── */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {/* Funds we can calculate returns for */}
+                            <div className="rounded-2xl border border-emerald-200 bg-white p-4" data-testid="card-with-data">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                <span className="text-xs font-bold text-slate-700">Funds we can track fully</span>
+                                <span className="ml-auto text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">{withData.length} funds</span>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
+                                  <span className="text-xs text-slate-500">Current value</span>
+                                  <span className="text-sm font-bold text-slate-800">{fmtL(withMarket)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-1.5">
+                                  <span className="text-xs text-slate-500">{isGain ? 'Profit earned' : 'Loss so far'}</span>
+                                  <span className={`text-sm font-bold ${isGain ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {isGain ? '+' : ''}{fmtL(withReturn)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Funds without cost history */}
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4" data-testid="card-without-data">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                                <span className="text-xs font-bold text-slate-700">Funds without cost history</span>
+                                <span className="ml-auto text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">{withoutData.length} funds</span>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
+                                  <span className="text-xs text-slate-500">Current value</span>
+                                  <span className="text-sm font-bold text-slate-700">{fmtL(withoutMarket)}</span>
+                                </div>
+                                <div className="flex justify-between items-center py-1.5">
+                                  <span className="text-xs text-slate-500">Profit / loss</span>
+                                  <span className="text-sm font-medium text-slate-400">Can't calculate</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ── ROW 4: Fund count + info note ── */}
+                          <div className="flex flex-wrap gap-3 items-stretch">
+                            <div className="flex-1 min-w-[140px] rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-4 flex items-center gap-3" data-testid="stat-schemes">
+                              <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
+                                <Layers className="w-5 h-5 text-violet-600" />
+                              </div>
+                              <div>
+                                <p className="text-2xl font-bold text-slate-900"><AnimatedCounter value={totalSchemes} /></p>
+                                <p className="text-xs text-slate-500">Total funds · {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+                              </div>
+                            </div>
+
+                            {withoutData.length > 0 && (
+                              <div className="flex-[2] min-w-[220px] flex gap-3 items-start p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-xs font-bold text-amber-800 mb-0.5">Why can't we calculate profit for {withoutData.length} fund{withoutData.length !== 1 ? 's' : ''}?</p>
+                                  <p className="text-xs text-amber-700 leading-relaxed">
+                                    These are usually Demat-held funds (via CDSL/NSDL) where the original purchase price isn't stored in the CAS statement. We can show their current value but not the profit/loss.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </>
                       );
                     })()}
