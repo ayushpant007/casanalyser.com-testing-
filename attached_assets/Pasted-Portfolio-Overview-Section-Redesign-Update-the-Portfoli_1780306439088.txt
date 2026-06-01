@@ -1,0 +1,74 @@
+Portfolio Overview Section Redesign
+
+Update the Portfolio Overview section to provide a clearer breakdown of funds based on whether the invested amount is available in the CAS.
+
+Current Issue
+
+The current Total Invested card shows only the aggregate invested amount available from the CAS, while Market Value, Returns, and Fund Count represent the entire portfolio. This can be misleading because many mutual fund schemes in the CAS may not contain historical invested amount data.
+
+New Structure
+1. Portfolio Summary Header
+
+Show a primary portfolio summary at the top:
+
+Total Invested Amount
+
+Total invested amount across all schemes where invested amount data is available in the CAS.
+Display a breakdown below:
+Invested Amount Available: ₹X
+Invested Amount Not Available: Y schemes
+2. Split Portfolio Into Two Categories
+Section A: Schemes With Invested Amount Available
+
+Display the following metrics:
+
+Market Value
+Total Returns (absolute return amount)
+Total Number of Schemes
+
+Example:
+
+Schemes With Investment Data
+
+Market Value: ₹XX.XX L
+Returns: +₹XX.XX L
+Schemes: XX
+Section B: Schemes Without Invested Amount Available
+
+Display the following metrics:
+
+Market Value
+Total Returns → Show as "Not Available" or "--" because invested amount is unavailable and accurate returns cannot be calculated.
+Total Number of Schemes
+
+Example:
+
+Schemes Without Investment Data
+
+Market Value: ₹XX.XX L
+Returns: --
+Schemes: XX
+Informational Note
+
+Add a highlighted information banner below the metrics:
+
+Important: Some mutual fund schemes in the CAS do not contain historical investment transaction data. As a result, invested amount and return calculations cannot be determined for those schemes. To provide a more accurate portfolio view, schemes with and without investment data have been separated. Market value and scheme counts are displayed independently for both categories.
+
+UI/UX Requirements
+Keep the existing premium card-based design.
+Use two clearly separated sections/cards:
+Green theme → Schemes With Investment Data
+Purple/Gray theme → Schemes Without Investment Data
+Add tooltips explaining why investment data may be unavailable.
+Make the breakdown easy to understand at first glance.
+Ensure totals are calculated correctly and users cannot confuse portfolio market value with invested amount availability.
+Maintain responsive design for desktop and mobile.
+Expected Outcome
+
+Users should immediately understand:
+
+How much invested capital can actually be calculated from the CAS.
+Which schemes lack investment history.
+Market value attributable to each category.
+Why return calculations may not be available for some schemes.
+That the portfolio has been intentionally separated for transparency and accuracy.

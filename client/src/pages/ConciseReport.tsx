@@ -1691,133 +1691,156 @@ export default function ConciseReport() {
 
                   {/* Stats grid */}
                   <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                      {/* Cost Value */}
-                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-cost">
-                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-blue-400/10 rounded-full blur-xl group-hover:bg-blue-400/20 transition-colors" />
-                        <div className="relative flex items-center justify-between mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
-                            <Wallet className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <span className="text-[8px] font-bold uppercase tracking-widest text-blue-500/80">Cost</span>
-                        </div>
-                        <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight">
-                          {totalInvested >= 100000
-                            ? <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
-                            : <span>₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
-                          }
-                        </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Invested</p>
-                      </div>
-
-                      {/* Market Value */}
-                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-market">
-                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-emerald-400/10 rounded-full blur-xl group-hover:bg-emerald-400/20 transition-colors" />
-                        <div className="relative flex items-center justify-between mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                            <IndianRupee className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-600/80">
-                            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                            Live
-                          </span>
-                        </div>
-                        <p className="relative text-base sm:text-xl font-bold text-emerald-700 leading-tight">
-                          <AnimatedCounter value={totalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
-                        </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Market Value</p>
-                      </div>
-
-                      {/* Returns */}
-                      <div
-                        className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${
-                          isPositive
-                            ? 'from-teal-50 to-teal-100/60 border-teal-200/70'
-                            : 'from-rose-50 to-rose-100/60 border-rose-200/70'
-                        }`}
-                        data-testid="stat-returns"
-                      >
-                        <div className={`absolute -top-6 -right-6 w-16 h-16 rounded-full blur-xl transition-colors ${isPositive ? 'bg-teal-400/10 group-hover:bg-teal-400/20' : 'bg-rose-400/10 group-hover:bg-rose-400/20'}`} />
-                        <div className="relative flex items-center justify-between mb-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPositive ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
-                            {isPositive ? <TrendingUp className="w-4 h-4 text-teal-600" /> : <TrendingDown className="w-4 h-4 text-rose-600" />}
-                          </div>
-                          <span className={`text-[8px] font-bold uppercase tracking-widest ${isPositive ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
-                            {isPositive ? '+' : ''}{absoluteReturnPct.toFixed(1)}%
-                          </span>
-                        </div>
-                        <p className={`relative text-base sm:text-xl font-bold leading-tight ${isPositive ? 'text-teal-700' : 'text-rose-700'}`}>
-                          {isPositive ? '+' : '-'}<AnimatedCounter value={Math.abs(absoluteReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
-                        </p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Returns</p>
-                      </div>
-
-                      {/* Schemes */}
-                      <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100/60 border border-violet-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-schemes">
-                        <div className="absolute -top-6 -right-6 w-16 h-16 bg-violet-400/10 rounded-full blur-xl group-hover:bg-violet-400/20 transition-colors" />
-                        <div className="relative flex items-center justify-between mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
-                            <Layers className="w-4 h-4 text-violet-600" />
-                          </div>
-                          <span className="text-[8px] font-bold uppercase tracking-widest text-violet-600/80">Funds</span>
-                        </div>
-                        <p className="relative text-base sm:text-xl font-bold text-slate-900 leading-tight"><AnimatedCounter value={totalSchemes} /></p>
-                        <p className="relative text-[10px] sm:text-xs text-slate-500 mt-0.5">{accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
-                      </div>
-                    </div>
-                    {analysis.cas_source !== 'CAMS' && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Allocation Donut */}
-                      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Allocation</p>
-                        {accounts.length > 0 ? (
-                          <div className="flex items-center gap-4">
-                            <PieChart width={130} height={130}>
-                              <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={3} dataKey="value">
-                                {pieData.map((_: any, idx: number) => <Cell key={idx} fill={COLORS[idx % COLORS.length]} />)}
-                              </Pie>
-                              <RechartsTooltip formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, '']} contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                            </PieChart>
-                            <div className="flex flex-col gap-2 flex-1">
-                              {accounts.map((a: any, idx: number) => {
-                                const pct = pieTotal > 0 ? ((a.value / pieTotal) * 100).toFixed(1) : '0.0';
-                                return (
-                                  <div key={idx} className="flex items-center gap-2">
-                                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                                    <span className="text-xs text-slate-600 flex-1 leading-tight">{a.type}</span>
-                                    <span className="text-xs font-bold text-slate-700">{pct}%</span>
-                                  </div>
-                                );
-                              })}
+                    {(() => {
+                      const withData    = mfSnapshot.filter((m: any) => (m.invested_amount || 0) > 0);
+                      const withoutData = mfSnapshot.filter((m: any) => !(m.invested_amount > 0));
+                      const withMarket   = withData.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
+                      const withReturn   = withData.reduce((s: number, m: any) => s + (m.unrealised_profit_loss || 0), 0);
+                      const withoutMarket = withoutData.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
+                      const withReturnPct = totalInvested > 0 ? (withReturn / totalInvested) * 100 : 0;
+                      const fmtAmt = (v: number) => v >= 100000
+                        ? `₹${(v / 100000).toFixed(2)} L`
+                        : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+                      return (
+                        <>
+                          {/* ── Summary header bar ── */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Total Invested (from CAS)</p>
+                              <p className="text-2xl sm:text-3xl font-bold text-slate-900">
+                                {totalInvested >= 100000
+                                  ? <AnimatedCounter value={totalInvested / 100000} prefix="₹" suffix=" L" decimals={2} />
+                                  : <span>₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</span>
+                                }
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-700">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                {withData.length} scheme{withData.length !== 1 ? 's' : ''} with cost data
+                              </div>
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-500">
+                                <span className="w-2 h-2 rounded-full bg-slate-400" />
+                                {withoutData.length} scheme{withoutData.length !== 1 ? 's' : ''} without cost data
+                              </div>
                             </div>
                           </div>
-                        ) : <div className="h-36 flex items-center justify-center text-slate-400 text-xs">No allocation data</div>}
-                      </div>
-                      {/* Accounts */}
-                      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-3">Accounts</p>
-                        <div className="space-y-2">
-                          {accounts.map((acc: any, idx: number) => {
-                            const initials = (acc.type || '??').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
-                            const pct = pieTotal > 0 ? ((acc.value / pieTotal) * 100).toFixed(1) : '0.0';
-                            return (
-                              <div key={idx} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-100">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }}>
-                                  {initials}
+
+                          {/* ── Two category cards ── */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {/* Section A — With invested data */}
+                            <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50/60 p-4" data-testid="card-with-data">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-300/60 flex items-center justify-center">
+                                  <Wallet className="w-3.5 h-3.5 text-emerald-600" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-semibold text-slate-800 leading-tight truncate">{acc.type}</p>
-                                  <p className="text-[10px] text-slate-400 leading-tight truncate">{acc.count} scheme{acc.count !== 1 ? 's' : ''}{acc.details ? ` · ${acc.details}` : ''}</p>
+                                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Schemes With Investment Data</span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Market Value</p>
+                                  <p className="text-sm font-bold text-slate-800">{fmtAmt(withMarket)}</p>
                                 </div>
-                                <div className="text-right flex-shrink-0">
-                                  <p className="text-xs font-bold text-slate-800">{formatLakh(acc.value || 0)}</p>
-                                  <p className="text-[10px] text-slate-400">{pct}%</p>
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Returns</p>
+                                  <p className={`text-sm font-bold ${withReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {withReturn >= 0 ? '+' : ''}{fmtAmt(Math.abs(withReturn))}
+                                    <span className="text-[10px] font-medium ml-1">({withReturnPct >= 0 ? '+' : ''}{withReturnPct.toFixed(1)}%)</span>
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Schemes</p>
+                                  <p className="text-sm font-bold text-slate-800">{withData.length}</p>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>}
+                            </div>
+
+                            {/* Section B — Without invested data */}
+                            <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-violet-50/40 p-4" data-testid="card-without-data">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-200/60 flex items-center justify-center">
+                                  <Layers className="w-3.5 h-3.5 text-violet-500" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Schemes Without Investment Data</span>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Market Value</p>
+                                  <p className="text-sm font-bold text-slate-700">{fmtAmt(withoutMarket)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Returns</p>
+                                  <p className="text-sm font-bold text-slate-400">—</p>
+                                  <p className="text-[9px] text-slate-400">Not available</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] text-slate-400 mb-0.5">Schemes</p>
+                                  <p className="text-sm font-bold text-slate-700">{withoutData.length}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ── Total portfolio row ── */}
+                          <div className="grid grid-cols-3 gap-2">
+                            {/* Total Market Value */}
+                            <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-market">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                                  <IndianRupee className="w-3.5 h-3.5 text-emerald-600" />
+                                </div>
+                                <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-widest text-emerald-600/80">
+                                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />Live
+                                </span>
+                              </div>
+                              <p className="text-base sm:text-xl font-bold text-emerald-700 leading-tight">
+                                <AnimatedCounter value={totalValuation / 100000} prefix="₹" suffix=" L" decimals={2} />
+                              </p>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Total Market Value</p>
+                            </div>
+                            {/* Returns (only from schemes with data) */}
+                            <div className={`group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br border hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden ${withReturn >= 0 ? 'from-teal-50 to-teal-100/60 border-teal-200/70' : 'from-rose-50 to-rose-100/60 border-rose-200/70'}`} data-testid="stat-returns">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${withReturn >= 0 ? 'bg-teal-500/15' : 'bg-rose-500/15'}`}>
+                                  {withReturn >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-teal-600" /> : <TrendingDown className="w-3.5 h-3.5 text-rose-600" />}
+                                </div>
+                                <span className={`text-[8px] font-bold uppercase tracking-widest ${withReturn >= 0 ? 'text-teal-600/80' : 'text-rose-600/80'}`}>
+                                  {withReturn >= 0 ? '+' : ''}{withReturnPct.toFixed(1)}%
+                                </span>
+                              </div>
+                              <p className={`text-base sm:text-xl font-bold leading-tight ${withReturn >= 0 ? 'text-teal-700' : 'text-rose-700'}`}>
+                                {withReturn >= 0 ? '+' : '-'}<AnimatedCounter value={Math.abs(withReturn) / 100000} prefix="₹" suffix=" L" decimals={2} />
+                              </p>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">Returns (cost-tracked)</p>
+                            </div>
+                            {/* Schemes total */}
+                            <div className="group relative p-3 sm:p-4 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100/60 border border-violet-200/70 hover:shadow-md hover:-translate-y-0.5 transition-all overflow-hidden" data-testid="stat-schemes">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
+                                  <Layers className="w-3.5 h-3.5 text-violet-600" />
+                                </div>
+                                <span className="text-[8px] font-bold uppercase tracking-widest text-violet-600/80">Funds</span>
+                              </div>
+                              <p className="text-base sm:text-xl font-bold text-slate-900 leading-tight"><AnimatedCounter value={totalSchemes} /></p>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5">{accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
+                            </div>
+                          </div>
+
+                          {/* ── Info banner ── */}
+                          {withoutData.length > 0 && (
+                            <div className="flex gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                              <div className="shrink-0 mt-0.5">
+                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                              </div>
+                              <p className="text-xs text-amber-800 leading-relaxed">
+                                <span className="font-bold">Why are {withoutData.length} scheme{withoutData.length !== 1 ? 's' : ''} missing investment cost?</span>
+                                {" "}Some mutual fund schemes in your CAS do not contain historical investment transaction data — this is common for Demat-held units (CDSL/NSDL) and certain legacy folios where the cost basis isn't included in the statement. Returns can only be calculated for the <span className="font-semibold">{withData.length} scheme{withData.length !== 1 ? 's' : ''}</span> where invested amounts are available.
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   </>
                 );
