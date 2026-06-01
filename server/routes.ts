@@ -39,7 +39,10 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
       const client = new GoogleGenerativeAI(key);
       const model = client.getGenerativeModel({ 
         model: modelName,
-        generationConfig: options.responseMimeType ? { responseMimeType: options.responseMimeType } : undefined
+        generationConfig: {
+          temperature: 0,          // deterministic — same PDF always gives same numbers
+          ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
+        }
       });
       const result = await model.generateContent(prompt);
       return result.response.text();
