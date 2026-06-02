@@ -1696,6 +1696,35 @@ export default function ConciseReport() {
 
                   {/* Stats grid */}
                   <div className="p-3 sm:p-5 space-y-5">
+                    {/* ── Total Portfolio Value from CAS ── */}
+                    {(() => {
+                      const casTotal = analysis.summary?.net_asset_value;
+                      if (!casTotal || casTotal <= 0) return null;
+                      const fmtCas = (v: number) => v >= 100000
+                        ? `₹${(v / 100000).toFixed(2)} L`
+                        : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+                      return (
+                        <div className="relative overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-indigo-50 to-purple-50 px-5 py-4 flex items-center justify-between gap-4" data-testid="stat-cas-total">
+                          <div className="absolute -top-6 -right-6 w-24 h-24 bg-violet-300/20 rounded-full blur-2xl" />
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
+                              <IndianRupee className="w-5 h-5 text-violet-600" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value</p>
+                              <p className="text-[10px] text-violet-400 mt-0.5">As reported in your CAS statement</p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-2xl sm:text-3xl font-black text-violet-700 leading-none">
+                              <AnimatedCounter value={casTotal / 100000} prefix="₹" suffix=" L" decimals={2} />
+                            </p>
+                            <p className="text-[10px] text-violet-400 mt-0.5">{fmtCas(casTotal)}</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {(() => {
                       const withData     = mfSnapshot.filter((m: any) => (m.invested_amount || 0) > 0);
                       const withoutData  = mfSnapshot.filter((m: any) => !(m.invested_amount > 0));
