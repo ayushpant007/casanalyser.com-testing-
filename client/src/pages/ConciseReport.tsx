@@ -1645,7 +1645,6 @@ export default function ConciseReport() {
                 </div>
               )}
               <div className="flex items-center gap-2 text-slate-400">
-                <Calendar className="w-4 h-4" />
                 <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
               </div>
             </div>
