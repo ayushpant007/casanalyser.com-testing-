@@ -1647,11 +1647,11 @@ export default function ConciseReport() {
                 <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
               </div>
             </div>
-            {/* Brand logo */}
+            {/* Brand logo — hidden on mobile to avoid crowding long names */}
             <img
               src="/financial-friend-logo.png"
               alt="Financial Friend"
-              className="h-24 sm:h-28 w-auto shrink-0"
+              className="hidden sm:block h-24 sm:h-28 w-auto shrink-0"
             />
           </div>
 
