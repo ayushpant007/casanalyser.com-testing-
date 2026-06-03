@@ -1631,12 +1631,12 @@ export default function ConciseReport() {
                 <div className="flex items-center flex-wrap gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-white">{investorName}</h1>
                   {report.investorType && (
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${
                       report.investorType.toLowerCase().includes("aggressive")
-                        ? "bg-rose-500/20 text-rose-300 border-rose-400/30"
+                        ? "text-rose-300"
                         : report.investorType.toLowerCase().includes("moderate")
-                        ? "bg-amber-500/20 text-amber-300 border-amber-400/30"
-                        : "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
+                        ? "text-amber-300"
+                        : "text-emerald-300"
                     }`}>
                       <Shield className="w-3 h-3" />
                       {report.investorType}{report.ageGroup ? ` · ${report.ageGroup}` : ""}
