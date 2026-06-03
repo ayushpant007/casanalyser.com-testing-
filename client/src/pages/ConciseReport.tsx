@@ -1611,7 +1611,7 @@ export default function ConciseReport() {
           <img
             src="/financial-friend-logo.png"
             alt="Financial Friend"
-            className="h-14 sm:h-16 w-auto"
+            className="h-40 sm:h-48 w-auto"
           />
           <div className="flex items-center gap-2 shrink-0">
             <Button
