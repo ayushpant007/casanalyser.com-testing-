@@ -1686,7 +1686,7 @@ export default function ConciseReport() {
 
                     <div className="relative flex items-start justify-between gap-4 flex-wrap">
                       <div className="min-w-0">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-sm mb-3">
+                        <div className="inline-flex items-center gap-1.5 mb-3">
                           <Sparkles className="w-3 h-3 text-amber-300" />
                           <span className="text-[10px] font-bold uppercase tracking-widest text-white/95">Snapshot</span>
                         </div>
