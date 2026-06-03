@@ -1599,21 +1599,16 @@ export default function ConciseReport() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-4 relative z-10">
-        {/* Top bar: Back + logo (center) + Download */}
-        <div className="flex items-center justify-between gap-3">
+        {/* Top bar: Back + title + Download */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors shrink-0"
+            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Back to Full Report</span>
           </button>
-          <img
-            src="/financial-friend-logo.png"
-            alt="Financial Friend"
-            className="h-40 sm:h-48 w-auto"
-          />
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2">
             <Button
               onClick={downloadPDF}
               disabled={isDownloading}
@@ -1652,6 +1647,12 @@ export default function ConciseReport() {
                 <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
               </div>
             </div>
+            {/* Brand logo */}
+            <img
+              src="/financial-friend-logo.png"
+              alt="Financial Friend"
+              className="h-24 sm:h-28 w-auto shrink-0"
+            />
           </div>
 
           {/* 1. Portfolio Overview */}
