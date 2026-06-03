@@ -1625,28 +1625,37 @@ export default function ConciseReport() {
         <div ref={reportRef} className="space-y-6">
 
           {/* Header */}
-          <div className="pb-4 border-b border-slate-200/20">
-            {investorName && (
-              <div className="flex items-center flex-wrap gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-white">{investorName}</h1>
-                {report.investorType && (
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                    report.investorType.toLowerCase().includes("aggressive")
-                      ? "bg-rose-500/20 text-rose-300 border-rose-400/30"
-                      : report.investorType.toLowerCase().includes("moderate")
-                      ? "bg-amber-500/20 text-amber-300 border-amber-400/30"
-                      : "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
-                  }`}>
-                    <Shield className="w-3 h-3" />
-                    {report.investorType}{report.ageGroup ? ` · ${report.ageGroup}` : ""}
-                  </span>
-                )}
+          <div className="pb-4 border-b border-slate-200/20 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              {investorName && (
+                <div className="flex items-center flex-wrap gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-white">{investorName}</h1>
+                  {report.investorType && (
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                      report.investorType.toLowerCase().includes("aggressive")
+                        ? "bg-rose-500/20 text-rose-300 border-rose-400/30"
+                        : report.investorType.toLowerCase().includes("moderate")
+                        ? "bg-amber-500/20 text-amber-300 border-amber-400/30"
+                        : "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
+                    }`}>
+                      <Shield className="w-3 h-3" />
+                      {report.investorType}{report.ageGroup ? ` · ${report.ageGroup}` : ""}
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-slate-400">
+                <Calendar className="w-4 h-4" />
+                <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
               </div>
-            )}
-            <div className="flex items-center gap-2 text-slate-400">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
             </div>
+            {/* Brand logo */}
+            <img
+              src="/financial-friend-logo.png"
+              alt="Financial Friend"
+              className="h-12 sm:h-14 w-auto shrink-0 rounded-lg"
+              style={{ background: "#000", padding: "4px 8px" }}
+            />
           </div>
 
           {/* 1. Portfolio Overview */}
