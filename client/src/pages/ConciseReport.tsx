@@ -1653,8 +1653,7 @@ export default function ConciseReport() {
             <img
               src="/financial-friend-logo.png"
               alt="Financial Friend"
-              className="h-12 sm:h-14 w-auto shrink-0 rounded-lg"
-              style={{ background: "#000", padding: "4px 8px" }}
+              className="h-16 sm:h-20 w-auto shrink-0"
             />
           </div>
 
