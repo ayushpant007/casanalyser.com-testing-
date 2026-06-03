@@ -3,7 +3,7 @@ import { useReport } from "@/hooks/use-reports";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, ArrowLeft, Calendar, CalendarDays, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Shield, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw } from "lucide-react";
+import { Download, Loader2, ArrowLeft, Calendar, CalendarDays, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Shield, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw, FileText } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, Area, AreaChart } from "recharts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2 } from "lucide-react";
@@ -2754,6 +2754,122 @@ export default function ConciseReport() {
                 {filtered.length === 0 && (
                   <div className="py-12 text-center text-slate-400 text-sm">No funds match "{snapshotSearch}"</div>
                 )}
+              </div>
+            );
+          })()}
+
+          {/* ── Full Portfolio Audit ────────────────────────────────────────── */}
+          {mfSnapshot.length > 0 && (() => {
+            const auditPL = totalUnrealised;
+            const auditPLPct = totalInvested > 0 ? (auditPL / totalInvested) * 100 : 0;
+            const auditPositive = auditPL >= 0;
+            const fmtL2 = (v: number) => v >= 100000
+              ? `₹${(v / 100000).toFixed(2)}L`
+              : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+            const auditV2 = mfSnapshot.reduce((s: number, m: any) => s + (m.valuation || 0), 0);
+            const actMap2: Record<string, number> = {};
+            mfSnapshot.forEach((mf: any) => {
+              const cat = (mf.fund_category || "").toLowerCase();
+              const pct = auditV2 > 0 ? (mf.valuation / auditV2) * 100 : 0;
+              if (cat.includes("equity")) actMap2["Equity"] = (actMap2["Equity"] || 0) + pct;
+              else if (cat.includes("debt")) actMap2["Debt"] = (actMap2["Debt"] || 0) + pct;
+              else if (cat.includes("hybrid")) actMap2["Hybrid"] = (actMap2["Hybrid"] || 0) + pct;
+              else if (cat.includes("gold") || cat.includes("silver")) actMap2["Gold/Silver"] = (actMap2["Gold/Silver"] || 0) + pct;
+              else actMap2["Others"] = (actMap2["Others"] || 0) + pct;
+            });
+            const allCats2 = ["Equity","Debt","Hybrid","Gold/Silver","Others"];
+            const dominant2 = allCats2.reduce((a, b) => (actMap2[a] || 0) > (actMap2[b] || 0) ? a : b, allCats2[0]);
+            const dominantPct2 = (actMap2[dominant2] || 0).toFixed(1);
+            const ideal2 = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
+            const missing2 = allCats2.filter(c => (actMap2[c] || 0) < 1 && parseFloat((ideal2[c] || "0").replace("%","")) > 0);
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" data-testid="section-portfolio-audit">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 text-white flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-indigo-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">AI Summary</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-white">Full Portfolio Audit</h3>
+                  </div>
+                  {investorName && (
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Generated for</span>
+                      <p className="text-sm font-bold text-white">{investorName}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Key stats strip */}
+                <div className="grid grid-cols-3 border-b border-slate-100 divide-x divide-slate-100">
+                  <div className="px-5 py-3.5 text-center">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Portfolio Worth</p>
+                    <p className="text-lg font-black text-slate-800">{fmtL2(totalValuation)}</p>
+                  </div>
+                  <div className="px-5 py-3.5 text-center">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Total Returns</p>
+                    <p className={`text-lg font-black ${auditPositive ? "text-emerald-600" : "text-rose-600"}`}>
+                      {auditPositive ? "+" : ""}{auditPLPct.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="px-5 py-3.5 text-center">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Total Funds</p>
+                    <p className="text-lg font-black text-slate-800">{mfSnapshot.length}</p>
+                  </div>
+                </div>
+
+                {/* Audit paragraph */}
+                <div className="px-6 py-6 space-y-5">
+                  <p className="text-sm sm:text-[15px] text-slate-700 leading-relaxed">
+                    {investorName
+                      ? <><strong className="text-slate-900">{investorName}</strong>, here's a complete picture of your portfolio.</>
+                      : "Here's a complete picture of your portfolio."
+                    }{" "}
+                    You've built a portfolio currently worth{" "}
+                    <strong className="text-slate-900">{fmtL2(totalValuation)}</strong> from an investment of{" "}
+                    <strong className="text-slate-900">{fmtL2(totalInvested)}</strong>, delivering an overall return of{" "}
+                    <strong className={auditPositive ? "text-emerald-600" : "text-rose-600"}>
+                      {auditPositive ? "+" : ""}{auditPLPct.toFixed(1)}%{" "}
+                      ({auditPositive ? "+" : "-"}{fmtL2(Math.abs(auditPL))})
+                    </strong>{" "}
+                    across <strong className="text-slate-900">{mfSnapshot.length} mutual fund schemes</strong>.{" "}
+                    Your portfolio is currently tilted towards{" "}
+                    <strong className="text-slate-900">{dominant2} ({dominantPct2}%)</strong>,{" "}
+                    broadly in line with your{" "}
+                    <strong className="text-slate-900">{report.investorType || "chosen"}</strong> risk profile for the{" "}
+                    <strong className="text-slate-900">{report.ageGroup || "—"}</strong> age group.{" "}
+                    {missing2.length > 0 && (
+                      <>
+                        However, you have limited or no exposure to{" "}
+                        <strong className="text-slate-900">{missing2.join(", ")}</strong> — asset classes that could enhance diversification, reduce volatility, and improve long-term risk-adjusted returns.{" "}
+                      </>
+                    )}
+                    While the overall trajectory looks <strong className="text-slate-900">{auditPositive ? "positive" : "concerning"}</strong>,
+                    a deeper review of individual fund performance, overlapping schemes, and category gaps is essential to fully optimise your portfolio's potential.
+                  </p>
+
+                  {/* CTA box */}
+                  <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-indigo-900 mb-1">Ready to turn these insights into action?</p>
+                      <p className="text-xs text-indigo-700 leading-relaxed">
+                        Numbers are only a starting point. A one-on-one consultation with <strong>Financial Friend</strong> can help you rebalance strategically, eliminate overlapping funds, and build a personalised investment roadmap aligned with your long-term financial goals.
+                      </p>
+                    </div>
+                    <a
+                      href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-lg whitespace-nowrap"
+                      style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)", boxShadow: "0 4px 16px rgba(99,102,241,0.35)" }}
+                      data-testid="link-audit-cta-calendly"
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                      Book Free Consultation
+                    </a>
+                  </div>
+                </div>
               </div>
             );
           })()}
