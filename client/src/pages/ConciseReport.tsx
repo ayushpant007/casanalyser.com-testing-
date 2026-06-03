@@ -1625,10 +1625,16 @@ export default function ConciseReport() {
         <div ref={reportRef} className="space-y-6">
 
           {/* Header */}
-          <div className="pb-4 border-b border-slate-200/20 flex items-start justify-between gap-4">
-            <div className="min-w-0">
+          <div className="pb-4 border-b border-slate-200/20 flex flex-col sm:flex-row items-center sm:items-start sm:justify-between gap-4">
+            {/* Brand logo — top-center on mobile, right side on desktop */}
+            <img
+              src="/financial-friend-logo.png"
+              alt="Financial Friend"
+              className="h-24 sm:h-28 w-auto shrink-0 order-first sm:order-last"
+            />
+            <div className="min-w-0 order-last sm:order-first w-full sm:w-auto text-center sm:text-left">
               {investorName && (
-                <div className="flex items-center flex-wrap gap-3 mb-2">
+                <div className="flex items-center justify-center sm:justify-start flex-wrap gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-white">{investorName}</h1>
                   {report.investorType && (
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${
@@ -1643,16 +1649,10 @@ export default function ConciseReport() {
                   )}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-slate-400">
                 <span className="text-sm">Concise Report · Analyzed on {report.createdAt ? format(new Date(report.createdAt), "MMMM d, yyyy") : "Unknown Date"}</span>
               </div>
             </div>
-            {/* Brand logo */}
-            <img
-              src="/financial-friend-logo.png"
-              alt="Financial Friend"
-              className="h-24 sm:h-28 w-auto shrink-0"
-            />
           </div>
 
           {/* 1. Portfolio Overview */}
