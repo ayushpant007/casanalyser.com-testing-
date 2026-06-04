@@ -24,6 +24,27 @@ import { pool } from "./db";
 const execAsync = promisify(exec);
 const upload = multer({ storage: multer.memoryStorage() });
 
+// ── Async job store ───────────────────────────────────────────────────────────
+interface AnalysisJob {
+  status: "processing" | "done" | "error";
+  report?: any;
+  message?: string;
+  createdAt: number;
+}
+const analysisJobs = new Map<string, AnalysisJob>();
+
+// Clean up jobs older than 30 minutes to prevent memory leak
+setInterval(() => {
+  const cutoff = Date.now() - 30 * 60 * 1000;
+  for (const [id, job] of analysisJobs.entries()) {
+    if (job.createdAt < cutoff) analysisJobs.delete(id);
+  }
+}, 5 * 60 * 1000);
+
+function generateJobId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 const GEMINI_KEYS = [
   process.env.GEMINI_API_KEY_1,
   process.env.GEMINI_API_KEY_2,
@@ -132,21 +153,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  app.post(api.analyze.path, upload.single("file"), async (req: any, res) => {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-    const password = req.body.password;
-    if (!password) {
-      return res.status(400).json({ message: "Password is required" });
-    }
-    const investorType = req.body.investorType || "Aggressive";
-    const ageGroup = req.body.ageGroup || "20-35";
-
+  // ── Background analysis worker ────────────────────────────────────────────
+  async function runAnalysisJob(jobId: string, fileBuffer: Buffer, originalName: string, password: string, investorType: string, ageGroup: string) {
     const tempPath = path.join(os.tmpdir(), `upload-${Date.now()}.pdf`);
-
     try {
-      await fs.writeFile(tempPath, req.file.buffer);
+      await fs.writeFile(tempPath, fileBuffer);
 
       let text = "";
       try {
@@ -154,17 +165,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         text = stdout;
       } catch (e: any) {
         console.error("PDF Parsing error:", e);
-        if (e.message.includes("Incorrect password") || (e.stderr && e.stderr.includes("Incorrect password"))) {
-            return res.status(401).json({ message: "Incorrect password" });
-        }
-        if (e.code === 3 || e.code === 1) {
-             return res.status(401).json({ message: "Incorrect password or file permission error" });
+        const msg = (e.message || "") + (e.stderr || "");
+        if (msg.includes("Incorrect password") || e.code === 3 || e.code === 1) {
+          analysisJobs.set(jobId, { status: "error", message: "Incorrect password", createdAt: analysisJobs.get(jobId)!.createdAt });
+          return;
         }
         throw e;
       }
 
       if (!text || text.trim().length === 0) {
-        return res.status(400).json({ message: "Could not extract text from PDF. It might be empty or scanned." });
+        analysisJobs.set(jobId, { status: "error", message: "Could not extract text from PDF. It might be empty or scanned.", createdAt: analysisJobs.get(jobId)!.createdAt });
+        return;
       }
 
       let csvContent = "";
@@ -248,12 +259,9 @@ ${text}`;
       const analysisRawStr = typeof analysisRawResult === 'string' ? analysisRawResult : "";
       const analysis = JSON.parse(analysisRawStr || "{}");
 
-      // Detect CAS source (CAMS / NSDL / CDSL) from raw text
       analysis.cas_source = detectCasSource(text);
 
-      // ── Strip equity stocks (INE ISINs) from mf_snapshot ─────────────────
-      // The AI sometimes adds equity shares (INE... ISINs) from Demat sections
-      // to mf_snapshot despite the prompt instruction. Remove them server-side.
+      // ── Strip equity stocks (INE ISINs) from mf_snapshot ──────────────────
       if (Array.isArray(analysis.mf_snapshot)) {
         const before = analysis.mf_snapshot.length;
         analysis.mf_snapshot = analysis.mf_snapshot.filter((m: any) => {
@@ -263,11 +271,8 @@ ${text}`;
         const removed = before - analysis.mf_snapshot.length;
         if (removed > 0) console.log(`[Filter] Removed ${removed} equity stock(s) (INE ISINs) from mf_snapshot`);
       }
-      // ─────────────────────────────────────────────────────────────────────
 
       // ── Server-side Demat MF extraction ───────────────────────────────────
-      // Directly scans raw PDF text for INF... ISINs in Demat holding sections.
-      // Handles both single-line and multi-line table layouts from pdftotext.
       try {
         const existingIsins = new Set<string>(
           (analysis.mf_snapshot || []).map((m: any) => m.isin).filter(Boolean)
@@ -299,10 +304,7 @@ ${text}`;
         };
 
         const parseNum = (s: string) => parseFloat(s.replace(/,/g, "")) || 0;
-
         const lines = text.split(/\r?\n/);
-
-        // Build: isin → { lineIdx, context block (lines around it) }
         const isinLineIndex: Record<string, number> = {};
         for (let i = 0; i < lines.length; i++) {
           const m = lines[i].match(/\b(INF[A-Z0-9]{9})\b/);
@@ -313,55 +315,27 @@ ${text}`;
 
         for (const [isin, lineIdx] of Object.entries(isinLineIndex)) {
           if (existingIsins.has(isin)) continue;
-
-          // Collect a context window: the ISIN line ± 4 lines
           const ctxLines = lines.slice(Math.max(0, lineIdx - 1), lineIdx + 6);
           const block = ctxLines.join(" ");
-
-          // Extract all positive numbers from the block
           const nums = [...block.matchAll(/([\d,]+\.?\d*)/g)]
             .map(m => parseNum(m[1]))
             .filter(n => n > 0 && n < 1e10);
-
-          // Extract scheme name from lines[lineIdx]: strip ISIN and leading/trailing spaces
-          // Also check lineIdx+1 if current line is just the ISIN
           let schemeLine = lines[lineIdx].replace(/\b(INF[A-Z0-9]{9})\b/, "").trim();
-          if (schemeLine.length < 5 && lines[lineIdx + 1]) {
-            schemeLine = lines[lineIdx + 1].trim();
-          }
-          // Remove any trailing numbers from scheme name
+          if (schemeLine.length < 5 && lines[lineIdx + 1]) schemeLine = lines[lineIdx + 1].trim();
           const schemeName = schemeLine.replace(/[\s\d,.]+$/, "").trim().replace(/\s+/g, " ") || isin;
-
-          // Need at least 2 positive numbers to determine units/value
           if (nums.length < 2) {
             console.log(`[Demat] Skipping ${isin} — not enough numbers in context (found ${nums.length})`);
             continue;
           }
-
-          // Heuristic mapping:
-          // - Units = largest number that, when multiplied by another, approximates the last (largest) number
-          // - Value = typically the largest number in the block
-          // - NAV = value / units
           const sortedNums = [...nums].sort((a, b) => b - a);
-          const value = sortedNums[0]; // likely the market value (largest)
-          // Find units: a number where units × some_price ≈ value
+          const value = sortedNums[0];
           let units = 0, nav = 0;
           for (const u of nums) {
             if (u === value) continue;
             const impliedNav = value / u;
-            // Reasonable NAV range: 0.1 to 10000
-            if (impliedNav >= 0.1 && impliedNav <= 10000) {
-              units = u;
-              nav = impliedNav;
-              break;
-            }
+            if (impliedNav >= 0.1 && impliedNav <= 10000) { units = u; nav = impliedNav; break; }
           }
-          if (units <= 0) {
-            units = nums[0];
-            nav = nums.length > 1 ? nums[1] : 0;
-          }
-
-          // If name extraction failed, look up scheme name from MFAPI
+          if (units <= 0) { units = nums[0]; nav = nums.length > 1 ? nums[1] : 0; }
           let resolvedName = schemeName;
           if (!schemeName || schemeName === isin || schemeName.length < 6) {
             try {
@@ -369,20 +343,11 @@ ${text}`;
               if (lookup?.name) resolvedName = lookup.name;
             } catch (_) {}
           }
-
           const { fund_category, fund_type } = inferCategory(resolvedName);
           (analysis.mf_snapshot = analysis.mf_snapshot || []).push({
-            isin,
-            scheme_name: resolvedName,
-            folio_no: "",
-            units,
-            nav,
-            invested_amount: 0,
-            valuation: value,
-            unrealised_profit_loss: 0,
-            fund_category,
-            fund_type,
-            source: "demat",
+            isin, scheme_name: resolvedName, folio_no: "", units, nav,
+            invested_amount: 0, valuation: value, unrealised_profit_loss: 0,
+            fund_category, fund_type, source: "demat",
           });
           existingIsins.add(isin);
           console.log(`[Demat] Added: ${isin} | ${resolvedName} | units=${units.toFixed(3)} nav=${nav.toFixed(4)} value=${value}`);
@@ -390,96 +355,83 @@ ${text}`;
       } catch (dematErr) {
         console.error("[Demat] Extraction error:", dematErr);
       }
-      // ─────────────────────────────────────────────────────────────────────
 
-      // ── Fix any entries where AI stored ISIN as scheme_name ───────────────
-      // Also detects and corrects swapped nav / invested_amount values.
+      // ── Fix swapped nav / invested_amount ─────────────────────────────────
       if (Array.isArray(analysis.mf_snapshot)) {
         await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
-          // 1. Fix scheme name if it's just the ISIN or empty
           const name: string = (entry.scheme_name || "").trim();
           const isinPattern = /^INF[A-Z0-9]{9}$/;
           if (!name || name === entry.isin || name.length < 6 || isinPattern.test(name)) {
             try {
-              // Try findSchemeCodeByISIN first (fast, local map)
               let resolvedName = "";
               const lookup = await findSchemeCodeByISIN(entry.isin);
               if (lookup?.name && lookup.name.length > 5) {
                 resolvedName = lookup.name;
               } else {
-                // Fallback: fetchNavByISIN resolves via MFAPI search
                 const navData = await fetchNavByISIN(entry.isin, entry.isin);
                 if (navData?.scheme_name && navData.scheme_name.length > 5 && !isinPattern.test(navData.scheme_name)) {
                   resolvedName = navData.scheme_name;
                 }
               }
-              if (resolvedName) {
-                console.log(`[NameFix] ${entry.isin}: "${name}" → "${resolvedName}"`);
-                entry.scheme_name = resolvedName;
-              }
+              if (resolvedName) { console.log(`[NameFix] ${entry.isin}: "${name}" → "${resolvedName}"`); entry.scheme_name = resolvedName; }
             } catch (_) {}
           }
-
-          // 2. Detect swapped nav / invested_amount for CAS folio entries.
           if (entry.source === "cas" && entry.units > 0) {
-
-            // Case A: nav is tiny (< ₹1) but invested_amount looks like a NAV value (> ₹50).
-            // For Indian MFs, NAV per unit is almost always ≥ ₹1.
             if (entry.nav > 0 && entry.invested_amount > 0) {
               const navProduct = entry.units * entry.nav;
               if (navProduct < 1.0 && entry.nav < 10 && entry.invested_amount > 50) {
                 console.log(`[NavFix-A] ${entry.isin}: swapping nav(${entry.nav}) ↔ invested_amount(${entry.invested_amount})`);
-                const tmp = entry.nav;
-                entry.nav = entry.invested_amount;
-                entry.invested_amount = tmp;
+                const tmp = entry.nav; entry.nav = entry.invested_amount; entry.invested_amount = tmp;
                 entry.valuation = entry.units * entry.nav;
               }
             }
-
-            // Case B: valuation=0 and invested_amount=0 but nav > 0.
-            // This happens for segregated/wound-down portfolios where CAS shows NAV=0
-            // and the "Cumulative Amount Invested" column holds the cost (e.g. 454.98),
-            // but the AI mistakenly put that cost into the nav field.
             if (entry.nav > 0 && (entry.invested_amount === 0 || entry.invested_amount == null) && (entry.valuation === 0 || entry.valuation == null)) {
               console.log(`[NavFix-B] ${entry.isin}: moving nav(${entry.nav}) → invested_amount, setting nav=0`);
-              entry.invested_amount = entry.nav;
-              entry.nav = 0;
+              entry.invested_amount = entry.nav; entry.nav = 0;
             }
           }
         }));
       }
-      // ─────────────────────────────────────────────────────────────────────
 
-      const report = await storage.createReport({
-        filename: req.file.originalname,
-        investorType,
-        ageGroup,
-        analysis
-      });
+      const report = await storage.createReport({ filename: originalName, investorType, ageGroup, analysis });
 
-      uploadCasToDrive(
-        req.file.buffer,
-        req.file.originalname,
-        analysis.investor_name,
-        password
-      ).then((result) => {
-        if (result) {
-          console.log(`CAS uploaded to Google Drive: ${result.webViewLink}`);
-        }
-      }).catch((err) => {
-        console.error("Google Drive upload failed:", err);
-      });
+      uploadCasToDrive(fileBuffer, originalName, analysis.investor_name, password)
+        .then((result) => { if (result) console.log(`CAS uploaded to Google Drive: ${result.webViewLink}`); })
+        .catch((err) => { console.error("Google Drive upload failed:", err); });
 
-      res.json(report);
-
+      analysisJobs.set(jobId, { status: "done", report, createdAt: analysisJobs.get(jobId)!.createdAt });
     } catch (error: any) {
-      console.error("Analysis error:", error);
-      res.status(500).json({ message: "Analysis failed: " + error.message });
+      console.error("Analysis job error:", error);
+      analysisJobs.set(jobId, { status: "error", message: "Analysis failed: " + error.message, createdAt: analysisJobs.get(jobId)!.createdAt });
     } finally {
-      try {
-        await fs.unlink(tempPath);
-      } catch (e) { /* ignore */ }
+      try { await fs.unlink(tempPath); } catch (e) { /* ignore */ }
     }
+  }
+
+  app.post(api.analyze.path, upload.single("file"), async (req: any, res) => {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const password = req.body.password;
+    if (!password) return res.status(400).json({ message: "Password is required" });
+
+    const investorType = req.body.investorType || "Aggressive";
+    const ageGroup = req.body.ageGroup || "20-35";
+    const jobId = generateJobId();
+
+    // Store job as processing immediately
+    analysisJobs.set(jobId, { status: "processing", createdAt: Date.now() });
+
+    // Start heavy work in background — do NOT await
+    runAnalysisJob(jobId, req.file.buffer, req.file.originalname, password, investorType, ageGroup);
+
+    // Respond immediately so the proxy never times out
+    res.status(202).json({ jobId });
+  });
+
+  // ── Job status polling endpoint ────────────────────────────────────────────
+  app.get("/api/analyze/status/:jobId", (req, res) => {
+    const job = analysisJobs.get(req.params.jobId);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.json({ status: job.status, report: job.report, message: job.message });
   });
 
   app.get(api.reports.list.path, async (req, res) => {

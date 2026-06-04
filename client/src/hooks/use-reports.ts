@@ -43,50 +43,53 @@ export function useReport(id: number | null) {
   });
 }
 
-// POST /api/analyze
+// POST /api/analyze — starts job, then polls /api/analyze/status/:jobId
 export function useAnalyzeReport() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ file, password, investorType, ageGroup }: { file: File; password?: string; investorType?: string; ageGroup?: string }) => {
       const formData = new FormData();
       formData.append("file", file);
-      if (password) {
-        formData.append("password", password);
-      }
-      if (investorType) {
-        formData.append("investorType", investorType);
-      }
-      if (ageGroup) {
-        formData.append("ageGroup", ageGroup);
+      if (password) formData.append("password", password);
+      if (investorType) formData.append("investorType", investorType);
+      if (ageGroup) formData.append("ageGroup", ageGroup);
+
+      // Step 1: POST to start the job — returns immediately with a jobId
+      const startRes = await fetch(api.analyze.path, {
+        method: api.analyze.method,
+        body: formData,
+      });
+
+      if (!startRes.ok) {
+        const errData = await startRes.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to start analysis. Please check your file/password.");
       }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 200_000); // 200s client timeout
+      const { jobId } = await startRes.json();
 
-      let res: Response;
-      try {
-        res = await fetch(api.analyze.path, {
-          method: api.analyze.method,
-          body: formData,
-          signal: controller.signal,
-        });
-      } catch (err: any) {
-        if (err.name === "AbortError") {
-          throw new Error("Analysis is taking too long. Please try again or use a smaller PDF.");
+      // Step 2: Poll the status endpoint every 3 seconds (up to 5 minutes)
+      const statusUrl = api.analyzeStatus.path.replace(":jobId", jobId);
+      const deadline = Date.now() + 5 * 60 * 1000; // 5-minute polling budget
+
+      while (Date.now() < deadline) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        const statusRes = await fetch(statusUrl);
+        if (!statusRes.ok) throw new Error("Lost track of analysis job. Please try again.");
+
+        const status = await statusRes.json();
+
+        if (status.status === "done") {
+          return status.report as EnhancedReport;
         }
-        throw err;
-      } finally {
-        clearTimeout(timeoutId);
+        if (status.status === "error") {
+          throw new Error(status.message || "Analysis failed. Please check your file/password.");
+        }
+        // status === "processing" → keep polling
       }
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Analysis failed. Please check your file/password.");
-      }
-
-      const data = await res.json();
-      return api.analyze.responses[200].parse(data) as EnhancedReport;
+      throw new Error("Analysis is taking too long. Please try again or use a smaller PDF.");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.reports.list.path] });
