@@ -31,6 +31,8 @@ const GEMINI_KEYS = [
   process.env.GEMINI_API_KEY_4
 ].filter(Boolean) as string[];
 
+const GEMINI_TIMEOUT_MS = 180_000; // 3 minutes per key attempt
+
 async function generateWithFallback(prompt: string, options: { model?: string, responseMimeType?: string } = {}) {
   const modelName = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite").toLowerCase().replace(/\s+/g, '-');
   let lastError: any;
@@ -41,11 +43,16 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
       const model = client.getGenerativeModel({ 
         model: modelName,
         generationConfig: {
-          temperature: 0,          // deterministic — same PDF always gives same numbers
+          temperature: 0,
           ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
         }
       });
-      const result = await model.generateContent(prompt);
+
+      // Race the Gemini call against a timeout so it never hangs indefinitely
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Gemini timeout after ${GEMINI_TIMEOUT_MS / 1000}s`)), GEMINI_TIMEOUT_MS)
+      );
+      const result = await Promise.race([model.generateContent(prompt), timeoutPromise]);
       return result.response.text();
     } catch (err: any) {
       console.error(`Gemini call failed with key starting with ${key.substring(0, 8)}:`, err.message);
@@ -143,7 +150,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       let text = "";
       try {
-        const { stdout } = await execAsync(`pdftotext -upw "${password}" "${tempPath}" -`);
+        const { stdout } = await execAsync(`pdftotext -upw "${password}" "${tempPath}" -`, { maxBuffer: 50 * 1024 * 1024 });
         text = stdout;
       } catch (e: any) {
         console.error("PDF Parsing error:", e);

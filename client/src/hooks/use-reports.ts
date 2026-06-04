@@ -61,10 +61,24 @@ export function useAnalyzeReport() {
         formData.append("ageGroup", ageGroup);
       }
 
-      const res = await fetch(api.analyze.path, {
-        method: api.analyze.method,
-        body: formData,
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 200_000); // 200s client timeout
+
+      let res: Response;
+      try {
+        res = await fetch(api.analyze.path, {
+          method: api.analyze.method,
+          body: formData,
+          signal: controller.signal,
+        });
+      } catch (err: any) {
+        if (err.name === "AbortError") {
+          throw new Error("Analysis is taking too long. Please try again or use a smaller PDF.");
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
