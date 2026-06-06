@@ -2656,7 +2656,7 @@ export default function ConciseReport() {
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                       This is a concise performance check. For a detailed analysis and personalized report,{" "}
                       <a
-                        href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                        href="https://calendly.com/gunjan-financialfriend/30min"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-semibold text-indigo-600 underline underline-offset-2"
@@ -2923,7 +2923,7 @@ export default function ConciseReport() {
                       </p>
                     </div>
                     <a
-                      href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                      href="https://calendly.com/gunjan-financialfriend/30min"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-lg whitespace-nowrap"
@@ -3035,7 +3035,7 @@ export default function ConciseReport() {
                     +91 93511 04008
                   </a>
                   <a
-                    href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                    href="https://calendly.com/gunjan-financialfriend/30min"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 min-w-[200px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] hover:shadow-xl"
