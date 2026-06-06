@@ -2085,7 +2085,7 @@ export default function ConciseReport() {
                     borderBottom: isBeating ? "1px solid rgba(16,185,129,0.18)" : "1px solid rgba(239,68,68,0.14)",
                   }}
                 >
-                  <p className="text-[11px] sm:text-xs font-semibold leading-snug" style={{ color: isBeating ? "#059669" : "#dc2626" }}>
+                  <p className="text-[11px] sm:text-xs font-semibold leading-snug text-center w-full" style={{ color: isBeating ? "#059669" : "#dc2626" }}>
                     {isBeating
                       ? `Your portfolio beat Nifty 500 by ${fmtRs(Math.abs(alphaAbsolute))} over the last ${periodLabel}.`
                       : `Your portfolio missed ${fmtRs(Math.abs(alphaAbsolute))} vs Nifty 500 over the last ${periodLabel} — every month of delay increases this gap.`}
