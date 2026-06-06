@@ -359,7 +359,7 @@ export default function ConciseReport() {
   const [analyzeProgress, setAnalyzeProgress] = useState({ done: 0, total: 0 });
   const [benchmarkPeriod, setBenchmarkPeriod] = useState<"1y" | "3y">("1y");
   const hasAutoStarted = useRef(false);
-  const hasBenchmarkAutoSet = useRef(false);
+  const userHasManuallyToggled = useRef(false);
 
   // ── Live Nifty 500 benchmark from Supabase ────────────────────────────────
   const [niftyLive, setNiftyLive] = useState<{ return_1y: number; return_3y: number; as_of_date: string | null; source: string } | null>(null);
@@ -502,7 +502,8 @@ export default function ConciseReport() {
 
   // ── Auto-select benchmark period based on alpha ───────────────────────────
   useEffect(() => {
-    if (hasBenchmarkAutoSet.current) return;
+    if (userHasManuallyToggled.current) return;
+    if (isAutoAnalyzing) return;
 
     const NIFTY500_1Y_FALLBACK = 7.98;
     const NIFTY500_3Y_FALLBACK = 14.66;
@@ -536,8 +537,6 @@ export default function ConciseReport() {
 
     if (alpha1y === null) return;
 
-    hasBenchmarkAutoSet.current = true;
-
     if ((alpha1y < 0) && (alpha3y === null || alpha3y >= 0)) {
       setBenchmarkPeriod("1y");
     } else if (alpha3y !== null && alpha3y < 0 && alpha1y >= 0) {
@@ -547,7 +546,7 @@ export default function ConciseReport() {
     } else {
       setBenchmarkPeriod("1y");
     }
-  }, [mfSnapshot, storedPerformances, niftyLive]);
+  }, [mfSnapshot, storedPerformances, niftyLive, isAutoAnalyzing]);
 
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];
@@ -2032,7 +2031,7 @@ export default function ConciseReport() {
                     <div className="flex items-center rounded-xl overflow-hidden p-0.5" style={{ background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.18)" }}>
                       <button
                         data-testid="toggle-1y"
-                        onClick={() => setBenchmarkPeriod("1y")}
+                        onClick={() => { userHasManuallyToggled.current = true; setBenchmarkPeriod("1y"); }}
                         className="px-4 py-1.5 text-xs font-black rounded-lg transition-all"
                         style={{
                           background: !is3Y ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "transparent",
@@ -2042,7 +2041,7 @@ export default function ConciseReport() {
                       >1Y</button>
                       <button
                         data-testid="toggle-3y"
-                        onClick={() => setBenchmarkPeriod("3y")}
+                        onClick={() => { userHasManuallyToggled.current = true; setBenchmarkPeriod("3y"); }}
                         className="px-4 py-1.5 text-xs font-black rounded-lg transition-all"
                         style={{
                           background: is3Y ? "linear-gradient(135deg, #6366f1, #4f46e5)" : "transparent",
