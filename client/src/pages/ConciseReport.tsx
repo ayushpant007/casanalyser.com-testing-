@@ -2380,6 +2380,52 @@ export default function ConciseReport() {
                         </div>
                       );
                     })()}
+
+                    {/* Rebalancing Action Plan (inline) */}
+                    {rebalancingPlan.length > 0 && (
+                      <div className="mx-3 sm:mx-0 mt-4">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Rebalancing Action Plan · {rebalancingPlan.length} {rebalancingPlan.length === 1 ? "category" : "categories"} need attention</p>
+                        <div className="space-y-2">
+                          {rebalancingPlan.map((item: any, i: number) => (
+                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border" style={{ backgroundColor: item.over ? "#fef2f2" : "#fffbeb", borderColor: item.over ? "#fecaca" : "#fde68a" }}>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                                  <p className="text-xs font-bold text-slate-800">{item.category}</p>
+                                </div>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-[10px] text-slate-500">Current: <strong>{item.actual.toFixed(1)}%</strong></span>
+                                  <span className="text-[10px] text-slate-500">Target: <strong>{item.ideal.toFixed(1)}%</strong></span>
+                                  <span className="text-[10px] font-bold" style={{ color: item.over ? "#ef4444" : "#f59e0b" }}>
+                                    {item.over ? `↓ Reduce by ${item.diff.toFixed(1)}%` : `↑ Increase by ${Math.abs(item.diff).toFixed(1)}%`}
+                                  </span>
+                                </div>
+                              </div>
+                              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: item.over ? "#ef4444" : "#f59e0b" }} />
+                            </div>
+                          ))}
+                        </div>
+                        {/* Rebalancing CTA */}
+                        <div
+                          className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
+                          style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+                        >
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            <span className="font-semibold text-slate-800">Need a personalized rebalancing strategy?</span>{" "}
+                            Get a detailed consultation with Financial Friend.
+                          </p>
+                          <a
+                            href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
+                            style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
+                          >
+                            Book Now
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {/* Category Wise Distribution */}
                   <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
@@ -2423,60 +2469,6 @@ export default function ConciseReport() {
               );
             })()}
           </div>
-
-          {/* ── Rebalancing Action Plan ────────────────────────────────────── */}
-          {rebalancingPlan.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-700 to-blue-700 px-6 py-5 text-white">
-                <div className="flex items-center gap-2 mb-1">
-                  <Target className="w-4 h-4" />
-                  <h3 className="text-lg font-bold">Rebalancing Action Plan</h3>
-                </div>
-                <p className="text-indigo-200 text-xs">{rebalancingPlan.length} categories need attention</p>
-              </div>
-              <div className="p-5 space-y-3">
-                {rebalancingPlan.map((item: any, i: number) => (
-                  <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl border" style={{ backgroundColor: item.over ? "#fef2f2" : "#fffbeb", borderColor: item.over ? "#fecaca" : "#fde68a" }}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                        <p className="text-sm font-bold text-slate-800">{item.category}</p>
-                      </div>
-                      <div className="flex items-center gap-4 mt-1.5">
-                        <span className="text-xs text-slate-500">Current: <strong>{item.actual.toFixed(1)}%</strong></span>
-                        <span className="text-xs text-slate-500">Target: <strong>{item.ideal.toFixed(1)}%</strong></span>
-                        <span className="text-xs font-bold" style={{ color: item.over ? "#ef4444" : "#f59e0b" }}>
-                          {item.over ? `↓ Reduce by ${item.diff.toFixed(1)}%` : `↑ Increase by ${Math.abs(item.diff).toFixed(1)}%`}
-                        </span>
-                      </div>
-                    </div>
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: item.over ? "#ef4444" : "#f59e0b" }} />
-                  </div>
-                ))}
-              </div>
-              {/* Rebalancing CTA */}
-              <div className="px-5 pb-4 pt-1">
-                <div
-                  className="px-4 py-3 rounded-xl flex items-center justify-between gap-3"
-                  style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
-                >
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    <span className="font-semibold text-slate-800">Need a personalized rebalancing strategy?</span>{" "}
-                    Get a detailed consultation with Financial Friend.
-                  </p>
-                  <a
-                    href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
-                    style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
-                  >
-                    Book Now
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── SIP Health Panel ──────────────────────────────────────────── */}
           <div ref={sipHealthRef} />
