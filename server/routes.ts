@@ -199,8 +199,10 @@ Extract:
 2. Account-wise summary table: [{"type": string, "details": string, "count": number, "value": number}]
 3. Asset Class Allocation for the month: [{"asset_class": string, "value": number, "percentage": number}]
 4. Mutual Fund Portfolio Snapshot: [{"scheme_name": string, "folio_no": string, "units": number, "nav": number, "invested_amount": number, "valuation": number, "unrealised_profit_loss": number, "fund_category": string, "fund_type": string, "isin": string, "source": string}]
-   - IMPORTANT: For "units", strictly extract the "No. of Units" or "Units" column value from the statement for each scheme.
-   - "nav" MUST be the per-unit NAV value from the "NAV (₹)" column ONLY. This is a per-unit price, NOT a total amount.
+   - IMPORTANT: For "units", strictly extract the "Closing Bal (Units)" / "No. of Units" / "Units" / "Balance Units" column value ONLY. This is typically a small number (e.g. 150.105). Do NOT put the NAV value here.
+   - "nav" MUST be the per-unit NAV value from the "NAV (₹)" column ONLY. For Liquid / Overnight / Money Market / Gilt funds this can be a large number (e.g. 6789.4997). Do NOT put the units value here.
+   - CRITICAL for high-NAV funds: Liquid Fund, Overnight Fund, Money Market Fund, Gilt Fund NAVs are commonly in the range ₹1000–₹10000. Their unit counts are small (e.g. 100–500 units). Never swap these. If one number is large (>500) and the other is small (<500), the LARGE number is the NAV and the SMALL number is the units — unless the column header says otherwise.
+   - Double-check by verifying: units × nav ≈ valuation. Example: 150.105 units × 6789.4997 NAV ≈ ₹10,19,138 valuation.
    - "invested_amount" MUST be the TOTAL INVESTED amount from the cost column for that scheme — NOT the NAV, NOT the current/market value, NOT the P/L. Use the column whose header is one of:
        • "Cumulative Amount Invested (in INR)"   ← CDSL CAS (Mutual Fund Units Held / Consolidated Account Statement)
        • "Invested (₹)" / "Invested Amount"      ← CAMS / KFinTech CAS
@@ -390,6 +392,37 @@ ${text}`;
               entry.invested_amount = entry.nav; entry.nav = 0;
             }
           }
+        }));
+      }
+
+      // ── Detect swapped units ↔ nav using live NAV (handles high-NAV funds) ──
+      // Multiplication is commutative so product checks can't catch this swap.
+      // We compare both fields against the live API NAV: whichever field is
+      // within 15% of live NAV is the real per-unit price (i.e. nav), not units.
+      if (Array.isArray(analysis.mf_snapshot)) {
+        await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
+          if (!entry.isin || entry.units <= 0 || entry.nav <= 0) return;
+          try {
+            const liveData = await fetchNavByISIN(entry.isin, entry.scheme_name);
+            const liveNav = liveData?.current_nav;
+            if (!liveNav || liveNav <= 0) return;
+
+            const distUnits = Math.abs(entry.units - liveNav) / liveNav; // how close is "units" to live NAV
+            const distNav   = Math.abs(entry.nav   - liveNav) / liveNav; // how close is "nav"   to live NAV
+
+            // If "units" is within 15% of live NAV AND "nav" is off by >40%
+            // → the AI put the NAV value in the units field → swap them
+            if (distUnits < 0.15 && distNav > 0.40) {
+              console.log(`[UnitsNavSwap] ${entry.isin}: units(${entry.units}) ≈ liveNav(${liveNav}), nav(${entry.nav}) is wrong — swapping`);
+              const tmp = entry.units;
+              entry.units = entry.nav;
+              entry.nav = tmp;
+              // Recompute valuation from corrected units × corrected (CAS) nav
+              if (entry.valuation <= 0 && entry.units > 0) {
+                entry.valuation = entry.units * entry.nav;
+              }
+            }
+          } catch (_) { /* non-fatal: leave entry unchanged */ }
         }));
       }
 
