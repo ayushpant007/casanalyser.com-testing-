@@ -359,6 +359,7 @@ export default function ConciseReport() {
   const [analyzeProgress, setAnalyzeProgress] = useState({ done: 0, total: 0 });
   const [benchmarkPeriod, setBenchmarkPeriod] = useState<"1y" | "3y">("1y");
   const hasAutoStarted = useRef(false);
+  const hasBenchmarkAutoSet = useRef(false);
 
   // ── Live Nifty 500 benchmark from Supabase ────────────────────────────────
   const [niftyLive, setNiftyLive] = useState<{ return_1y: number; return_3y: number; as_of_date: string | null; source: string } | null>(null);
@@ -498,6 +499,55 @@ export default function ConciseReport() {
     return mfSnapshot.reduce((a: number, m: any) => a + (m.valuation || 0), 0);
   }, [mfSnapshot]);
   const totalUnrealised = useMemo(() => mfSnapshot.reduce((a: number, m: any) => a + (m.unrealised_profit_loss || 0), 0), [mfSnapshot]);
+
+  // ── Auto-select benchmark period based on alpha ───────────────────────────
+  useEffect(() => {
+    if (hasBenchmarkAutoSet.current) return;
+
+    const NIFTY500_1Y_FALLBACK = 7.98;
+    const NIFTY500_3Y_FALLBACK = 14.66;
+
+    const nifty1y = niftyLive?.return_1y ?? NIFTY500_1Y_FALLBACK;
+    const nifty3y = niftyLive?.return_3y ?? NIFTY500_3Y_FALLBACK;
+
+    const fundsWithPerf1Y = mfSnapshot.filter((mf: any) => {
+      const cagr = storedPerformances[mf.isin]?.cagr?.["1y"];
+      return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
+    });
+    if (fundsWithPerf1Y.length === 0) return;
+
+    const fundsWithPerf3Y = mfSnapshot.filter((mf: any) => {
+      const cagr = storedPerformances[mf.isin]?.cagr?.["3y"];
+      return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
+    });
+
+    const calcAlpha = (funds: any[], nifty: number, period: "1y" | "3y"): number | null => {
+      const totalInv = funds.reduce((s: number, mf: any) => s + (mf.invested_amount || 0), 0);
+      if (totalInv <= 0) return null;
+      const weighted = funds.reduce((sum: number, mf: any) => {
+        const cagr = parseFloat(String(storedPerformances[mf.isin]?.cagr?.[period]));
+        return sum + cagr * ((mf.invested_amount || 0) / totalInv);
+      }, 0);
+      return weighted - nifty;
+    };
+
+    const alpha1y = calcAlpha(fundsWithPerf1Y, nifty1y, "1y");
+    const alpha3y = fundsWithPerf3Y.length > 0 ? calcAlpha(fundsWithPerf3Y, nifty3y, "3y") : null;
+
+    if (alpha1y === null) return;
+
+    hasBenchmarkAutoSet.current = true;
+
+    if ((alpha1y < 0) && (alpha3y === null || alpha3y >= 0)) {
+      setBenchmarkPeriod("1y");
+    } else if (alpha3y !== null && alpha3y < 0 && alpha1y >= 0) {
+      setBenchmarkPeriod("3y");
+    } else if (alpha1y < 0 && alpha3y !== null && alpha3y < 0) {
+      setBenchmarkPeriod(alpha3y <= alpha1y ? "3y" : "1y");
+    } else {
+      setBenchmarkPeriod("1y");
+    }
+  }, [mfSnapshot, storedPerformances, niftyLive]);
 
   const sipAmounts = useMemo(() => {
     const txns: any[] = analysis.transactions || [];
