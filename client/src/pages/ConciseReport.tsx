@@ -2090,9 +2090,6 @@ export default function ConciseReport() {
                       ? `Your portfolio beat Nifty 500 by ${fmtRs(Math.abs(alphaAbsolute))} over the last ${periodLabel}.`
                       : `Your portfolio missed ${fmtRs(Math.abs(alphaAbsolute))} vs Nifty 500 over the last ${periodLabel} — every month of delay increases this gap.`}
                   </p>
-                  <span className="text-[11px] sm:text-xs font-black whitespace-nowrap" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
-                    {fmtRs(alphaAbsolute)}
-                  </span>
                 </div>
 
                 {/* White body */}
