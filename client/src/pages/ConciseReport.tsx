@@ -2303,7 +2303,7 @@ export default function ConciseReport() {
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Action</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Exertion</div>
                       </div>
                       {/* Rows */}
                       {allCategories.map((cat, idx) => {
