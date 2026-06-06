@@ -2548,6 +2548,50 @@ export default function ConciseReport() {
                     ))}
                   </div>
                 </div>
+
+                {/* Scoring logic banner */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-slate-100 border-b border-slate-100">
+                  {[
+                    {
+                      label: "Excellent",
+                      range: "80 – 100%",
+                      color: "#10b981",
+                      bg: "#f0fdf4",
+                      desc: "Consistently beats its benchmark with strong 1Y, 3Y & 5Y returns. A top-performing fund.",
+                    },
+                    {
+                      label: "Good",
+                      range: "60 – 79%",
+                      color: "#3b82f6",
+                      bg: "#eff6ff",
+                      desc: "Solid overall performance. Returns are decent and the fund mostly keeps pace with or beats its benchmark.",
+                    },
+                    {
+                      label: "Average",
+                      range: "45 – 59%",
+                      color: "#f59e0b",
+                      bg: "#fffbeb",
+                      desc: "Returns are close to the benchmark but not consistently better. Worth monitoring for improvement.",
+                    },
+                    {
+                      label: "Poor",
+                      range: "< 45%",
+                      color: "#ef4444",
+                      bg: "#fef2f2",
+                      desc: "Underperforms its benchmark. Weak returns across periods — consider reviewing or switching.",
+                    },
+                  ].map(item => (
+                    <div key={item.label} className="px-4 py-3" style={{ backgroundColor: item.bg }}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-[11px] font-bold" style={{ color: item.color }}>{item.label}</span>
+                        <span className="text-[10px] text-slate-400 font-medium">· {item.range}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="p-4 sm:p-8">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
                     {RATING_CONFIG.map(({ key, label, color, bg, border }) => {
