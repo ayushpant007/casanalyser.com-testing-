@@ -44,50 +44,53 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user: any, done) => done(null, user));
   passport.deserializeUser((user: any, done) => done(null, user));
 
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID || "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-        callbackURL: CALLBACK_URL,
-      },
-      (accessToken, refreshToken, profile, done) => {
-        const email = profile.emails?.[0]?.value || "";
-        return done(null, {
-          id: profile.id,
-          email,
-          displayName: profile.displayName,
-          accessToken,
-          refreshToken,
-        });
-      },
-    ),
-  );
+  const googleConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+  if (googleConfigured) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          callbackURL: CALLBACK_URL,
+        },
+        (accessToken, refreshToken, profile, done) => {
+          const email = profile.emails?.[0]?.value || "";
+          return done(null, {
+            id: profile.id,
+            email,
+            displayName: profile.displayName,
+            accessToken,
+            refreshToken,
+          });
+        },
+      ),
+    );
+  }
 
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.get(
-    "/auth/google",
+  app.get("/auth/google", (req: Request, res: Response) => {
+    if (!googleConfigured) {
+      return res.status(503).json({ message: "Google OAuth not configured" });
+    }
     passport.authenticate("google", {
-      scope: [
-        "openid",
-        "profile",
-        "email",
-        "https://www.googleapis.com/auth/gmail.readonly",
-      ],
+      scope: ["openid", "profile", "email", "https://www.googleapis.com/auth/gmail.readonly"],
       accessType: "offline",
       prompt: "consent",
-    }),
-  );
+    } as any)(req, res);
+  });
 
-  app.get(
-    "/auth/callback",
+  app.get("/auth/callback", (req: Request, res: Response, next: NextFunction) => {
+    if (!googleConfigured) {
+      return res.redirect("/app?auth=failed");
+    }
     passport.authenticate("google", {
       failureRedirect: "/app?auth=failed",
       session: true,
-    }),
-    (req: Request, res: Response) => {
+    } as any)(req, res, (err: any) => {
+      if (err) return next(err);
       const user = req.user as any;
       if (user && req.session) {
         req.session.gmailUser = {
@@ -99,8 +102,8 @@ export function setupAuth(app: Express) {
         };
       }
       res.redirect("/app?auth=success");
-    },
-  );
+    });
+  });
 
   app.get("/api/auth/me", (req: Request, res: Response) => {
     const gmailUser = req.session?.gmailUser;
