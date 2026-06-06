@@ -2849,122 +2849,184 @@ export default function ConciseReport() {
             const dominantPct2 = (actMap2[dominant2] || 0).toFixed(1);
             const ideal2 = IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""] || {};
             const missing2 = allCats2.filter(c => (actMap2[c] || 0) < 1 && parseFloat((ideal2[c] || "0").replace("%","")) > 0);
+            const barColors: Record<string, { from: string; to: string; glow: string }> = {
+              Equity:      { from: "#6366f1", to: "#818cf8", glow: "rgba(99,102,241,0.45)" },
+              Debt:        { from: "#0ea5e9", to: "#38bdf8", glow: "rgba(14,165,233,0.45)" },
+              Hybrid:      { from: "#f59e0b", to: "#fbbf24", glow: "rgba(245,158,11,0.45)" },
+              "Gold/Silver":{ from: "#f97316", to: "#fb923c", glow: "rgba(249,115,22,0.45)" },
+              Others:      { from: "#a855f7", to: "#c084fc", glow: "rgba(168,85,247,0.45)" },
+            };
             return (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" data-testid="section-portfolio-audit">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 text-white flex items-center justify-between flex-wrap gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-4 h-4 text-indigo-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">AI Summary</span>
+              <div
+                data-testid="section-portfolio-audit"
+                style={{
+                  borderRadius: 24, overflow: "hidden",
+                  background: "linear-gradient(160deg, #0f1629 0%, #0a0f1e 60%, #0d1025 100%)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  boxShadow: "0 24px 80px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
+                }}
+              >
+                {/* ── Hero Header ── */}
+                <div style={{ position: "relative", padding: "28px 28px 24px", overflow: "hidden" }}>
+                  {/* background glow blobs */}
+                  <div style={{ position:"absolute", top:-60, right:-40, width:220, height:220, borderRadius:"50%", background:"radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)", pointerEvents:"none" }} />
+                  <div style={{ position:"absolute", bottom:-40, left:60, width:160, height:160, borderRadius:"50%", background:"radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)", pointerEvents:"none" }} />
+
+                  <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", flexWrap:"wrap", gap:16, position:"relative" }}>
+                    <div>
+                      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:8 }}>
+                        <div style={{ width:28, height:28, borderRadius:8, background:"linear-gradient(135deg,#6366f1,#a855f7)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                          <FileText style={{ width:13, height:13, color:"#fff" }} />
+                        </div>
+                        <span style={{ fontSize:10, fontWeight:800, letterSpacing:"0.18em", textTransform:"uppercase", color:"rgba(168,85,247,0.9)" }}>AI Portfolio Audit</span>
+                      </div>
+                      <h3 style={{ fontSize:26, fontWeight:900, letterSpacing:"-0.03em", lineHeight:1, background:"linear-gradient(135deg,#fff 30%,rgba(255,255,255,0.6))", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+                        Full Portfolio<br/>
+                        <span style={{ background:"linear-gradient(135deg,#6366f1,#a855f7,#22d3ee)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>Snapshot</span>
+                      </h3>
                     </div>
-                    <h3 className="text-xl font-bold text-white">Full Portfolio Audit</h3>
+                    {investorName && (
+                      <div style={{ textAlign:"right" }}>
+                        <p style={{ fontSize:9, fontWeight:700, letterSpacing:"0.15em", textTransform:"uppercase", color:"rgba(255,255,255,0.25)", marginBottom:4 }}>Generated for</p>
+                        <p style={{ fontSize:13, fontWeight:800, color:"#fff", maxWidth:220, textAlign:"right", lineHeight:1.3 }}>{investorName}</p>
+                      </div>
+                    )}
                   </div>
-                  {investorName && (
-                    <div className="text-right">
-                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Generated for</span>
-                      <p className="text-sm font-bold text-white">{investorName}</p>
-                    </div>
-                  )}
-                </div>
 
-                {/* Key stats strip */}
-                <div className="grid grid-cols-3 border-b border-slate-100 divide-x divide-slate-100">
-                  <div className="px-5 py-3.5 text-center">
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Portfolio Worth</p>
-                    <p className="text-lg font-black text-slate-800">{fmtL2(totalValuation)}</p>
-                  </div>
-                  <div className="px-5 py-3.5 text-center">
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Total Returns</p>
-                    <p className={`text-lg font-black ${auditPositive ? "text-emerald-600" : "text-rose-600"}`}>
-                      {auditPositive ? "+" : ""}{auditPLPct.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className="px-5 py-3.5 text-center">
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Total Funds</p>
-                    <p className="text-lg font-black text-slate-800">{mfSnapshot.length}</p>
-                  </div>
-                </div>
-
-                {/* Visual Portfolio Summary */}
-                <div className="px-6 py-5 space-y-5">
-
-                  {/* Row 1 — 4 key metric tiles */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {/* ── 3 hero metrics ── */}
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginTop:22 }}>
                     {[
-                      { label: "Invested",   value: fmtL2(totalInvested),  sub: "Total cost",          color: "#6366f1", bg: "rgba(99,102,241,0.07)"  },
-                      { label: "Valuation",  value: fmtL2(totalValuation), sub: "Current worth",       color: "#0ea5e9", bg: "rgba(14,165,233,0.07)"  },
-                      { label: "Gain / Loss",value: `${auditPositive?"+":"−"}${fmtL2(Math.abs(auditPL))}`, sub: `${auditPositive?"+":"−"}${auditPLPct.toFixed(1)}% overall`, color: auditPositive ? "#10b981" : "#ef4444", bg: auditPositive ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.07)" },
-                      { label: "Schemes",    value: String(mfSnapshot.length), sub: "Mutual funds",    color: "#f59e0b", bg: "rgba(245,158,11,0.07)"  },
-                    ].map(tile => (
-                      <div key={tile.label} className="rounded-xl px-4 py-3.5 flex flex-col gap-0.5" style={{ background: tile.bg, border: `1px solid ${tile.color}22` }}>
-                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tile.color }}>{tile.label}</span>
-                        <span className="text-xl font-black text-slate-800 leading-tight">{tile.value}</span>
-                        <span className="text-[11px] text-slate-400 font-medium">{tile.sub}</span>
+                      { label:"Portfolio Value", value: fmtL2(totalValuation), grad:"linear-gradient(135deg,#6366f1,#818cf8)", glow:"rgba(99,102,241,0.3)" },
+                      { label:"Total Return",    value: `${auditPositive?"+":"−"}${auditPLPct.toFixed(1)}%`, grad: auditPositive?"linear-gradient(135deg,#10b981,#34d399)":"linear-gradient(135deg,#ef4444,#f87171)", glow: auditPositive?"rgba(16,185,129,0.3)":"rgba(239,68,68,0.3)" },
+                      { label:"Total Schemes",   value: String(mfSnapshot.length), grad:"linear-gradient(135deg,#f59e0b,#fbbf24)", glow:"rgba(245,158,11,0.3)" },
+                    ].map(h => (
+                      <div key={h.label} style={{
+                        borderRadius:16, padding:"16px 18px",
+                        background:"rgba(255,255,255,0.04)",
+                        border:"1px solid rgba(255,255,255,0.07)",
+                        backdropFilter:"blur(12px)",
+                        boxShadow:`0 8px 24px -8px ${h.glow}`,
+                        textAlign:"center",
+                      }}>
+                        <p style={{ fontSize:9, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"rgba(255,255,255,0.3)", marginBottom:6 }}>{h.label}</p>
+                        <p style={{ fontSize:22, fontWeight:900, letterSpacing:"-0.03em", background:h.grad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", lineHeight:1 }}>{h.value}</p>
                       </div>
                     ))}
                   </div>
+                </div>
 
-                  {/* Row 2 — Allocation bars + profile */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-                    {/* Allocation breakdown */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Asset Allocation</p>
-                      <div className="space-y-2">
-                        {(["Equity","Debt","Hybrid","Gold/Silver","Others"] as const).map(cat => {
-                          const pct = actMap2[cat] || 0;
-                          if (pct < 0.05) return null;
-                          const barColors: Record<string, string> = { Equity:"#6366f1", Debt:"#0ea5e9", Hybrid:"#f59e0b", "Gold/Silver":"#f97316", Others:"#8b5cf6" };
-                          return (
-                            <div key={cat}>
-                              <div className="flex justify-between text-[11px] mb-1">
-                                <span className="font-semibold text-slate-600">{cat}</span>
-                                <span className="font-bold text-slate-700">{pct.toFixed(1)}%</span>
-                              </div>
-                              <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                                <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct,100)}%`, background: barColors[cat] }} />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                {/* ── 4 detail tiles ── */}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:10, padding:"0 20px 20px" }}>
+                  {[
+                    { label:"Invested",    value:fmtL2(totalInvested),            sub:"Total cost",                    from:"#6366f1", to:"#818cf8" },
+                    { label:"Valuation",   value:fmtL2(totalValuation),           sub:"Current worth",                 from:"#0ea5e9", to:"#38bdf8" },
+                    { label:"Gain / Loss", value:`${auditPositive?"+":"−"}${fmtL2(Math.abs(auditPL))}`, sub:`${auditPositive?"+":"−"}${auditPLPct.toFixed(1)}% overall return`, from: auditPositive?"#10b981":"#ef4444", to: auditPositive?"#34d399":"#f87171" },
+                    { label:"Schemes",     value:String(mfSnapshot.length),       sub:"Mutual fund schemes",           from:"#f59e0b", to:"#fbbf24" },
+                  ].map(t => (
+                    <div key={t.label} style={{
+                      borderRadius:16, padding:"16px 18px",
+                      background:`linear-gradient(135deg, ${t.from}12, ${t.to}08)`,
+                      border:`1px solid ${t.from}28`,
+                      boxShadow:`0 4px 16px -6px ${t.from}30`,
+                    }}>
+                      <p style={{ fontSize:9, fontWeight:800, letterSpacing:"0.16em", textTransform:"uppercase", color:`${t.from}`, marginBottom:4 }}>{t.label}</p>
+                      <p style={{ fontSize:22, fontWeight:900, letterSpacing:"-0.03em", background:`linear-gradient(135deg,${t.from},${t.to})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", lineHeight:1.1, marginBottom:3 }}>{t.value}</p>
+                      <p style={{ fontSize:10, color:"rgba(255,255,255,0.28)", fontWeight:500 }}>{t.sub}</p>
                     </div>
+                  ))}
+                </div>
 
-                    {/* Risk profile + gaps */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-4 flex flex-col gap-3">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Investor Profile</p>
-                        <div className="flex flex-wrap gap-2">
-                          {report.investorType && (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(99,102,241,0.1)", color: "#6366f1", border: "1px solid rgba(99,102,241,0.2)" }}>{report.investorType}</span>
-                          )}
-                          {report.ageGroup && (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(14,165,233,0.1)", color: "#0ea5e9", border: "1px solid rgba(14,165,233,0.2)" }}>{report.ageGroup}</span>
-                          )}
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1px solid rgba(245,158,11,0.2)" }}>Dominant: {dominant2}</span>
-                        </div>
-                      </div>
-                      {missing2.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-2">Missing Exposure</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {missing2.map(c => (
-                              <span key={c} className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.18)" }}>{c}</span>
-                            ))}
+                {/* ── Allocation + Profile row ── */}
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, padding:"0 20px 22px" }} className="audit-bottom-grid">
+                  {/* Allocation */}
+                  <div style={{ borderRadius:16, padding:"18px 20px", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:14 }}>
+                      <div style={{ width:6, height:6, borderRadius:2, background:"linear-gradient(135deg,#6366f1,#a855f7)" }} />
+                      <p style={{ fontSize:9, fontWeight:800, letterSpacing:"0.16em", textTransform:"uppercase", color:"rgba(255,255,255,0.3)" }}>Asset Allocation</p>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+                      {(["Equity","Debt","Hybrid","Gold/Silver","Others"] as const).map(cat => {
+                        const pct = actMap2[cat] || 0;
+                        if (pct < 0.05) return null;
+                        const bc = barColors[cat];
+                        return (
+                          <div key={cat}>
+                            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:5 }}>
+                              <span style={{ fontSize:11, fontWeight:700, color:"rgba(255,255,255,0.65)" }}>{cat}</span>
+                              <span style={{ fontSize:11, fontWeight:900, background:`linear-gradient(135deg,${bc.from},${bc.to})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>{pct.toFixed(1)}%</span>
+                            </div>
+                            <div style={{ height:6, borderRadius:99, background:"rgba(255,255,255,0.06)", overflow:"hidden" }}>
+                              <div style={{
+                                height:"100%", borderRadius:99,
+                                width:`${Math.min(pct,100)}%`,
+                                background:`linear-gradient(90deg,${bc.from},${bc.to})`,
+                                boxShadow:`0 0 8px ${bc.glow}`,
+                                transition:"width 0.8s cubic-bezier(0.22,1,0.36,1)",
+                              }} />
+                            </div>
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">Adding these could improve diversification and reduce volatility.</p>
-                        </div>
-                      )}
-                      {missing2.length === 0 && (
-                        <div className="flex items-center gap-2 text-emerald-600 text-xs font-semibold">
-                          <span className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[10px]">✓</span>
-                          Well-diversified across all major asset classes
-                        </div>
-                      )}
+                        );
+                      })}
+                    </div>
+                    {/* Segmented total bar */}
+                    <div style={{ marginTop:14, height:8, borderRadius:99, overflow:"hidden", display:"flex", gap:1 }}>
+                      {(["Equity","Debt","Hybrid","Gold/Silver","Others"] as const).map(cat => {
+                        const pct = actMap2[cat] || 0;
+                        if (pct < 0.05) return null;
+                        const bc = barColors[cat];
+                        return <div key={cat} style={{ flex: pct, background:`linear-gradient(90deg,${bc.from},${bc.to})`, minWidth:2 }} />;
+                      })}
                     </div>
                   </div>
+
+                  {/* Investor profile */}
+                  <div style={{ borderRadius:16, padding:"18px 20px", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", display:"flex", flexDirection:"column", gap:14 }}>
+                    <div>
+                      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10 }}>
+                        <div style={{ width:6, height:6, borderRadius:2, background:"linear-gradient(135deg,#22d3ee,#a855f7)" }} />
+                        <p style={{ fontSize:9, fontWeight:800, letterSpacing:"0.16em", textTransform:"uppercase", color:"rgba(255,255,255,0.3)" }}>Investor Profile</p>
+                      </div>
+                      <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                        {report.investorType && (
+                          <span style={{ padding:"5px 12px", borderRadius:99, fontSize:11, fontWeight:800, background:"rgba(99,102,241,0.15)", color:"#818cf8", border:"1px solid rgba(99,102,241,0.3)", boxShadow:"0 0 12px rgba(99,102,241,0.15)" }}>{report.investorType}</span>
+                        )}
+                        {report.ageGroup && (
+                          <span style={{ padding:"5px 12px", borderRadius:99, fontSize:11, fontWeight:800, background:"rgba(34,211,238,0.1)", color:"#22d3ee", border:"1px solid rgba(34,211,238,0.25)", boxShadow:"0 0 12px rgba(34,211,238,0.1)" }}>{report.ageGroup}</span>
+                        )}
+                        <span style={{ padding:"5px 12px", borderRadius:99, fontSize:11, fontWeight:800, background:"rgba(245,158,11,0.1)", color:"#fbbf24", border:"1px solid rgba(245,158,11,0.25)" }}>↑ {dominant2} {dominantPct2}%</span>
+                      </div>
+                    </div>
+
+                    {missing2.length > 0 ? (
+                      <div>
+                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
+                          <span style={{ fontSize:14 }}>⚠️</span>
+                          <p style={{ fontSize:9, fontWeight:800, letterSpacing:"0.16em", textTransform:"uppercase", color:"rgba(248,113,113,0.8)" }}>Missing Exposure</p>
+                        </div>
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:8 }}>
+                          {missing2.map(c => (
+                            <span key={c} style={{ padding:"4px 11px", borderRadius:99, fontSize:11, fontWeight:700, background:"rgba(239,68,68,0.1)", color:"#f87171", border:"1px solid rgba(239,68,68,0.25)", boxShadow:"0 0 10px rgba(239,68,68,0.12)" }}>{c}</span>
+                          ))}
+                        </div>
+                        <p style={{ fontSize:10, color:"rgba(255,255,255,0.22)", lineHeight:1.5 }}>Adding these could reduce volatility &amp; improve long-term returns.</p>
+                      </div>
+                    ) : (
+                      <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", borderRadius:12, background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)" }}>
+                        <span style={{ fontSize:18 }}>✅</span>
+                        <div>
+                          <p style={{ fontSize:11, fontWeight:800, color:"#34d399", marginBottom:2 }}>Well Diversified</p>
+                          <p style={{ fontSize:10, color:"rgba(255,255,255,0.3)" }}>Across all major asset classes</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                <style>{`
+                  @media (max-width: 600px) {
+                    .audit-bottom-grid { grid-template-columns: 1fr !important; }
+                  }
+                `}</style>
               </div>
             );
           })()}
