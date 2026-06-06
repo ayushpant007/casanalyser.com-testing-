@@ -2089,7 +2089,7 @@ export default function ConciseReport() {
                   <p className="text-[11px] sm:text-xs font-semibold leading-snug" style={{ color: isBeating ? "#059669" : "#dc2626" }}>
                     {isBeating
                       ? `Your portfolio beat Nifty 500 by ${fmtRs(Math.abs(alphaAbsolute))} over the last ${periodLabel}.`
-                      : `Your portfolio missed ₹[AMOUNT] vs Nifty 500 over the last ${periodLabel} — [ONE LINE INSIGHT PLACEHOLDER].`}
+                      : `Your portfolio missed ${fmtRs(Math.abs(alphaAbsolute))} vs Nifty 500 over the last ${periodLabel} — every month of delay increases this gap.`}
                   </p>
                   <span className="text-[11px] sm:text-xs font-black whitespace-nowrap" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
                     {fmtRs(alphaAbsolute)}
