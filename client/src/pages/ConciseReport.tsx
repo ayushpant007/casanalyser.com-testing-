@@ -2298,11 +2298,12 @@ export default function ConciseReport() {
                   <div className="px-3 sm:px-6 pt-4 pb-5">
                     <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(59,130,246,0.06)" }}>
                       {/* Header */}
-                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Action</div>
                       </div>
                       {/* Rows */}
                       {allCategories.map((cat, idx) => {
@@ -2315,10 +2316,16 @@ export default function ConciseReport() {
                         const statusColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
                         const statusLabel = isOnTarget ? "On Target" : isOver ? "Over" : "Under";
                         const statusBg = isOnTarget ? "rgba(16,185,129,0.1)" : isOver ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)";
+                        const actionColor = isOnTarget ? "#10b981" : isOver ? "#ef4444" : "#f59e0b";
+                        const actionLabel = isOnTarget
+                          ? "✓ Hold"
+                          : isOver
+                          ? `↓ −${Math.abs(diff).toFixed(1)}%`
+                          : `↑ +${Math.abs(diff).toFixed(1)}%`;
                         return (
                           <div
                             key={cat}
-                            className={`grid grid-cols-[2fr_1fr_1fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                            className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
                           >
                             {/* Category */}
                             <div className="flex items-center gap-2 min-w-0">
@@ -2355,6 +2362,15 @@ export default function ConciseReport() {
                                 {statusLabel}
                               </span>
                             </div>
+                            {/* Action */}
+                            <div className="flex justify-center">
+                              <span
+                                className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md whitespace-nowrap tabular-nums"
+                                style={{ color: actionColor, background: `${actionColor}14`, border: `1px solid ${actionColor}33` }}
+                              >
+                                {actionLabel}
+                              </span>
+                            </div>
                           </div>
                         );
                       })}
@@ -2381,49 +2397,25 @@ export default function ConciseReport() {
                       );
                     })()}
 
-                    {/* Rebalancing Action Plan (inline) */}
+                    {/* Rebalancing CTA */}
                     {rebalancingPlan.length > 0 && (
-                      <div className="mx-3 sm:mx-0 mt-4">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Rebalancing Action Plan · {rebalancingPlan.length} {rebalancingPlan.length === 1 ? "category" : "categories"} need attention</p>
-                        <div className="space-y-2">
-                          {rebalancingPlan.map((item: any, i: number) => (
-                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border" style={{ backgroundColor: item.over ? "#fef2f2" : "#fffbeb", borderColor: item.over ? "#fecaca" : "#fde68a" }}>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                                  <p className="text-xs font-bold text-slate-800">{item.category}</p>
-                                </div>
-                                <div className="flex items-center gap-3 mt-1">
-                                  <span className="text-[10px] text-slate-500">Current: <strong>{item.actual.toFixed(1)}%</strong></span>
-                                  <span className="text-[10px] text-slate-500">Target: <strong>{item.ideal.toFixed(1)}%</strong></span>
-                                  <span className="text-[10px] font-bold" style={{ color: item.over ? "#ef4444" : "#f59e0b" }}>
-                                    {item.over ? `↓ Reduce by ${item.diff.toFixed(1)}%` : `↑ Increase by ${Math.abs(item.diff).toFixed(1)}%`}
-                                  </span>
-                                </div>
-                              </div>
-                              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: item.over ? "#ef4444" : "#f59e0b" }} />
-                            </div>
-                          ))}
-                        </div>
-                        {/* Rebalancing CTA */}
-                        <div
-                          className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
-                          style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+                      <div
+                        className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
+                        style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
+                      >
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          <span className="font-semibold text-slate-800">Need a personalized rebalancing strategy?</span>{" "}
+                          Get a detailed consultation with Financial Friend.
+                        </p>
+                        <a
+                          href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
+                          style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
                         >
-                          <p className="text-xs text-slate-600 leading-relaxed">
-                            <span className="font-semibold text-slate-800">Need a personalized rebalancing strategy?</span>{" "}
-                            Get a detailed consultation with Financial Friend.
-                          </p>
-                          <a
-                            href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
-                            style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
-                          >
-                            Book Now
-                          </a>
-                        </div>
+                          Book Now
+                        </a>
                       </div>
                     )}
                   </div>
