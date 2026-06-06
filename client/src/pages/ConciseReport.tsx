@@ -2886,55 +2886,83 @@ export default function ConciseReport() {
                   </div>
                 </div>
 
-                {/* Audit paragraph */}
-                <div className="px-6 py-6 space-y-5">
-                  <p className="text-sm sm:text-[15px] text-slate-700 leading-relaxed">
-                    {investorName
-                      ? <><strong className="text-slate-900">{investorName}</strong>, here's a complete picture of your portfolio.</>
-                      : "Here's a complete picture of your portfolio."
-                    }{" "}
-                    You've built a portfolio currently worth{" "}
-                    <strong className="text-slate-900">{fmtL2(totalValuation)}</strong> from an investment of{" "}
-                    <strong className="text-slate-900">{fmtL2(totalInvested)}</strong>, delivering an overall return of{" "}
-                    <strong className={auditPositive ? "text-emerald-600" : "text-rose-600"}>
-                      {auditPositive ? "+" : ""}{auditPLPct.toFixed(1)}%{" "}
-                      ({auditPositive ? "+" : "-"}{fmtL2(Math.abs(auditPL))})
-                    </strong>{" "}
-                    across <strong className="text-slate-900">{mfSnapshot.length} mutual fund schemes</strong>.{" "}
-                    Your portfolio is currently tilted towards{" "}
-                    <strong className="text-slate-900">{dominant2} ({dominantPct2}%)</strong>,{" "}
-                    broadly in line with your{" "}
-                    <strong className="text-slate-900">{report.investorType || "chosen"}</strong> risk profile for the{" "}
-                    <strong className="text-slate-900">{report.ageGroup || "—"}</strong> age group.{" "}
-                    {missing2.length > 0 && (
-                      <>
-                        However, you have limited or no exposure to{" "}
-                        <strong className="text-slate-900">{missing2.join(", ")}</strong> — asset classes that could enhance diversification, reduce volatility, and improve long-term risk-adjusted returns.{" "}
-                      </>
-                    )}
-                    While the overall trajectory looks <strong className="text-slate-900">{auditPositive ? "positive" : "concerning"}</strong>,
-                    a deeper review of individual fund performance, overlapping schemes, and category gaps is essential to fully optimise your portfolio's potential.
-                  </p>
+                {/* Visual Portfolio Summary */}
+                <div className="px-6 py-5 space-y-5">
 
-                  {/* CTA box */}
-                  <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-indigo-900 mb-1">Ready to turn these insights into action?</p>
-                      <p className="text-xs text-indigo-700 leading-relaxed">
-                        Numbers are only a starting point. A one-on-one consultation with <strong>Financial Friend</strong> can help you rebalance strategically, eliminate overlapping funds, and build a personalised investment roadmap aligned with your long-term financial goals.
-                      </p>
+                  {/* Row 1 — 4 key metric tiles */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "Invested",   value: fmtL2(totalInvested),  sub: "Total cost",          color: "#6366f1", bg: "rgba(99,102,241,0.07)"  },
+                      { label: "Valuation",  value: fmtL2(totalValuation), sub: "Current worth",       color: "#0ea5e9", bg: "rgba(14,165,233,0.07)"  },
+                      { label: "Gain / Loss",value: `${auditPositive?"+":"−"}${fmtL2(Math.abs(auditPL))}`, sub: `${auditPositive?"+":"−"}${auditPLPct.toFixed(1)}% overall`, color: auditPositive ? "#10b981" : "#ef4444", bg: auditPositive ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.07)" },
+                      { label: "Schemes",    value: String(mfSnapshot.length), sub: "Mutual funds",    color: "#f59e0b", bg: "rgba(245,158,11,0.07)"  },
+                    ].map(tile => (
+                      <div key={tile.label} className="rounded-xl px-4 py-3.5 flex flex-col gap-0.5" style={{ background: tile.bg, border: `1px solid ${tile.color}22` }}>
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tile.color }}>{tile.label}</span>
+                        <span className="text-xl font-black text-slate-800 leading-tight">{tile.value}</span>
+                        <span className="text-[11px] text-slate-400 font-medium">{tile.sub}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Row 2 — Allocation bars + profile */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    {/* Allocation breakdown */}
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Asset Allocation</p>
+                      <div className="space-y-2">
+                        {(["Equity","Debt","Hybrid","Gold/Silver","Others"] as const).map(cat => {
+                          const pct = actMap2[cat] || 0;
+                          if (pct < 0.05) return null;
+                          const barColors: Record<string, string> = { Equity:"#6366f1", Debt:"#0ea5e9", Hybrid:"#f59e0b", "Gold/Silver":"#f97316", Others:"#8b5cf6" };
+                          return (
+                            <div key={cat}>
+                              <div className="flex justify-between text-[11px] mb-1">
+                                <span className="font-semibold text-slate-600">{cat}</span>
+                                <span className="font-bold text-slate-700">{pct.toFixed(1)}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(pct,100)}%`, background: barColors[cat] }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <a
-                      href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-lg whitespace-nowrap"
-                      style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)", boxShadow: "0 4px 16px rgba(99,102,241,0.35)" }}
-                      data-testid="link-audit-cta-calendly"
-                    >
-                      <CalendarDays className="w-4 h-4" />
-                      Book Free Consultation
-                    </a>
+
+                    {/* Risk profile + gaps */}
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-4 flex flex-col gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Investor Profile</p>
+                        <div className="flex flex-wrap gap-2">
+                          {report.investorType && (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(99,102,241,0.1)", color: "#6366f1", border: "1px solid rgba(99,102,241,0.2)" }}>{report.investorType}</span>
+                          )}
+                          {report.ageGroup && (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(14,165,233,0.1)", color: "#0ea5e9", border: "1px solid rgba(14,165,233,0.2)" }}>{report.ageGroup}</span>
+                          )}
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1px solid rgba(245,158,11,0.2)" }}>Dominant: {dominant2}</span>
+                        </div>
+                      </div>
+                      {missing2.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-2">Missing Exposure</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {missing2.map(c => (
+                              <span key={c} className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.18)" }}>{c}</span>
+                            ))}
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">Adding these could improve diversification and reduce volatility.</p>
+                        </div>
+                      )}
+                      {missing2.length === 0 && (
+                        <div className="flex items-center gap-2 text-emerald-600 text-xs font-semibold">
+                          <span className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[10px]">✓</span>
+                          Well-diversified across all major asset classes
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
