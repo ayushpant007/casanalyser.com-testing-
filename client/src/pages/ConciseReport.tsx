@@ -2397,27 +2397,6 @@ export default function ConciseReport() {
                       );
                     })()}
 
-                    {/* Rebalancing CTA */}
-                    {rebalancingPlan.length > 0 && (
-                      <div
-                        className="mt-3 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
-                        style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
-                      >
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          <span className="font-semibold text-slate-800">Need a personalized rebalancing strategy?</span>{" "}
-                          Get a detailed consultation with Financial Friend.
-                        </p>
-                        <a
-                          href="https://calendly.com/gunjan-financialfriend/financial-assessment-meeting"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white whitespace-nowrap"
-                          style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
-                        >
-                          Book Now
-                        </a>
-                      </div>
-                    )}
                   </div>
                   {/* Category Wise Distribution */}
                   <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
