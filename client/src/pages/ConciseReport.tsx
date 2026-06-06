@@ -2076,6 +2076,26 @@ export default function ConciseReport() {
                     </div>
                   </div>
                 </div>
+
+                {/* ── Alpha insight strip ── */}
+                <div
+                  className="px-4 sm:px-7 py-2.5 flex items-center justify-between gap-3"
+                  style={{
+                    background: isBeating ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.07)",
+                    borderBottom: isBeating ? "1px solid rgba(16,185,129,0.18)" : "1px solid rgba(239,68,68,0.14)",
+                  }}
+                >
+                  <span className="text-sm flex-shrink-0">{isBeating ? "📈" : "📉"}</span>
+                  <p className="text-[11px] sm:text-xs font-semibold leading-snug" style={{ color: isBeating ? "#059669" : "#dc2626" }}>
+                    {isBeating
+                      ? `Your portfolio beat Nifty 500 by ${fmtRs(Math.abs(alphaAbsolute))} over the last ${periodLabel}.`
+                      : `Your portfolio missed ₹[AMOUNT] vs Nifty 500 over the last ${periodLabel} — [ONE LINE INSIGHT PLACEHOLDER].`}
+                  </p>
+                  <span className="text-[11px] sm:text-xs font-black whitespace-nowrap" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
+                    {fmtRs(alphaAbsolute)}
+                  </span>
+                </div>
+
                 {/* White body */}
                 <div className="bg-white px-4 sm:px-7 py-5 space-y-5">
 
