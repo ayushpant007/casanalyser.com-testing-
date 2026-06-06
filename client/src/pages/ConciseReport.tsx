@@ -2890,30 +2890,28 @@ export default function ConciseReport() {
                 <div className="px-6 py-6 space-y-5">
                   <p className="text-sm sm:text-[15px] text-slate-700 leading-relaxed">
                     {investorName
-                      ? <><strong className="text-slate-900">{investorName}</strong>, here's a complete picture of your portfolio.</>
-                      : "Here's a complete picture of your portfolio."
+                      ? <><strong className="text-slate-900">{investorName}</strong>, here's a quick summary of how your investments are doing.</>
+                      : "Here's a quick summary of how your investments are doing."
                     }{" "}
-                    You've built a portfolio currently worth{" "}
-                    <strong className="text-slate-900">{fmtL2(totalValuation)}</strong> from an investment of{" "}
-                    <strong className="text-slate-900">{fmtL2(totalInvested)}</strong>, delivering an overall return of{" "}
+                    You put in <strong className="text-slate-900">{fmtL2(totalInvested)}</strong> across{" "}
+                    <strong className="text-slate-900">{mfSnapshot.length} mutual funds</strong>, and your money has grown to{" "}
+                    <strong className="text-slate-900">{fmtL2(totalValuation)}</strong> — that's a{" "}
                     <strong className={auditPositive ? "text-emerald-600" : "text-rose-600"}>
-                      {auditPositive ? "+" : ""}{auditPLPct.toFixed(1)}%{" "}
-                      ({auditPositive ? "+" : "-"}{fmtL2(Math.abs(auditPL))})
+                      {auditPositive ? "gain" : "loss"} of {fmtL2(Math.abs(auditPL))} ({auditPositive ? "+" : "-"}{auditPLPct.toFixed(1)}%)
                     </strong>{" "}
-                    across <strong className="text-slate-900">{mfSnapshot.length} mutual fund schemes</strong>.{" "}
-                    Your portfolio is currently tilted towards{" "}
-                    <strong className="text-slate-900">{dominant2} ({dominantPct2}%)</strong>,{" "}
-                    broadly in line with your{" "}
-                    <strong className="text-slate-900">{report.investorType || "chosen"}</strong> risk profile for the{" "}
+                    so far.{" "}
+                    A big chunk of your money — <strong className="text-slate-900">{dominantPct2}%</strong> — is in{" "}
+                    <strong className="text-slate-900">{dominant2}</strong>, which makes sense for a{" "}
+                    <strong className="text-slate-900">{report.investorType || "your"}</strong> investor in the{" "}
                     <strong className="text-slate-900">{report.ageGroup || "—"}</strong> age group.{" "}
                     {missing2.length > 0 && (
                       <>
-                        However, you have limited or no exposure to{" "}
-                        <strong className="text-slate-900">{missing2.join(", ")}</strong> — asset classes that could enhance diversification, reduce volatility, and improve long-term risk-adjusted returns.{" "}
+                        That said, you currently have very little in{" "}
+                        <strong className="text-slate-900">{missing2.join(", ")}</strong> — adding some exposure here can help spread your risk and make returns smoother over time.{" "}
                       </>
                     )}
-                    While the overall trajectory looks <strong className="text-slate-900">{auditPositive ? "positive" : "concerning"}</strong>,
-                    a deeper review of individual fund performance, overlapping schemes, and category gaps is essential to fully optimise your portfolio's potential.
+                    Overall, things look <strong className="text-slate-900">{auditPositive ? "good" : "like they need attention"}</strong> —
+                    but it's worth taking a closer look at each fund to spot any that are underperforming or overlapping with others.
                   </p>
 
                   {/* CTA box */}
