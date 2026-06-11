@@ -1899,7 +1899,7 @@ export default function ConciseReport() {
                           )}
 
                           {/* ── ROW 3: Funds breakdown ── */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className={`grid grid-cols-1 gap-3 ${withoutData.length > 0 ? "sm:grid-cols-2" : ""}`}>
                             {/* Funds we can calculate returns for */}
                             <div className="rounded-2xl border border-emerald-200 bg-white p-4" data-testid="card-with-data">
                               <div className="flex items-center gap-2 mb-3">
@@ -1921,24 +1921,26 @@ export default function ConciseReport() {
                               </div>
                             </div>
 
-                            {/* Funds without cost history */}
-                            <div className="rounded-2xl border border-slate-200 bg-white p-4" data-testid="card-without-data">
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
-                                <span className="text-xs font-bold text-slate-700">Funds without cost history</span>
-                                <span className="ml-auto text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">{withoutData.length} funds</span>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
-                                  <span className="text-xs text-slate-500">Current value</span>
-                                  <span className="text-sm font-bold text-slate-700">{fmtL(withoutMarket)}</span>
+                            {/* Funds without cost history — only show when there are some */}
+                            {withoutData.length > 0 && (
+                              <div className="rounded-2xl border border-slate-200 bg-white p-4" data-testid="card-without-data">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                                  <span className="text-xs font-bold text-slate-700">Funds without cost history</span>
+                                  <span className="ml-auto text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">{withoutData.length} funds</span>
                                 </div>
-                                <div className="flex justify-between items-center py-1.5">
-                                  <span className="text-xs text-slate-500">Profit / loss</span>
-                                  <span className="text-sm font-medium text-slate-400">Can't calculate</span>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
+                                    <span className="text-xs text-slate-500">Current value</span>
+                                    <span className="text-sm font-bold text-slate-700">{fmtL(withoutMarket)}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center py-1.5">
+                                    <span className="text-xs text-slate-500">Profit / loss</span>
+                                    <span className="text-sm font-medium text-slate-400">Can't calculate</span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </div>
 
                           {/* ── ROW 4: Fund count + info note ── */}
