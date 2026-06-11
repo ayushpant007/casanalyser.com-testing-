@@ -1802,6 +1802,12 @@ export default function ConciseReport() {
 
                       return (
                         <>
+                          {/* ── Mutual Fund Portfolio subheader ── */}
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 rounded-full bg-emerald-400" />
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Mutual Fund Portfolio</p>
+                          </div>
+
                           {/* ── ROW 1: Hero numbers ── */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
