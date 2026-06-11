@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { useReport } from "@/hooks/use-reports";
+import { useReport, useOverlapAnalysis } from "@/hooks/use-reports";
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -191,6 +191,7 @@ export default function ConciseReport() {
   const [, navigate] = useLocation();
   const reportId = params.id ? parseInt(params.id) : null;
   const { data: report, isLoading } = useReport(reportId);
+  const { data: overlapData, isLoading: overlapLoading } = useOverlapAnalysis(reportId);
   const reportRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -383,6 +384,7 @@ export default function ConciseReport() {
   const overviewRef = useRef<HTMLDivElement>(null);
   const benchmarkRef = useRef<HTMLDivElement>(null);
   const allocationRef = useRef<HTMLDivElement>(null);
+  const overlapRef = useRef<HTMLDivElement>(null);
   const sipHealthRef = useRef<HTMLDivElement>(null);
   const performanceRef = useRef<HTMLDivElement>(null);
   const snapshotRef = useRef<HTMLDivElement>(null);
@@ -394,6 +396,7 @@ export default function ConciseReport() {
         { id: "overview", ref: overviewRef },
         { id: "benchmark", ref: benchmarkRef },
         { id: "allocation", ref: allocationRef },
+        { id: "overlap", ref: overlapRef },
         { id: "sip", ref: sipHealthRef },
         { id: "performance", ref: performanceRef },
         { id: "snapshot", ref: snapshotRef },
@@ -1629,6 +1632,7 @@ export default function ConciseReport() {
             { id: "overview", label: "Overview", ref: overviewRef },
             { id: "benchmark", label: "Benchmark", ref: benchmarkRef },
             { id: "allocation", label: "Allocation", ref: allocationRef },
+            { id: "overlap", label: "Overlap", ref: overlapRef },
             { id: "sip", label: "SIP Health", ref: sipHealthRef },
             { id: "performance", label: "Performance", ref: performanceRef },
             { id: "snapshot", label: "Snapshot", ref: snapshotRef },
@@ -2439,6 +2443,235 @@ export default function ConciseReport() {
                 </>
               );
             })()}
+          </div>
+
+          {/* overlap anchor */}
+          <div ref={overlapRef} />
+          {/* 3. Overlapping Fund Analysis */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-700 to-teal-700 px-4 sm:px-6 py-5 text-white">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h3 className="text-[20px] text-left text-white font-bold">Overlapping Fund Analysis</h3>
+                  <p className="text-teal-200 text-xs mt-1">How much your funds overlap in stock holdings</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-[11px] text-teal-200 font-medium mb-0.5 uppercase tracking-wider">Diversification</div>
+                  <div className="text-3xl font-bold text-white">
+                    {overlapLoading ? (
+                      <Loader2 className="w-7 h-7 animate-spin inline-block" />
+                    ) : (
+                      overlapData?.diversificationScore || "—"
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {overlapLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <span className="ml-3 text-sm text-slate-500 font-medium">Analyzing fund overlaps...</span>
+              </div>
+            ) : !overlapData || overlapData.analyzedFunds.length === 0 ? (
+              <div className="px-6 py-8 text-center">
+                <Layers className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm text-slate-500 font-medium">No overlap data available</p>
+                <p className="text-xs text-slate-400 mt-1">Fund holdings not found in our database for this portfolio.</p>
+              </div>
+            ) : (
+              <>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
+                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Funds Analyzed</div>
+                    <div className="text-xl sm:text-2xl font-bold text-emerald-600">{overlapData.analyzedFunds.length}</div>
+                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">of {overlapData.analyzedFunds.length + overlapData.unmatchedFunds.length} total</div>
+                  </div>
+                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Avg Overlap</div>
+                    <div className="text-xl sm:text-2xl font-bold" style={{ color: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }}>
+                      {overlapData.averageOverlap.toFixed(1)}%
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+                      {overlapData.averageOverlap < 15 ? "Low overlap ✓" : overlapData.averageOverlap <= 30 ? "Moderate overlap" : "High overlap ⚠"}
+                    </div>
+                  </div>
+                  <div className="px-3 sm:px-6 py-4">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">High Conc. Stocks</div>
+                    <div className="text-xl sm:text-2xl font-bold" style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}>
+                      {overlapData.highConcentrationStocks}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+                      {overlapData.highConcentrationStocks === 0 ? "None ✓" : overlapData.highConcentrationStocks <= 3 ? "Watch closely" : "Too many ⚠"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Most Similar Fund Pairs */}
+                {overlapData.similarPairs.length > 0 && (
+                  <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                      Most Similar Fund Pairs
+                    </p>
+                    <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(16,185,129,0.06)" }}>
+                      <div className="grid grid-cols-[0.6fr_2fr_1fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Rank</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Pair</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Common</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Overlap</div>
+                      </div>
+                      {overlapData.similarPairs.slice(0, 5).map((pair, idx) => {
+                        const color = pair.overlapScore >= 30 ? "#ef4444" : pair.overlapScore >= 15 ? "#f59e0b" : "#10b981";
+                        return (
+                          <div
+                            key={idx}
+                            className={`grid grid-cols-[0.6fr_2fr_1fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                          >
+                            <div className="text-xs font-bold text-slate-500">#{idx + 1}</div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-slate-800 truncate">{pair.fundA}</p>
+                              <p className="text-[10px] text-slate-400 truncate">vs {pair.fundB}</p>
+                            </div>
+                            <div className="text-center text-xs font-semibold text-slate-600">{pair.commonHoldings}</div>
+                            <div className="text-center">
+                              <span className="text-xs font-bold tabular-nums" style={{ color }}>
+                                {pair.overlapScore.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 2: Highest Stock Concentration */}
+                {overlapData.stockConcentration.length > 0 && (
+                  <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                      Highest Stock Concentration
+                    </p>
+                    <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(16,185,129,0.06)" }}>
+                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Stock</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Total Exposure</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">In Funds</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
+                      </div>
+                      {overlapData.stockConcentration.slice(0, 8).map((stock, idx) => {
+                        const color = stock.totalExposure > 15 ? "#ef4444" : stock.totalExposure > 10 ? "#f59e0b" : "#10b981";
+                        const status = stock.totalExposure > 15 ? "High" : stock.totalExposure > 10 ? "Moderate" : "Normal";
+                        return (
+                          <div
+                            key={idx}
+                            className={`grid grid-cols-[2fr_1fr_1fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                          >
+                            <div className="text-xs font-semibold text-slate-800 truncate">{stock.company}</div>
+                            <div className="text-center text-xs font-bold tabular-nums" style={{ color }}>
+                              {stock.totalExposure.toFixed(1)}%
+                            </div>
+                            <div className="text-center text-xs text-slate-500">{stock.fundCount}</div>
+                            <div className="text-center">
+                              <span
+                                className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap"
+                                style={{ backgroundColor: `${color}14`, color, border: `1px solid ${color}33` }}
+                              >
+                                {status}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 3: Red Flags */}
+                {overlapData.redFlags.length > 0 && (
+                  <div className="px-3 sm:px-6 pt-5 pb-5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                      Red Flags
+                    </p>
+                    <div className="space-y-2">
+                      {overlapData.redFlags.map((flag, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl border"
+                          style={{
+                            background: flag.severity === "high" ? "rgba(239,68,68,0.05)" : "rgba(245,158,11,0.05)",
+                            borderColor: flag.severity === "high" ? "rgba(239,68,68,0.15)" : "rgba(245,158,11,0.15)",
+                          }}
+                        >
+                          <span className="flex-shrink-0 text-sm mt-0.5" style={{ color: flag.severity === "high" ? "#ef4444" : "#f59e0b" }}>
+                            {flag.severity === "high" ? "⚠" : "⚠"}
+                          </span>
+                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{flag.message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 4: Advisor-Friendly Final Verdict */}
+                <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                    Portfolio Diversification Score
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Overlap Score Card */}
+                    <div className="rounded-xl border p-4" style={{ borderColor: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444", background: overlapData.averageOverlap < 15 ? "rgba(16,185,129,0.04)" : overlapData.averageOverlap <= 30 ? "rgba(245,158,11,0.04)" : "rgba(239,68,68,0.04)" }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }} />
+                        <span className="text-xs font-bold text-slate-700">Average Overlap</span>
+                      </div>
+                      <div className="text-2xl font-black" style={{ color: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }}>
+                        {overlapData.averageOverlap.toFixed(1)}%
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-1">
+                        {overlapData.averageOverlap < 15 ? "Good — Less than 15% average overlap" : overlapData.averageOverlap <= 30 ? "Moderate — 15% to 30% average overlap" : "Poor — Over 30% average overlap"}
+                      </div>
+                    </div>
+
+                    {/* Concentration Score Card */}
+                    <div className="rounded-xl border p-4" style={{ borderColor: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444", background: overlapData.highConcentrationStocks === 0 ? "rgba(16,185,129,0.04)" : overlapData.highConcentrationStocks <= 3 ? "rgba(245,158,11,0.04)" : "rgba(239,68,68,0.04)" }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }} />
+                        <span className="text-xs font-bold text-slate-700">Stock Concentration</span>
+                      </div>
+                      <div className="text-2xl font-black" style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}>
+                        {overlapData.highConcentrationStocks === 0 ? "Good" : overlapData.highConcentrationStocks <= 3 ? "Moderate" : "Poor"}
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-1">
+                        {overlapData.highConcentrationStocks === 0 ? "No stock >10% across funds" : overlapData.highConcentrationStocks <= 3 ? `${overlapData.highConcentrationStocks} stock${overlapData.highConcentrationStocks > 1 ? "s" : ""} >10%` : `${overlapData.highConcentrationStocks} stocks >10% — too concentrated`}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Overall Score Banner */}
+                  <div className="mt-3 rounded-xl border p-4 text-center" style={{ borderColor: overlapData.diversificationScore === "Good" ? "#10b981" : overlapData.diversificationScore === "Moderate" ? "#f59e0b" : "#ef4444", background: overlapData.diversificationScore === "Good" ? "rgba(16,185,129,0.06)" : overlapData.diversificationScore === "Moderate" ? "rgba(245,158,11,0.06)" : "rgba(239,68,68,0.06)" }}>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Overall Verdict</div>
+                    <div className="text-2xl font-black" style={{ color: overlapData.diversificationScore === "Good" ? "#10b981" : overlapData.diversificationScore === "Moderate" ? "#f59e0b" : "#ef4444" }}>
+                      {overlapData.diversificationScore}
+                    </div>
+                    <div className="text-[10px] text-slate-500 mt-1">
+                      {overlapData.diversificationScore === "Good" ? "Portfolio is well diversified with low overlap and no concentration risk." : overlapData.diversificationScore === "Moderate" ? "Portfolio has some overlap or concentration. Consider reviewing similar funds." : "Portfolio is poorly diversified. Significant overlap and concentration detected. Action recommended."}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Unmatched funds note */}
+                {overlapData.unmatchedFunds.length > 0 && (
+                  <div className="px-3 sm:px-6 pb-5">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                      <p className="text-[10px] text-slate-400">
+                        {overlapData.unmatchedFunds.length} fund{overlapData.unmatchedFunds.length > 1 ? "s" : ""} not found in holdings database: {overlapData.unmatchedFunds.slice(0, 3).join(", ")}{overlapData.unmatchedFunds.length > 3 ? ` and ${overlapData.unmatchedFunds.length - 3} more` : ""}.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* ── SIP Health Panel ──────────────────────────────────────────── */}

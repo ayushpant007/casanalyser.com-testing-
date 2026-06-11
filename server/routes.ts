@@ -20,6 +20,7 @@ import { lookupByIsinOrName } from "./scoring";
 import { detectCasSource, calculateFundVsBenchmark } from "./fund-benchmark";
 import { uploadCasToDrive } from "./gdrive";
 import { pool } from "./db";
+import { analyzeOverlap } from "./overlap";
 
 const execAsync = promisify(exec);
 const upload = multer({ storage: multer.memoryStorage() });
@@ -836,6 +837,36 @@ ${text}`;
     } catch (err: any) {
       console.error("nifty-benchmark fetch error:", err.message);
       return res.json({ return_1y: 7.98, return_3y: 14.66, as_of_date: null, source: "fallback" });
+    }
+  });
+
+  // ── Overlap Analysis endpoint ───────────────────────────────────────────
+  app.get("/api/overlap/:id", async (req, res) => {
+    try {
+      const report = await storage.getReport(Number(req.params.id));
+      if (!report) return res.status(404).json({ message: "Report not found" });
+
+      const analysis = (report.analysis as any) || {};
+      const snapshot = (analysis.mf_snapshot || []) as any[];
+
+      if (snapshot.length === 0) {
+        return res.json({
+          diversificationScore: "Good",
+          averageOverlap: 0,
+          highConcentrationStocks: 0,
+          similarPairs: [],
+          stockConcentration: [],
+          redFlags: [{ type: "general", message: "No funds found in portfolio for overlap analysis.", severity: "moderate" }],
+          analyzedFunds: [],
+          unmatchedFunds: [],
+        });
+      }
+
+      const result = analyzeOverlap(snapshot);
+      res.json(result);
+    } catch (err: any) {
+      console.error("Overlap analysis error:", err);
+      res.status(500).json({ message: "Failed to compute overlap analysis" });
     }
   });
 

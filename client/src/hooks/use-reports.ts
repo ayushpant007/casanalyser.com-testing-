@@ -43,6 +43,46 @@ export function useReport(id: number | null) {
   });
 }
 
+export interface OverlapResult {
+  diversificationScore: "Good" | "Moderate" | "Poor";
+  averageOverlap: number;
+  highConcentrationStocks: number;
+  similarPairs: Array<{
+    fundA: string;
+    fundB: string;
+    overlapScore: number;
+    commonHoldings: number;
+    highConcentration: Array<{ company: string; weightA: number; weightB: number }>;
+    moderateConcentration: Array<{ company: string; weightA: number; weightB: number }>;
+  }>;
+  stockConcentration: Array<{
+    company: string;
+    totalExposure: number;
+    fundCount: number;
+    fundWeights: Array<{ fund: string; weight: number }>;
+  }>;
+  redFlags: Array<{
+    type: string;
+    message: string;
+    severity: string;
+  }>;
+  analyzedFunds: string[];
+  unmatchedFunds: string[];
+}
+
+export function useOverlapAnalysis(id: number | null) {
+  return useQuery({
+    queryKey: ["/api/overlap", id],
+    enabled: !!id,
+    queryFn: async () => {
+      if (!id) return null;
+      const res = await fetch(`/api/overlap/${id}`);
+      if (!res.ok) throw new Error("Failed to fetch overlap analysis");
+      return (await res.json()) as OverlapResult;
+    },
+  });
+}
+
 // POST /api/analyze — starts job, then polls /api/analyze/status/:jobId
 export function useAnalyzeReport() {
   const queryClient = useQueryClient();
