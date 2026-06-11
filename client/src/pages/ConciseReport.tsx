@@ -1771,6 +1771,7 @@ export default function ConciseReport() {
                             <div>
                               <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value</p>
                               <p className="text-[10px] text-violet-400 mt-0.5">As reported in your CAS statement</p>
+                              <p className="text-[10px] text-violet-300 mt-0.5">Includes Mutual Funds, ETFs, Stocks and other holdings</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
