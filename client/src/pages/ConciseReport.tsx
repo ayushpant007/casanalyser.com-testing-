@@ -2532,7 +2532,7 @@ export default function ConciseReport() {
                             <div className="text-xs font-bold text-slate-500">#{idx + 1}</div>
                             <div className="min-w-0">
                               <p className="text-xs font-semibold text-slate-800 leading-snug">
-                                {pair.fundA} <span className="text-slate-400 font-normal">VS</span> {pair.fundB}
+                                {pair.fundA} <span className="text-amber-500 font-semibold">VS</span> {pair.fundB}
                               </p>
                             </div>
                             <div className="text-center">
