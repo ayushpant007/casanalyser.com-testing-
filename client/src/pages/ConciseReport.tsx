@@ -2517,10 +2517,9 @@ export default function ConciseReport() {
                       Most Similar Fund Pairs
                     </p>
                     <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(16,185,129,0.06)" }}>
-                      <div className="grid grid-cols-[0.6fr_2fr_1fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                      <div className="grid grid-cols-[0.6fr_3fr_1fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Rank</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Pair</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Common</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Overlap</div>
                       </div>
                       {overlapData.similarPairs.slice(0, 5).map((pair, idx) => {
@@ -2528,14 +2527,14 @@ export default function ConciseReport() {
                         return (
                           <div
                             key={idx}
-                            className={`grid grid-cols-[0.6fr_2fr_1fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
+                            className={`grid grid-cols-[0.6fr_3fr_1fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}
                           >
                             <div className="text-xs font-bold text-slate-500">#{idx + 1}</div>
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-slate-800 truncate">{pair.fundA}</p>
-                              <p className="text-[10px] text-slate-400 truncate">vs {pair.fundB}</p>
+                              <p className="text-xs font-semibold text-slate-800 leading-snug">
+                                {pair.fundA} <span className="text-slate-400 font-normal">VS</span> {pair.fundB}
+                              </p>
                             </div>
-                            <div className="text-center text-xs font-semibold text-slate-600">{pair.commonHoldings}</div>
                             <div className="text-center">
                               <span className="text-xs font-bold tabular-nums" style={{ color }}>
                                 {pair.overlapScore.toFixed(1)}%
