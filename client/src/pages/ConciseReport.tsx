@@ -2225,13 +2225,6 @@ export default function ConciseReport() {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-400">
-                    * Based on {activeList.length} of {mfSnapshot.length} fund{mfSnapshot.length !== 1 ? "s" : ""} with available {periodLabel} CAGR data.{activeList.length < mfSnapshot.length ? ` ${mfSnapshot.length - activeList.length} fund(s) excluded due to unavailable data.` : ""}{" "}
-                    Nifty 500 TRI {periodLabel} return used as benchmark ({niftyBenchmark}%
-                    {niftyLive?.source === "supabase" && niftyLive.as_of_date
-                      ? ` · updated ${new Date(niftyLive.as_of_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
-                      : " · fallback value"}).
-                  </p>
                 </div>
               </div>
             );
