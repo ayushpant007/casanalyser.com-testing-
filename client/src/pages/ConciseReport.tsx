@@ -2193,11 +2193,52 @@ export default function ConciseReport() {
                               if (!niftyPts.length || !portPts.length) return null;
                               const forward  = portPts.map(p => `${p.x},${p.y}`).join(" ");
                               const backward = [...niftyPts].reverse().map(p => `${p.x},${p.y}`).join(" ");
+
+                              // Label at ~60% along the line (right-ish of center, in the gap)
+                              const midIdx = Math.floor(portPts.length * 0.6);
+                              const portMid  = portPts[midIdx];
+                              const niftyMid = niftyPts[midIdx];
+                              const labelX = portMid?.x ?? 0;
+                              const labelY = portMid && niftyMid ? (portMid.y + niftyMid.y) / 2 : 0;
+                              const labelText = `α=${isBeating ? "+" : ""}${alpha.toFixed(2)}%`;
+                              const color = isBeating ? "#059669" : "#dc2626";
+                              const bgColor = isBeating ? "rgba(236,253,245,0.92)" : "rgba(254,242,242,0.92)";
+                              const borderColor = isBeating ? "#6ee7b7" : "#fca5a5";
+                              const textW = labelText.length * 6.5 + 14;
+                              const textH = 18;
+
                               return (
-                                <polygon
-                                  points={`${forward} ${backward}`}
-                                  fill={isBeating ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.15)"}
-                                />
+                                <g>
+                                  <polygon
+                                    points={`${forward} ${backward}`}
+                                    fill={isBeating ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.15)"}
+                                  />
+                                  {portMid && niftyMid && Math.abs(portMid.y - niftyMid.y) > 6 && (
+                                    <g>
+                                      <rect
+                                        x={labelX - textW / 2}
+                                        y={labelY - textH / 2}
+                                        width={textW}
+                                        height={textH}
+                                        rx={5}
+                                        fill={bgColor}
+                                        stroke={borderColor}
+                                        strokeWidth={1}
+                                      />
+                                      <text
+                                        x={labelX}
+                                        y={labelY + 4.5}
+                                        textAnchor="middle"
+                                        fontSize={10}
+                                        fontWeight="700"
+                                        fontFamily="inherit"
+                                        fill={color}
+                                      >
+                                        {labelText}
+                                      </text>
+                                    </g>
+                                  )}
+                                </g>
                               );
                             }} />
                           </AreaChart>
