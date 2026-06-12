@@ -2614,53 +2614,6 @@ export default function ConciseReport() {
                   </div>
                 )}
 
-                {/* Section 4: Advisor-Friendly Final Verdict */}
-                <div className="px-3 sm:px-6 py-5 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                    Portfolio Diversification Score
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Overlap Score Card */}
-                    <div className="rounded-xl border p-4" style={{ borderColor: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444", background: overlapData.averageOverlap < 15 ? "rgba(16,185,129,0.04)" : overlapData.averageOverlap <= 30 ? "rgba(245,158,11,0.04)" : "rgba(239,68,68,0.04)" }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }} />
-                        <span className="text-xs font-bold text-slate-700">Average Overlap</span>
-                      </div>
-                      <div className="text-2xl font-black" style={{ color: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }}>
-                        {overlapData.averageOverlap.toFixed(1)}%
-                      </div>
-                      <div className="text-[10px] text-slate-500 mt-1">
-                        {overlapData.averageOverlap < 15 ? "Good — Less than 15% average overlap" : overlapData.averageOverlap <= 30 ? "Moderate — 15% to 30% average overlap" : "Poor — Over 30% average overlap"}
-                      </div>
-                    </div>
-
-                    {/* Concentration Score Card */}
-                    <div className="rounded-xl border p-4" style={{ borderColor: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444", background: overlapData.highConcentrationStocks === 0 ? "rgba(16,185,129,0.04)" : overlapData.highConcentrationStocks <= 3 ? "rgba(245,158,11,0.04)" : "rgba(239,68,68,0.04)" }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }} />
-                        <span className="text-xs font-bold text-slate-700">Stock Concentration</span>
-                      </div>
-                      <div className="text-2xl font-black" style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}>
-                        {overlapData.highConcentrationStocks === 0 ? "Good" : overlapData.highConcentrationStocks <= 3 ? "Moderate" : "Poor"}
-                      </div>
-                      <div className="text-[10px] text-slate-500 mt-1">
-                        {overlapData.highConcentrationStocks === 0 ? "No stock >10% across funds" : overlapData.highConcentrationStocks <= 3 ? `${overlapData.highConcentrationStocks} stock${overlapData.highConcentrationStocks > 1 ? "s" : ""} >10%` : `${overlapData.highConcentrationStocks} stocks >10% — too concentrated`}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Overall Score Banner */}
-                  <div className="mt-3 rounded-xl border p-4 text-center" style={{ borderColor: overlapData.diversificationScore === "Good" ? "#10b981" : overlapData.diversificationScore === "Moderate" ? "#f59e0b" : "#ef4444", background: overlapData.diversificationScore === "Good" ? "rgba(16,185,129,0.06)" : overlapData.diversificationScore === "Moderate" ? "rgba(245,158,11,0.06)" : "rgba(239,68,68,0.06)" }}>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Overall Verdict</div>
-                    <div className="text-2xl font-black" style={{ color: overlapData.diversificationScore === "Good" ? "#10b981" : overlapData.diversificationScore === "Moderate" ? "#f59e0b" : "#ef4444" }}>
-                      {overlapData.diversificationScore}
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-1">
-                      {overlapData.diversificationScore === "Good" ? "Portfolio is well diversified with low overlap and no concentration risk." : overlapData.diversificationScore === "Moderate" ? "Portfolio has some overlap or concentration. Consider reviewing similar funds." : "Portfolio is poorly diversified. Significant overlap and concentration detected. Action recommended."}
-                    </div>
-                  </div>
-                </div>
-
                 {/* Unmatched funds note */}
                 {overlapData.unmatchedFunds.length > 0 && (
                   <div className="px-3 sm:px-6 pb-5">
