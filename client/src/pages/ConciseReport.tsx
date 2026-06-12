@@ -4,7 +4,7 @@ import { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, ArrowLeft, Calendar, CalendarDays, TrendingUp, TrendingDown, FileSpreadsheet, TrendingUpIcon, Zap, Mail, Phone, MessageCircle, Wallet, IndianRupee, Layers, Sparkles, Search, X, ChevronUp, Target, Activity, AlertTriangle, ArrowUpRight, SortAsc, SortDesc, Eye, ChevronDown, Sun, Moon, RefreshCcw, FileText } from "lucide-react";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, Area, AreaChart } from "recharts";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, Area, AreaChart, Customized } from "recharts";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2 } from "lucide-react";
 
@@ -2154,6 +2154,13 @@ export default function ConciseReport() {
                               <span className="w-5 h-0.5 rounded-full bg-slate-400 inline-block" style={{ borderStyle: "dashed" }} />
                               <span className="text-[10px] font-semibold text-slate-500">Nifty 500</span>
                             </div>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-5 h-3 rounded-sm inline-block opacity-80"
+                                style={{ backgroundColor: isBeating ? "rgba(16,185,129,0.4)" : "rgba(239,68,68,0.35)" }}
+                              />
+                              <span className="text-[10px] font-semibold" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>Alpha</span>
+                            </div>
                           </div>
                         </div>
                         <ResponsiveContainer width="100%" height={200}>
@@ -2178,6 +2185,21 @@ export default function ConciseReport() {
                             />
                             <Area type="monotone" dataKey="nifty" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 4" fill="url(#niftyGrad)" dot={false} activeDot={{ r: 4, fill: "#94a3b8" }} />
                             <Area type="monotone" dataKey="portfolio" stroke="#6366f1" strokeWidth={2.5} fill="url(#portfolioGrad)" dot={false} activeDot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+                            <Customized component={(props: any) => {
+                              const items = props.formattedGraphicalItems;
+                              if (!items || items.length < 2) return null;
+                              const niftyPts: { x: number; y: number }[] = items[0]?.props?.points || [];
+                              const portPts: { x: number; y: number }[]  = items[1]?.props?.points || [];
+                              if (!niftyPts.length || !portPts.length) return null;
+                              const forward  = portPts.map(p => `${p.x},${p.y}`).join(" ");
+                              const backward = [...niftyPts].reverse().map(p => `${p.x},${p.y}`).join(" ");
+                              return (
+                                <polygon
+                                  points={`${forward} ${backward}`}
+                                  fill={isBeating ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.15)"}
+                                />
+                              );
+                            }} />
                           </AreaChart>
                         </ResponsiveContainer>
                         <div className="flex items-center justify-end gap-5 mt-1 pr-1">
