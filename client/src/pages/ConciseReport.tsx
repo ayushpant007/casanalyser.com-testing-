@@ -2541,34 +2541,139 @@ export default function ConciseReport() {
               </div>
             ) : (
               <>
-                {/* Summary Cards */}
-                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
-                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Funds Analyzed</div>
-                    <div className="text-xl sm:text-2xl font-bold text-emerald-600">{overlapData.analyzedFunds.length}</div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">of {overlapData.analyzedFunds.length + overlapData.unmatchedFunds.length} total</div>
-                  </div>
-                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Avg Overlap</div>
-                    <div className="text-xl sm:text-2xl font-bold" style={{ color: overlapData.averageOverlap < 15 ? "#10b981" : overlapData.averageOverlap <= 30 ? "#f59e0b" : "#ef4444" }}>
-                      {overlapData.averageOverlap.toFixed(1)}%
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">
-                      {overlapData.averageOverlap < 15 ? "Low overlap ✓" : overlapData.averageOverlap <= 30 ? "Moderate overlap" : "High overlap ⚠"}
-                    </div>
-                  </div>
-                  <div className="px-3 sm:px-6 py-4">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">High Conc. Stocks</div>
-                    <div className="text-xl sm:text-2xl font-bold" style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}>
-                      {overlapData.highConcentrationStocks}
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">
-                      {overlapData.highConcentrationStocks === 0 ? "None ✓" : overlapData.highConcentrationStocks <= 3 ? "Watch closely" : "Too many ⚠"}
-                    </div>
-                  </div>
-                </div>
+                {/* ── Overlap Meters ───────────────────────────────────────── */}
+                {(() => {
+                  const OverlapMeter = ({
+                    label, value, fundCount, subtitle
+                  }: { label: string; value: number | null; fundCount: number; subtitle: string }) => {
+                    const pct = value ?? 0;
+                    const clampedPct = Math.min(pct, 100);
+                    const meterColor = pct < 15 ? "#10b981" : pct <= 30 ? "#f59e0b" : "#ef4444";
+                    const meterBg = pct < 15 ? "rgba(16,185,129,0.08)" : pct <= 30 ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.08)";
+                    const meterBorder = pct < 15 ? "rgba(16,185,129,0.25)" : pct <= 30 ? "rgba(245,158,11,0.25)" : "rgba(239,68,68,0.25)";
+                    const statusLabel = pct < 15 ? "Low overlap" : pct <= 30 ? "Moderate overlap" : "High overlap";
+                    const statusIcon = pct < 15 ? "✓" : pct <= 30 ? "~" : "⚠";
+                    if (value === null || fundCount < 2) return (
+                      <div className="flex-1 rounded-2xl border border-slate-100 bg-slate-50 p-4 flex flex-col items-center justify-center gap-1 min-h-[130px]">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-1">{label}</p>
+                        <p className="text-xs text-slate-300">Not enough funds</p>
+                      </div>
+                    );
+                    return (
+                      <div
+                        className="flex-1 rounded-2xl p-4 sm:p-5 flex flex-col gap-3"
+                        style={{ background: meterBg, border: `1.5px solid ${meterBorder}` }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: meterColor }}>{label}</p>
+                            <p className="text-[11px] text-slate-400">{fundCount} fund{fundCount !== 1 ? "s" : ""} · {subtitle}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-black tabular-nums leading-none" style={{ color: meterColor }}>
+                              {pct.toFixed(1)}%
+                            </div>
+                            <div className="text-[10px] font-semibold mt-1" style={{ color: meterColor }}>
+                              {statusLabel} {statusIcon}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Meter track */}
+                        <div className="relative">
+                          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.06)" }}>
+                            {/* Zone ticks underneath */}
+                            <div className="absolute inset-0 flex">
+                              <div style={{ width: "15%" }} className="h-full" />
+                              <div style={{ width: "0.5px", height: "100%", background: "rgba(255,255,255,0.5)" }} />
+                              <div style={{ width: "15%" }} className="h-full" />
+                              <div style={{ width: "0.5px", height: "100%", background: "rgba(255,255,255,0.5)" }} />
+                            </div>
+                            {/* Fill bar */}
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${clampedPct}%`,
+                                background: `linear-gradient(90deg, #10b981 0%, #10b981 15%, #f59e0b 30%, #ef4444 60%, #b91c1c 100%)`
+                              }}
+                            />
+                          </div>
+                          {/* Needle marker */}
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 w-3 h-5 rounded-sm -translate-x-1/2"
+                            style={{
+                              left: `${clampedPct}%`,
+                              background: meterColor,
+                              boxShadow: `0 0 6px ${meterColor}99`
+                            }}
+                          />
+                          {/* Zone labels */}
+                          <div className="flex justify-between mt-1.5 px-0.5">
+                            <span className="text-[9px] font-semibold text-slate-300">0</span>
+                            <span className="text-[9px] font-semibold text-emerald-400" style={{ marginLeft: "calc(15% - 8px)" }}>15</span>
+                            <span className="text-[9px] font-semibold text-amber-400" style={{ marginLeft: "calc(15% - 8px)" }}>30</span>
+                            <span className="text-[9px] font-semibold text-slate-300 ml-auto">100</span>
+                          </div>
+                        </div>
+                        {/* Zone legend */}
+                        <div className="flex items-center gap-3 pt-0.5">
+                          {[
+                            { color: "#10b981", label: "Low (0–15)" },
+                            { color: "#f59e0b", label: "Moderate (15–30)" },
+                            { color: "#ef4444", label: "High (30+)" },
+                          ].map(z => (
+                            <span key={z.label} className="flex items-center gap-1 text-[9px] text-slate-400">
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: z.color }} />
+                              {z.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  };
 
-                {/* Section 1: Most Similar Fund Pairs */}
+                  return (
+                    <div className="px-3 sm:px-5 py-5 border-b border-slate-100">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Overlap Meters</p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <OverlapMeter
+                          label="Equity Funds"
+                          value={overlapData.equityAverageOverlap}
+                          fundCount={overlapData.equityFundCount}
+                          subtitle="avg overlap"
+                        />
+                        <OverlapMeter
+                          label="Debt Funds"
+                          value={overlapData.debtAverageOverlap}
+                          fundCount={overlapData.debtFundCount}
+                          subtitle="avg overlap"
+                        />
+                      </div>
+                      {/* High Conc Stocks strip */}
+                      <div className="mt-3 flex items-center justify-between rounded-xl px-4 py-2.5 border border-slate-100 bg-slate-50">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">High Concentration Stocks</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Stocks held heavily across multiple funds</p>
+                        </div>
+                        <div className="text-right">
+                          <span
+                            className="text-2xl font-black tabular-nums"
+                            style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}
+                          >
+                            {overlapData.highConcentrationStocks}
+                          </span>
+                          <p
+                            className="text-[10px] font-semibold mt-0.5"
+                            style={{ color: overlapData.highConcentrationStocks === 0 ? "#10b981" : overlapData.highConcentrationStocks <= 3 ? "#f59e0b" : "#ef4444" }}
+                          >
+                            {overlapData.highConcentrationStocks === 0 ? "None ✓" : overlapData.highConcentrationStocks <= 3 ? "Watch closely" : "Too many ⚠"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Section: Most Similar Fund Pairs */}
                 {overlapData.similarPairs.length > 0 && (
                   <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
@@ -2601,92 +2706,6 @@ export default function ConciseReport() {
                           </div>
                         );
                       })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Section: Equity Avg Overlap */}
-                {overlapData.equityAverageOverlap !== null && overlapData.equityFundCount >= 2 && (
-                  <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                      Equity Avg Overlap
-                    </p>
-                    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4 flex items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-700 mb-0.5">
-                          Average overlap across your {overlapData.equityFundCount} equity fund{overlapData.equityFundCount !== 1 ? "s" : ""}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Average across equity fund pairs that actually share stocks — zero-overlap pairs excluded.
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div
-                          className="text-3xl font-black tabular-nums"
-                          style={{
-                            color: overlapData.equityAverageOverlap < 15 ? "#10b981"
-                              : overlapData.equityAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.equityAverageOverlap.toFixed(1)}%
-                        </div>
-                        <div
-                          className="text-[10px] font-semibold mt-0.5"
-                          style={{
-                            color: overlapData.equityAverageOverlap < 15 ? "#10b981"
-                              : overlapData.equityAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.equityAverageOverlap < 15 ? "Low overlap ✓"
-                            : overlapData.equityAverageOverlap <= 30 ? "Moderate overlap"
-                            : "High overlap ⚠"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Section: Debt Avg Overlap */}
-                {overlapData.debtAverageOverlap !== null && overlapData.debtFundCount >= 2 && (
-                  <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                      Debt Avg Overlap
-                    </p>
-                    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4 flex items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-700 mb-0.5">
-                          Average overlap across your {overlapData.debtFundCount} debt fund{overlapData.debtFundCount !== 1 ? "s" : ""}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Average across debt fund pairs that actually share holdings — zero-overlap pairs excluded.
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div
-                          className="text-3xl font-black tabular-nums"
-                          style={{
-                            color: overlapData.debtAverageOverlap < 15 ? "#10b981"
-                              : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.debtAverageOverlap.toFixed(1)}%
-                        </div>
-                        <div
-                          className="text-[10px] font-semibold mt-0.5"
-                          style={{
-                            color: overlapData.debtAverageOverlap < 15 ? "#10b981"
-                              : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.debtAverageOverlap < 15 ? "Low overlap ✓"
-                            : overlapData.debtAverageOverlap <= 30 ? "Moderate overlap"
-                            : "High overlap ⚠"}
-                        </div>
-                      </div>
                     </div>
                   </div>
                 )}
