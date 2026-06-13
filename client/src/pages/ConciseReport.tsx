@@ -2541,91 +2541,81 @@ export default function ConciseReport() {
               </div>
             ) : (
               <>
-                {/* ── Overlap Meters ───────────────────────────────────────── */}
+                {/* ── Dial Gauges ──────────────────────────────────────────── */}
                 {(() => {
-                  const OverlapMeter = ({
-                    label, value, fundCount, subtitle
-                  }: { label: string; value: number | null; fundCount: number; subtitle: string }) => {
-                    const pct = value ?? 0;
-                    const clampedPct = Math.min(pct, 100);
-                    const meterColor = pct < 15 ? "#10b981" : pct <= 30 ? "#f59e0b" : "#ef4444";
-                    const meterBg = pct < 15 ? "rgba(16,185,129,0.08)" : pct <= 30 ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.08)";
-                    const meterBorder = pct < 15 ? "rgba(16,185,129,0.25)" : pct <= 30 ? "rgba(245,158,11,0.25)" : "rgba(239,68,68,0.25)";
-                    const statusLabel = pct < 15 ? "Low overlap" : pct <= 30 ? "Moderate overlap" : "High overlap";
-                    const statusIcon = pct < 15 ? "✓" : pct <= 30 ? "~" : "⚠";
-                    if (value === null || fundCount < 2) return (
-                      <div className="flex-1 rounded-2xl border border-slate-100 bg-slate-50 p-4 flex flex-col items-center justify-center gap-1 min-h-[130px]">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-1">{label}</p>
-                        <p className="text-xs text-slate-300">Not enough funds</p>
-                      </div>
-                    );
+                  const DialGauge = ({
+                    label, value, fundCount
+                  }: { label: string; value: number | null; fundCount: number }) => {
+                    const cx = 100, cy = 100, R = 76, sw = 22;
+                    const unavailable = value === null || fundCount < 2;
+                    const pct = unavailable ? 0 : Math.min(value as number, 100);
+                    const needleColor = unavailable ? "#94a3b8" : pct < 15 ? "#10b981" : pct <= 30 ? "#f59e0b" : "#ef4444";
+                    const bigColor = unavailable ? "#94a3b8" : needleColor;
+                    const statusText = unavailable
+                      ? "No debt concentration detected"
+                      : pct < 15 ? "Low overlap ✓"
+                      : pct <= 30 ? "Moderate overlap"
+                      : "High overlap ⚠";
+
+                    const pt = (deg: number, r: number) => ({
+                      x: cx + r * Math.cos((deg * Math.PI) / 180),
+                      y: cy - r * Math.sin((deg * Math.PI) / 180),
+                    });
+                    const arc = (a1: number, a2: number) => {
+                      const s = pt(a1, R), e = pt(a2, R);
+                      return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${R} ${R} 0 0 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+                    };
+
+                    // Needle: 0° (right) = 0% overlap, 180° (left) = 100% overlap
+                    const needleDeg = (pct / 100) * 180;
+                    const tip = pt(needleDeg, R - sw / 2 - 4);
+
                     return (
-                      <div
-                        className="flex-1 rounded-2xl p-4 sm:p-5 flex flex-col gap-3"
-                        style={{ background: meterBg, border: `1.5px solid ${meterBorder}` }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: meterColor }}>{label}</p>
-                            <p className="text-[11px] text-slate-400">{fundCount} fund{fundCount !== 1 ? "s" : ""} · {subtitle}</p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-3xl font-black tabular-nums leading-none" style={{ color: meterColor }}>
-                              {pct.toFixed(1)}%
-                            </div>
-                            <div className="text-[10px] font-semibold mt-1" style={{ color: meterColor }}>
-                              {statusLabel} {statusIcon}
-                            </div>
-                          </div>
-                        </div>
-                        {/* Meter track */}
-                        <div className="relative">
-                          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.06)" }}>
-                            {/* Zone ticks underneath */}
-                            <div className="absolute inset-0 flex">
-                              <div style={{ width: "15%" }} className="h-full" />
-                              <div style={{ width: "0.5px", height: "100%", background: "rgba(255,255,255,0.5)" }} />
-                              <div style={{ width: "15%" }} className="h-full" />
-                              <div style={{ width: "0.5px", height: "100%", background: "rgba(255,255,255,0.5)" }} />
-                            </div>
-                            {/* Fill bar */}
-                            <div
-                              className="h-full rounded-full transition-all duration-700"
-                              style={{
-                                width: `${clampedPct}%`,
-                                background: `linear-gradient(90deg, #10b981 0%, #10b981 15%, #f59e0b 30%, #ef4444 60%, #b91c1c 100%)`
-                              }}
-                            />
-                          </div>
-                          {/* Needle marker */}
-                          <div
-                            className="absolute top-1/2 -translate-y-1/2 w-3 h-5 rounded-sm -translate-x-1/2"
-                            style={{
-                              left: `${clampedPct}%`,
-                              background: meterColor,
-                              boxShadow: `0 0 6px ${meterColor}99`
-                            }}
+                      <div className="flex-1 flex flex-col items-center rounded-2xl border border-slate-200 bg-white py-5 px-3 min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
+                        <svg viewBox="0 0 200 108" className="w-full max-w-[220px]" style={{ overflow: "visible" }}>
+                          {/* Background track */}
+                          <path d={arc(0, 180)} fill="none" stroke="#e2e8f0" strokeWidth={sw} strokeLinecap="butt" />
+                          {/* Three color zones: right=green, middle=orange, left=red */}
+                          <path d={arc(0, 60)}   fill="none" stroke={unavailable ? "#e2e8f0" : "#10b981"} strokeWidth={sw} strokeLinecap="butt" />
+                          <path d={arc(60, 120)} fill="none" stroke={unavailable ? "#e2e8f0" : "#f59e0b"} strokeWidth={sw} strokeLinecap="butt" />
+                          <path d={arc(120, 180)} fill="none" stroke={unavailable ? "#e2e8f0" : "#ef4444"} strokeWidth={sw} strokeLinecap="butt" />
+                          {/* Zone dividers */}
+                          {!unavailable && (
+                            <>
+                              <line x1={pt(60, R - sw).x.toFixed(2)} y1={pt(60, R - sw).y.toFixed(2)} x2={pt(60, R + 2).x.toFixed(2)} y2={pt(60, R + 2).y.toFixed(2)} stroke="white" strokeWidth="2" />
+                              <line x1={pt(120, R - sw).x.toFixed(2)} y1={pt(120, R - sw).y.toFixed(2)} x2={pt(120, R + 2).x.toFixed(2)} y2={pt(120, R + 2).y.toFixed(2)} stroke="white" strokeWidth="2" />
+                            </>
+                          )}
+                          {/* Needle */}
+                          <line
+                            x1={cx} y1={cy}
+                            x2={tip.x.toFixed(2)} y2={tip.y.toFixed(2)}
+                            stroke={unavailable ? "#cbd5e1" : "#1e293b"}
+                            strokeWidth="4"
+                            strokeLinecap="round"
                           />
-                          {/* Zone labels */}
-                          <div className="flex justify-between mt-1.5 px-0.5">
-                            <span className="text-[9px] font-semibold text-slate-300">0</span>
-                            <span className="text-[9px] font-semibold text-emerald-400" style={{ marginLeft: "calc(15% - 8px)" }}>15</span>
-                            <span className="text-[9px] font-semibold text-amber-400" style={{ marginLeft: "calc(15% - 8px)" }}>30</span>
-                            <span className="text-[9px] font-semibold text-slate-300 ml-auto">100</span>
+                          <circle cx={cx} cy={cy} r="8" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
+                          <circle cx={cx} cy={cy} r="4" fill="white" />
+                          {/* Zone labels on arc */}
+                          <text x={pt(15, R + 14).x.toFixed(2)} y={pt(15, R + 14).y.toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#10b981"} fontFamily="system-ui,sans-serif">Low</text>
+                          <text x={pt(90, R + 14).x.toFixed(2)} y={(pt(90, R + 14).y + 2).toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#f59e0b"} fontFamily="system-ui,sans-serif">Mod</text>
+                          <text x={pt(160, R + 14).x.toFixed(2)} y={pt(160, R + 14).y.toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#ef4444"} fontFamily="system-ui,sans-serif">High</text>
+                          {/* 0 and 100 labels */}
+                          <text x={(pt(0, R + 14).x + 2).toFixed(2)} y={(pt(0, R + 14).y + 1).toFixed(2)} textAnchor="start" fontSize="7" fill="#94a3b8" fontFamily="system-ui,sans-serif">0</text>
+                          <text x={(pt(180, R + 14).x - 2).toFixed(2)} y={(pt(180, R + 14).y + 1).toFixed(2)} textAnchor="end" fontSize="7" fill="#94a3b8" fontFamily="system-ui,sans-serif">100</text>
+                        </svg>
+                        {/* Value below dial */}
+                        <div className="text-center -mt-1">
+                          <div className="text-3xl font-black tabular-nums leading-none" style={{ color: bigColor }}>
+                            {pct.toFixed(1)}%
                           </div>
-                        </div>
-                        {/* Zone legend */}
-                        <div className="flex items-center gap-3 pt-0.5">
-                          {[
-                            { color: "#10b981", label: "Low (0–15)" },
-                            { color: "#f59e0b", label: "Moderate (15–30)" },
-                            { color: "#ef4444", label: "High (30+)" },
-                          ].map(z => (
-                            <span key={z.label} className="flex items-center gap-1 text-[9px] text-slate-400">
-                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: z.color }} />
-                              {z.label}
-                            </span>
-                          ))}
+                          <div className="text-[11px] font-semibold mt-1.5" style={{ color: bigColor }}>
+                            {statusText}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">
+                            {unavailable ? "No debt funds in holdings DB" : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
+                          </div>
                         </div>
                       </div>
                     );
@@ -2633,23 +2623,13 @@ export default function ConciseReport() {
 
                   return (
                     <div className="px-3 sm:px-5 py-5 border-b border-slate-100">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Overlap Meters</p>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <OverlapMeter
-                          label="Equity Funds"
-                          value={overlapData.equityAverageOverlap}
-                          fundCount={overlapData.equityFundCount}
-                          subtitle="avg overlap"
-                        />
-                        <OverlapMeter
-                          label="Debt Funds"
-                          value={overlapData.debtAverageOverlap}
-                          fundCount={overlapData.debtFundCount}
-                          subtitle="avg overlap"
-                        />
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Overlap Meters</p>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <DialGauge label="Equity Funds" value={overlapData.equityAverageOverlap} fundCount={overlapData.equityFundCount} />
+                        <DialGauge label="Debt Funds" value={overlapData.debtAverageOverlap} fundCount={overlapData.debtFundCount} />
                       </div>
                       {/* High Conc Stocks strip */}
-                      <div className="mt-3 flex items-center justify-between rounded-xl px-4 py-2.5 border border-slate-100 bg-slate-50">
+                      <div className="mt-4 flex items-center justify-between rounded-xl px-4 py-2.5 border border-slate-100 bg-slate-50">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">High Concentration Stocks</p>
                           <p className="text-[11px] text-slate-400 mt-0.5">Stocks held heavily across multiple funds</p>
