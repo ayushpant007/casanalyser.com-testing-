@@ -2617,7 +2617,7 @@ export default function ConciseReport() {
                           Average overlap across your {overlapData.equityFundCount} equity fund{overlapData.equityFundCount !== 1 ? "s" : ""}
                         </p>
                         <p className="text-xs text-slate-400">
-                          Only equity funds (5+ stock holdings) are counted — debt &amp; liquid funds are excluded.
+                          Average across equity fund pairs that actually share stocks — zero-overlap pairs excluded.
                         </p>
                       </div>
                       <div className="text-right shrink-0">

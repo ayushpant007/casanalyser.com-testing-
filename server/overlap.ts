@@ -358,8 +358,11 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
       equityPairs.push(computePairOverlap(equityFunds[i].fund, equityFunds[j].fund));
     }
   }
-  const equityAvgOverlap = equityPairs.length > 0
-    ? equityPairs.reduce((sum, p) => sum + p.overlapScore, 0) / equityPairs.length
+  // Only average pairs that actually share stocks (overlap > 0)
+  // This gives "when equity funds DO overlap, how much?" — a meaningful signal
+  const overlappingEquityPairs = equityPairs.filter(p => p.overlapScore > 0);
+  const equityAvgOverlap = overlappingEquityPairs.length > 0
+    ? overlappingEquityPairs.reduce((sum, p) => sum + p.overlapScore, 0) / overlappingEquityPairs.length
     : null;
 
   // ── Stock concentration across portfolio ─────────────────────────────────
