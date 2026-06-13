@@ -1763,12 +1763,14 @@ export default function ConciseReport() {
                         : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
                       return (
                         <div className="relative overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-indigo-50 to-purple-50 px-5 py-4 flex items-center justify-between gap-4" data-testid="stat-cas-total">
+                          <div className="absolute -top-6 -right-6 w-24 h-24 bg-violet-300/20 rounded-full blur-2xl" />
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
                               <IndianRupee className="w-5 h-5 text-violet-600" />
                             </div>
                             <div>
                               <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value</p>
+                              <p className="text-[10px] text-violet-400 mt-0.5">As reported in your CAS statement</p>
                               <p className="text-[10px] text-violet-300 mt-0.5">Includes Mutual Funds, ETFs, Stocks and other holdings</p>
                             </div>
                           </div>
@@ -1776,6 +1778,7 @@ export default function ConciseReport() {
                             <p className="text-2xl sm:text-3xl font-black text-violet-700 leading-none">
                               <AnimatedCounter value={casTotal / 100000} prefix="₹" suffix=" L" decimals={2} />
                             </p>
+                            <p className="text-[10px] text-violet-400 mt-0.5">{fmtCas(casTotal)}</p>
                           </div>
                         </div>
                       );
