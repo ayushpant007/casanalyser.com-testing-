@@ -2549,142 +2549,159 @@ export default function ConciseReport() {
                     const unavailable = value === null || fundCount < 2;
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
 
-                    // Zone thresholds (0-100): VeryLow 0-20, Low 20-40, Moderate 40-60, High 60-80, VeryHigh 80-100
-                    const zones = [
-                      { label: "VERY\nLOW",  color: "#22c55e",  from: 0,  to: 20  },
-                      { label: "LOW",        color: "#86efac",  from: 20, to: 40  },
-                      { label: "MODERATE",   color: "#fbbf24",  from: 40, to: 60  },
-                      { label: "HIGH",       color: "#f97316",  from: 60, to: 80  },
-                      { label: "VERY\nHIGH", color: "#ef4444",  from: 80, to: 100 },
+                    const zones: { label: string; line2?: string; color: string; from: number; to: number }[] = [
+                      { label: "VERY", line2: "LOW",  color: "#16a34a", from: 0,  to: 20  },
+                      { label: "LOW",                 color: "#65a30d", from: 20, to: 40  },
+                      { label: "MODERATE",            color: "#ca8a04", from: 40, to: 60  },
+                      { label: "HIGH",                color: "#ea580c", from: 60, to: 80  },
+                      { label: "VERY", line2: "HIGH", color: "#dc2626", from: 80, to: 100 },
                     ];
 
-                    const activeZone = unavailable ? null : zones.find(z => pct >= z.from && pct <= z.to) || zones[zones.length - 1];
-                    const needleColor = activeZone?.color ?? "#94a3b8";
-                    const bigColor = unavailable ? "#94a3b8" : needleColor;
+                    const activeZone = unavailable ? null : (zones.find(z => pct >= z.from && pct < z.to) ?? zones[4]);
+                    const valueColor = unavailable ? "#94a3b8" : (activeZone?.color ?? "#94a3b8");
 
                     const statusText = unavailable
-                      ? (label === "Debt Funds" ? "No debt funds in holdings DB" : "Insufficient data")
-                      : pct < 20 ? "Very Low overlap ✓"
-                      : pct < 40 ? "Low overlap ✓"
-                      : pct < 60 ? "Moderate overlap"
-                      : pct < 80 ? "High overlap ⚠"
-                      : "Very High overlap ⚠";
+                      ? (label.includes("Debt") ? "No debt funds in holdings database" : "Insufficient data")
+                      : pct < 20 ? "Very Low Overlap ✓"
+                      : pct < 40 ? "Low Overlap ✓"
+                      : pct < 60 ? "Moderate Overlap"
+                      : pct < 80 ? "High Overlap ⚠"
+                      : "Very High Overlap ⚠";
 
-                    // SVG dimensions
-                    const cx = 110, cy = 108, R = 78, sw = 20;
+                    // SVG layout: 260×172, pivot at (130, 158) so semicircle sits nicely
+                    const cx = 130, cy = 158;
+                    const Ro = 108, Ri = 76; // outer/inner radius of the ring
+                    const GAP_DEG = 1.8;     // angular gap between segments
 
-                    const toRad = (deg: number) => (deg * Math.PI) / 180;
-                    // Map 0-100% to 180deg arc: 0% = 180° (left), 100% = 0° (right)
-                    const pctToDeg = (p: number) => 180 - (p / 100) * 180;
+                    const toRad = (d: number) => (d * Math.PI) / 180;
+                    // 0% → 180° (left), 100% → 0° (right)
+                    const pctToAngle = (p: number) => 180 - (p / 100) * 180;
 
-                    const pt = (deg: number, r: number) => ({
-                      x: cx + r * Math.cos(toRad(deg)),
-                      y: cy - r * Math.sin(toRad(deg)),
+                    const polar = (angleDeg: number, r: number) => ({
+                      x: cx + r * Math.cos(toRad(angleDeg)),
+                      y: cy - r * Math.sin(toRad(angleDeg)),
                     });
 
-                    const arcPath = (fromPct: number, toPct: number) => {
-                      const a1 = pctToDeg(fromPct);
-                      const a2 = pctToDeg(toPct);
-                      const s = pt(a1, R), e = pt(a2, R);
-                      const large = Math.abs(a2 - a1) > 180 ? 1 : 0;
-                      return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${R} ${R} 0 ${large} 0 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+                    // Filled ring-sector path (donut segment)
+                    const sectorPath = (fromPct: number, toPct: number) => {
+                      const a1 = pctToAngle(fromPct) - (fromPct === 0 ? 0 : GAP_DEG / 2);
+                      const a2 = pctToAngle(toPct)   + (toPct === 100 ? 0 : GAP_DEG / 2);
+                      const p1o = polar(a1, Ro), p2o = polar(a2, Ro);
+                      const p1i = polar(a1, Ri), p2i = polar(a2, Ri);
+                      const large = 0; // each zone < 180°
+                      return [
+                        `M ${p1o.x.toFixed(2)} ${p1o.y.toFixed(2)}`,
+                        `A ${Ro} ${Ro} 0 ${large} 0 ${p2o.x.toFixed(2)} ${p2o.y.toFixed(2)}`,
+                        `L ${p2i.x.toFixed(2)} ${p2i.y.toFixed(2)}`,
+                        `A ${Ri} ${Ri} 0 ${large} 1 ${p1i.x.toFixed(2)} ${p1i.y.toFixed(2)}`,
+                        "Z",
+                      ].join(" ");
                     };
 
-                    // Needle angle
-                    const needleDeg = pctToDeg(pct);
-                    const needleLen = R - sw / 2 - 2;
-                    const tip = pt(needleDeg, needleLen);
+                    // Needle as a thin triangle polygon
+                    const needleAngle = pctToAngle(pct);
+                    const tipPt   = polar(needleAngle, Ri - 6);
+                    const perpA   = needleAngle + 90;
+                    const perpB   = needleAngle - 90;
+                    const base1   = polar(perpA, 5);
+                    const base2   = polar(perpB, 5);
+                    const needlePoints = `${tipPt.x.toFixed(2)},${tipPt.y.toFixed(2)} ${base1.x.toFixed(2)},${base1.y.toFixed(2)} ${base2.x.toFixed(2)},${base2.y.toFixed(2)}`;
 
-                    // Label positions: midpoint of each zone arc, slightly outside
-                    const labelPos = (fromPct: number, toPct: number, r: number) => {
-                      const midDeg = pctToDeg((fromPct + toPct) / 2);
-                      return pt(midDeg, r);
-                    };
+                    // Label positions — midpoint angle of each zone, just outside Ro
+                    const LABEL_R = Ro + 16;
 
                     return (
-                      <div className="flex-1 flex flex-col items-center rounded-2xl border border-slate-100 bg-white py-4 px-2 min-w-0" style={{ boxShadow: "0 2px 12px 0 rgba(0,0,0,0.06)" }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{label}</p>
-                        <svg viewBox="0 0 220 128" className="w-full max-w-[240px]">
-                          {/* Grey background track */}
-                          <path d={arcPath(0, 100)} fill="none" stroke="#e2e8f0" strokeWidth={sw} strokeLinecap="butt" />
+                      <div
+                        className="flex-1 flex flex-col items-center rounded-2xl bg-white py-4 px-2 min-w-0"
+                        style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 18px 0 rgba(0,0,0,0.07)" }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
 
-                          {/* Color zone arcs */}
-                          {zones.map((z) => (
+                        <svg viewBox="0 0 260 172" className="w-full max-w-[260px]" style={{ overflow: "visible" }}>
+                          <defs>
+                            <filter id="gauge-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                              <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.12" />
+                            </filter>
+                          </defs>
+
+                          {/* Disabled grey ring (shown when unavailable) */}
+                          {unavailable && (
                             <path
-                              key={z.label}
-                              d={arcPath(z.from, z.to)}
-                              fill="none"
-                              stroke={unavailable ? "#e2e8f0" : z.color}
-                              strokeWidth={sw}
-                              strokeLinecap="butt"
+                              d={(() => {
+                                const a1 = 180, a2 = 0;
+                                const p1o = polar(a1, Ro), p2o = polar(a2, Ro);
+                                const p1i = polar(a1, Ri), p2i = polar(a2, Ri);
+                                return [
+                                  `M ${p1o.x.toFixed(2)} ${p1o.y.toFixed(2)}`,
+                                  `A ${Ro} ${Ro} 0 0 0 ${p2o.x.toFixed(2)} ${p2o.y.toFixed(2)}`,
+                                  `L ${p2i.x.toFixed(2)} ${p2i.y.toFixed(2)}`,
+                                  `A ${Ri} ${Ri} 0 0 1 ${p1i.x.toFixed(2)} ${p1i.y.toFixed(2)}`,
+                                  "Z",
+                                ].join(" ");
+                              })()}
+                              fill="#e2e8f0"
+                            />
+                          )}
+
+                          {/* Colored zone segments */}
+                          {!unavailable && zones.map((z) => (
+                            <path
+                              key={z.label + z.from}
+                              d={sectorPath(z.from, z.to)}
+                              fill={z.color}
+                              filter="url(#gauge-shadow)"
                             />
                           ))}
 
-                          {/* White dividers between zones */}
-                          {!unavailable && [20, 40, 60, 80].map(p => {
-                            const deg = pctToDeg(p);
-                            const inner = pt(deg, R - sw);
-                            const outer = pt(deg, R + 1);
-                            return (
-                              <line
-                                key={p}
-                                x1={inner.x.toFixed(2)} y1={inner.y.toFixed(2)}
-                                x2={outer.x.toFixed(2)} y2={outer.y.toFixed(2)}
-                                stroke="white" strokeWidth="2.5"
-                              />
-                            );
-                          })}
-
-                          {/* Zone labels — rotated along arc */}
+                          {/* Zone labels — tangent-rotated along outer rim */}
                           {zones.map((z) => {
-                            const midDeg = pctToDeg((z.from + z.to) / 2);
-                            const lp = labelPos(z.from, z.to, R + 15);
-                            const lines = z.label.split("\n");
+                            const midAngle = pctToAngle((z.from + z.to) / 2);
+                            const lp = polar(midAngle, LABEL_R);
+                            // rotate text so it reads along the arc (tangent direction)
+                            const textRotation = 90 - midAngle;
                             const textColor = unavailable ? "#cbd5e1" : z.color;
                             return (
                               <text
-                                key={z.label}
-                                transform={`rotate(${-(midDeg - 90)}, ${lp.x.toFixed(2)}, ${lp.y.toFixed(2)})`}
+                                key={z.label + z.from}
+                                transform={`rotate(${textRotation.toFixed(1)}, ${lp.x.toFixed(2)}, ${lp.y.toFixed(2)})`}
                                 x={lp.x.toFixed(2)}
                                 y={lp.y.toFixed(2)}
                                 textAnchor="middle"
-                                fontSize="6"
+                                dominantBaseline="middle"
+                                fontSize="7"
                                 fontWeight="800"
                                 fill={textColor}
-                                fontFamily="system-ui,sans-serif"
-                                letterSpacing="0.3"
+                                fontFamily="system-ui, sans-serif"
+                                letterSpacing="0.4"
                               >
-                                {lines.map((l, i) => (
-                                  <tspan key={i} x={lp.x.toFixed(2)} dy={i === 0 ? (lines.length > 1 ? "-3.5" : "0") : "7"}>{l}</tspan>
-                                ))}
+                                <tspan x={lp.x.toFixed(2)} dy={z.line2 ? "-4" : "0"}>{z.label}</tspan>
+                                {z.line2 && <tspan x={lp.x.toFixed(2)} dy="8">{z.line2}</tspan>}
                               </text>
                             );
                           })}
 
-                          {/* Needle */}
-                          <line
-                            x1={cx} y1={cy}
-                            x2={tip.x.toFixed(2)} y2={tip.y.toFixed(2)}
-                            stroke={unavailable ? "#cbd5e1" : "#1e293b"}
-                            strokeWidth="3.5"
-                            strokeLinecap="round"
+                          {/* Needle triangle */}
+                          <polygon
+                            points={needlePoints}
+                            fill={unavailable ? "#cbd5e1" : "#111827"}
                           />
-                          {/* Needle base circle */}
-                          <circle cx={cx} cy={cy} r="9" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
-                          <circle cx={cx} cy={cy} r="4.5" fill="white" />
+
+                          {/* Pivot circles */}
+                          <circle cx={cx} cy={cy} r="11" fill={unavailable ? "#cbd5e1" : "#111827"} />
+                          <circle cx={cx} cy={cy} r="5.5" fill="white" />
                         </svg>
 
-                        {/* Value & status */}
-                        <div className="text-center -mt-2">
-                          <div className="text-2xl font-black tabular-nums leading-none" style={{ color: bigColor }}>
+                        {/* Value & status below gauge */}
+                        <div className="text-center -mt-1">
+                          <div className="text-2xl font-black tabular-nums leading-tight" style={{ color: valueColor }}>
                             {unavailable ? "—" : `${pct.toFixed(1)}%`}
                           </div>
-                          <div className="text-[11px] font-semibold mt-1" style={{ color: bigColor }}>
+                          <div className="text-[11px] font-semibold mt-0.5" style={{ color: valueColor }}>
                             {statusText}
                           </div>
                           <div className="text-[10px] text-slate-400 mt-0.5">
                             {unavailable
-                              ? (label === "Debt Funds" ? "No debt funds in holdings DB" : "Need ≥ 2 funds")
+                              ? (label.includes("Debt") ? "No debt funds in holdings DB" : "Need ≥ 2 funds")
                               : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
                           </div>
                         </div>
