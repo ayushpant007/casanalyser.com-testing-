@@ -1751,7 +1751,6 @@ export default function ConciseReport() {
 
                     </div>
                   </div>
-
                   {/* Stats grid */}
                   <div className="p-3 sm:p-5 space-y-5">
                     {/* ── Total Portfolio Value from CAS ── */}
@@ -1768,7 +1767,7 @@ export default function ConciseReport() {
                               <IndianRupee className="w-5 h-5 text-violet-600" />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value</p>
+                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value(Includes Mutual Funds, ETFs, Stocks and other holdings)</p>
                               <p className="text-[10px] text-violet-300 mt-0.5">Includes Mutual Funds, ETFs, Stocks and other holdings</p>
                             </div>
                           </div>
@@ -1968,8 +1967,8 @@ export default function ConciseReport() {
                       );
                     })()}
                   </div>
-                  </>
-                );
+                </>
+              );
               })()}
           </div>
 
