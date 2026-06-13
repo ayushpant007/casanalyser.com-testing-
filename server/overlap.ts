@@ -41,6 +41,8 @@ export interface OverlapAnalysisResult {
   averageOverlap: number;
   equityAverageOverlap: number | null;
   equityFundCount: number;
+  debtAverageOverlap: number | null;
+  debtFundCount: number;
   highConcentrationStocks: number;
   similarPairs: FundPairOverlap[];
   stockConcentration: StockConcentration[];
@@ -318,6 +320,8 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
       averageOverlap: 0,
       equityAverageOverlap: null,
       equityFundCount: 0,
+      debtAverageOverlap: null,
+      debtFundCount: 0,
       highConcentrationStocks: 0,
       similarPairs: [],
       stockConcentration: [],
@@ -363,6 +367,20 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
   const overlappingEquityPairs = equityPairs.filter(p => p.overlapScore > 0);
   const equityAvgOverlap = overlappingEquityPairs.length > 0
     ? overlappingEquityPairs.reduce((sum, p) => sum + p.overlapScore, 0) / overlappingEquityPairs.length
+    : null;
+
+  // ── Debt-only average overlap ─────────────────────────────────────────────
+  // Debt funds = matched funds with < 5 stock holdings in the holdings DB
+  const debtFunds = funds.filter(m => !isEquityFund(m.fund));
+  const debtPairs: FundPairOverlap[] = [];
+  for (let i = 0; i < debtFunds.length; i++) {
+    for (let j = i + 1; j < debtFunds.length; j++) {
+      debtPairs.push(computePairOverlap(debtFunds[i].fund, debtFunds[j].fund));
+    }
+  }
+  const overlappingDebtPairs = debtPairs.filter(p => p.overlapScore > 0);
+  const debtAvgOverlap = overlappingDebtPairs.length > 0
+    ? overlappingDebtPairs.reduce((sum, p) => sum + p.overlapScore, 0) / overlappingDebtPairs.length
     : null;
 
   // ── Stock concentration across portfolio ─────────────────────────────────
@@ -433,6 +451,8 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     averageOverlap: Math.round(avgOverlap * 100) / 100,
     equityAverageOverlap: equityAvgOverlap !== null ? Math.round(equityAvgOverlap * 100) / 100 : null,
     equityFundCount: equityFunds.length,
+    debtAverageOverlap: debtAvgOverlap !== null ? Math.round(debtAvgOverlap * 100) / 100 : null,
+    debtFundCount: debtFunds.length,
     highConcentrationStocks: highConcStocks.length,
     similarPairs: pairs.slice(0, 10),
     stockConcentration: stockConcentration.slice(0, 15),
