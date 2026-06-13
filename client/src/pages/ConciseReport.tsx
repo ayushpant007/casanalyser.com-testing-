@@ -2546,75 +2546,146 @@ export default function ConciseReport() {
                   const DialGauge = ({
                     label, value, fundCount
                   }: { label: string; value: number | null; fundCount: number }) => {
-                    const cx = 100, cy = 100, R = 76, sw = 22;
                     const unavailable = value === null || fundCount < 2;
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
-                    const needleColor = unavailable ? "#94a3b8" : pct < 15 ? "#10b981" : pct <= 30 ? "#f59e0b" : "#ef4444";
+
+                    // Zone thresholds (0-100): VeryLow 0-20, Low 20-40, Moderate 40-60, High 60-80, VeryHigh 80-100
+                    const zones = [
+                      { label: "VERY\nLOW",  color: "#22c55e",  from: 0,  to: 20  },
+                      { label: "LOW",        color: "#86efac",  from: 20, to: 40  },
+                      { label: "MODERATE",   color: "#fbbf24",  from: 40, to: 60  },
+                      { label: "HIGH",       color: "#f97316",  from: 60, to: 80  },
+                      { label: "VERY\nHIGH", color: "#ef4444",  from: 80, to: 100 },
+                    ];
+
+                    const activeZone = unavailable ? null : zones.find(z => pct >= z.from && pct <= z.to) || zones[zones.length - 1];
+                    const needleColor = activeZone?.color ?? "#94a3b8";
                     const bigColor = unavailable ? "#94a3b8" : needleColor;
+
                     const statusText = unavailable
-                      ? "No debt concentration detected"
-                      : pct < 15 ? "Low overlap ✓"
-                      : pct <= 30 ? "Moderate overlap"
-                      : "High overlap ⚠";
+                      ? (label === "Debt Funds" ? "No debt funds in holdings DB" : "Insufficient data")
+                      : pct < 20 ? "Very Low overlap ✓"
+                      : pct < 40 ? "Low overlap ✓"
+                      : pct < 60 ? "Moderate overlap"
+                      : pct < 80 ? "High overlap ⚠"
+                      : "Very High overlap ⚠";
+
+                    // SVG dimensions
+                    const cx = 110, cy = 108, R = 78, sw = 20;
+
+                    const toRad = (deg: number) => (deg * Math.PI) / 180;
+                    // Map 0-100% to 180deg arc: 0% = 180° (left), 100% = 0° (right)
+                    const pctToDeg = (p: number) => 180 - (p / 100) * 180;
 
                     const pt = (deg: number, r: number) => ({
-                      x: cx + r * Math.cos((deg * Math.PI) / 180),
-                      y: cy - r * Math.sin((deg * Math.PI) / 180),
+                      x: cx + r * Math.cos(toRad(deg)),
+                      y: cy - r * Math.sin(toRad(deg)),
                     });
-                    const arc = (a1: number, a2: number) => {
+
+                    const arcPath = (fromPct: number, toPct: number) => {
+                      const a1 = pctToDeg(fromPct);
+                      const a2 = pctToDeg(toPct);
                       const s = pt(a1, R), e = pt(a2, R);
-                      return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${R} ${R} 0 0 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+                      const large = Math.abs(a2 - a1) > 180 ? 1 : 0;
+                      return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${R} ${R} 0 ${large} 0 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
                     };
 
-                    // Needle: 0° (right) = 0% overlap, 180° (left) = 100% overlap
-                    const needleDeg = (pct / 100) * 180;
-                    const tip = pt(needleDeg, R - sw / 2 - 4);
+                    // Needle angle
+                    const needleDeg = pctToDeg(pct);
+                    const needleLen = R - sw / 2 - 2;
+                    const tip = pt(needleDeg, needleLen);
+
+                    // Label positions: midpoint of each zone arc, slightly outside
+                    const labelPos = (fromPct: number, toPct: number, r: number) => {
+                      const midDeg = pctToDeg((fromPct + toPct) / 2);
+                      return pt(midDeg, r);
+                    };
 
                     return (
-                      <div className="flex-1 flex flex-col items-center rounded-2xl border border-slate-200 bg-white py-5 px-3 min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
-                        <svg viewBox="0 0 200 108" className="w-full max-w-[220px]" style={{ overflow: "visible" }}>
-                          {/* Background track */}
-                          <path d={arc(0, 180)} fill="none" stroke="#e2e8f0" strokeWidth={sw} strokeLinecap="butt" />
-                          {/* Three color zones: right=green, middle=orange, left=red */}
-                          <path d={arc(0, 60)}   fill="none" stroke={unavailable ? "#e2e8f0" : "#10b981"} strokeWidth={sw} strokeLinecap="butt" />
-                          <path d={arc(60, 120)} fill="none" stroke={unavailable ? "#e2e8f0" : "#f59e0b"} strokeWidth={sw} strokeLinecap="butt" />
-                          <path d={arc(120, 180)} fill="none" stroke={unavailable ? "#e2e8f0" : "#ef4444"} strokeWidth={sw} strokeLinecap="butt" />
-                          {/* Zone dividers */}
-                          {!unavailable && (
-                            <>
-                              <line x1={pt(60, R - sw).x.toFixed(2)} y1={pt(60, R - sw).y.toFixed(2)} x2={pt(60, R + 2).x.toFixed(2)} y2={pt(60, R + 2).y.toFixed(2)} stroke="white" strokeWidth="2" />
-                              <line x1={pt(120, R - sw).x.toFixed(2)} y1={pt(120, R - sw).y.toFixed(2)} x2={pt(120, R + 2).x.toFixed(2)} y2={pt(120, R + 2).y.toFixed(2)} stroke="white" strokeWidth="2" />
-                            </>
-                          )}
+                      <div className="flex-1 flex flex-col items-center rounded-2xl border border-slate-100 bg-white py-4 px-2 min-w-0" style={{ boxShadow: "0 2px 12px 0 rgba(0,0,0,0.06)" }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{label}</p>
+                        <svg viewBox="0 0 220 128" className="w-full max-w-[240px]">
+                          {/* Grey background track */}
+                          <path d={arcPath(0, 100)} fill="none" stroke="#e2e8f0" strokeWidth={sw} strokeLinecap="butt" />
+
+                          {/* Color zone arcs */}
+                          {zones.map((z) => (
+                            <path
+                              key={z.label}
+                              d={arcPath(z.from, z.to)}
+                              fill="none"
+                              stroke={unavailable ? "#e2e8f0" : z.color}
+                              strokeWidth={sw}
+                              strokeLinecap="butt"
+                            />
+                          ))}
+
+                          {/* White dividers between zones */}
+                          {!unavailable && [20, 40, 60, 80].map(p => {
+                            const deg = pctToDeg(p);
+                            const inner = pt(deg, R - sw);
+                            const outer = pt(deg, R + 1);
+                            return (
+                              <line
+                                key={p}
+                                x1={inner.x.toFixed(2)} y1={inner.y.toFixed(2)}
+                                x2={outer.x.toFixed(2)} y2={outer.y.toFixed(2)}
+                                stroke="white" strokeWidth="2.5"
+                              />
+                            );
+                          })}
+
+                          {/* Zone labels — rotated along arc */}
+                          {zones.map((z) => {
+                            const midDeg = pctToDeg((z.from + z.to) / 2);
+                            const lp = labelPos(z.from, z.to, R + 15);
+                            const lines = z.label.split("\n");
+                            const textColor = unavailable ? "#cbd5e1" : z.color;
+                            return (
+                              <text
+                                key={z.label}
+                                transform={`rotate(${-(midDeg - 90)}, ${lp.x.toFixed(2)}, ${lp.y.toFixed(2)})`}
+                                x={lp.x.toFixed(2)}
+                                y={lp.y.toFixed(2)}
+                                textAnchor="middle"
+                                fontSize="6"
+                                fontWeight="800"
+                                fill={textColor}
+                                fontFamily="system-ui,sans-serif"
+                                letterSpacing="0.3"
+                              >
+                                {lines.map((l, i) => (
+                                  <tspan key={i} x={lp.x.toFixed(2)} dy={i === 0 ? (lines.length > 1 ? "-3.5" : "0") : "7"}>{l}</tspan>
+                                ))}
+                              </text>
+                            );
+                          })}
+
                           {/* Needle */}
                           <line
                             x1={cx} y1={cy}
                             x2={tip.x.toFixed(2)} y2={tip.y.toFixed(2)}
                             stroke={unavailable ? "#cbd5e1" : "#1e293b"}
-                            strokeWidth="4"
+                            strokeWidth="3.5"
                             strokeLinecap="round"
                           />
-                          <circle cx={cx} cy={cy} r="8" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
-                          <circle cx={cx} cy={cy} r="4" fill="white" />
-                          {/* Zone labels on arc */}
-                          <text x={pt(15, R + 14).x.toFixed(2)} y={pt(15, R + 14).y.toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#10b981"} fontFamily="system-ui,sans-serif">Low</text>
-                          <text x={pt(90, R + 14).x.toFixed(2)} y={(pt(90, R + 14).y + 2).toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#f59e0b"} fontFamily="system-ui,sans-serif">Mod</text>
-                          <text x={pt(160, R + 14).x.toFixed(2)} y={pt(160, R + 14).y.toFixed(2)} textAnchor="middle" fontSize="7.5" fontWeight="700" fill={unavailable ? "#cbd5e1" : "#ef4444"} fontFamily="system-ui,sans-serif">High</text>
-                          {/* 0 and 100 labels */}
-                          <text x={(pt(0, R + 14).x + 2).toFixed(2)} y={(pt(0, R + 14).y + 1).toFixed(2)} textAnchor="start" fontSize="7" fill="#94a3b8" fontFamily="system-ui,sans-serif">0</text>
-                          <text x={(pt(180, R + 14).x - 2).toFixed(2)} y={(pt(180, R + 14).y + 1).toFixed(2)} textAnchor="end" fontSize="7" fill="#94a3b8" fontFamily="system-ui,sans-serif">100</text>
+                          {/* Needle base circle */}
+                          <circle cx={cx} cy={cy} r="9" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
+                          <circle cx={cx} cy={cy} r="4.5" fill="white" />
                         </svg>
-                        {/* Value below dial */}
-                        <div className="text-center -mt-1">
-                          <div className="text-3xl font-black tabular-nums leading-none" style={{ color: bigColor }}>
-                            {pct.toFixed(1)}%
+
+                        {/* Value & status */}
+                        <div className="text-center -mt-2">
+                          <div className="text-2xl font-black tabular-nums leading-none" style={{ color: bigColor }}>
+                            {unavailable ? "—" : `${pct.toFixed(1)}%`}
                           </div>
-                          <div className="text-[11px] font-semibold mt-1.5" style={{ color: bigColor }}>
+                          <div className="text-[11px] font-semibold mt-1" style={{ color: bigColor }}>
                             {statusText}
                           </div>
                           <div className="text-[10px] text-slate-400 mt-0.5">
-                            {unavailable ? "No debt funds in holdings DB" : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
+                            {unavailable
+                              ? (label === "Debt Funds" ? "No debt funds in holdings DB" : "Need ≥ 2 funds")
+                              : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
                           </div>
                         </div>
                       </div>
