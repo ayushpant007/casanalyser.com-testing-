@@ -2649,7 +2649,7 @@ export default function ConciseReport() {
                 )}
 
                 {/* Section: Debt Avg Overlap */}
-                {overlapData.debtAverageOverlap !== null && overlapData.debtFundCount >= 2 && (
+                {overlapData.debtFundCount >= 2 && (
                   <div className="px-3 sm:px-6 pt-5 pb-4 border-b border-slate-100">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
                       Debt Avg Overlap
@@ -2660,32 +2660,43 @@ export default function ConciseReport() {
                           Average overlap across your {overlapData.debtFundCount} debt fund{overlapData.debtFundCount !== 1 ? "s" : ""}
                         </p>
                         <p className="text-xs text-slate-400">
-                          Average across debt fund pairs that actually share holdings — zero-overlap pairs excluded.
+                          {overlapData.debtAverageOverlap !== null
+                            ? "Average across debt fund pairs that actually share holdings — zero-overlap pairs excluded."
+                            : "Debt funds hold bonds, not stocks — overlap analysis is not applicable for debt funds."}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <div
-                          className="text-3xl font-black tabular-nums"
-                          style={{
-                            color: overlapData.debtAverageOverlap < 15 ? "#10b981"
-                              : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.debtAverageOverlap.toFixed(1)}%
-                        </div>
-                        <div
-                          className="text-[10px] font-semibold mt-0.5"
-                          style={{
-                            color: overlapData.debtAverageOverlap < 15 ? "#10b981"
-                              : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
-                              : "#ef4444"
-                          }}
-                        >
-                          {overlapData.debtAverageOverlap < 15 ? "Low overlap ✓"
-                            : overlapData.debtAverageOverlap <= 30 ? "Moderate overlap"
-                            : "High overlap ⚠"}
-                        </div>
+                        {overlapData.debtAverageOverlap !== null ? (
+                          <>
+                            <div
+                              className="text-3xl font-black tabular-nums"
+                              style={{
+                                color: overlapData.debtAverageOverlap < 15 ? "#10b981"
+                                  : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
+                                  : "#ef4444"
+                              }}
+                            >
+                              {overlapData.debtAverageOverlap.toFixed(1)}%
+                            </div>
+                            <div
+                              className="text-[10px] font-semibold mt-0.5"
+                              style={{
+                                color: overlapData.debtAverageOverlap < 15 ? "#10b981"
+                                  : overlapData.debtAverageOverlap <= 30 ? "#f59e0b"
+                                  : "#ef4444"
+                              }}
+                            >
+                              {overlapData.debtAverageOverlap < 15 ? "Low overlap ✓"
+                                : overlapData.debtAverageOverlap <= 30 ? "Moderate overlap"
+                                : "High overlap ⚠"}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-3xl font-black tabular-nums text-slate-300">N/A</div>
+                            <div className="text-[10px] font-semibold mt-0.5 text-slate-400">Not applicable</div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

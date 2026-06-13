@@ -289,6 +289,16 @@ function computePairOverlap(fundA: FundHoldings, fundB: FundHoldings): FundPairO
 export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
   const { nameMap, isinMap } = loadHoldings();
 
+  // Count debt funds from mfSnapshot by fund_category (independent of holdings DB)
+  const debtCategoryCount = mfSnapshot.filter(mf => {
+    const cat = (mf.fund_category || "").toLowerCase();
+    return cat.includes("debt") || cat.includes("liquid") || cat.includes("money market")
+      || cat.includes("overnight") || cat.includes("ultra short") || cat.includes("low duration")
+      || cat.includes("short duration") || cat.includes("medium duration") || cat.includes("gilt")
+      || cat.includes("banking and psu") || cat.includes("corporate bond") || cat.includes("credit risk")
+      || cat.includes("floater") || cat.includes("dynamic bond") || cat.includes("10 year");
+  }).length;
+
   const matched: { schemeName: string; fund: FundHoldings }[] = [];
   const unmatched: string[] = [];
 
@@ -321,7 +331,7 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
       equityAverageOverlap: null,
       equityFundCount: 0,
       debtAverageOverlap: null,
-      debtFundCount: 0,
+      debtFundCount: debtCategoryCount,
       highConcentrationStocks: 0,
       similarPairs: [],
       stockConcentration: [],
@@ -452,7 +462,7 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     equityAverageOverlap: equityAvgOverlap !== null ? Math.round(equityAvgOverlap * 100) / 100 : null,
     equityFundCount: equityFunds.length,
     debtAverageOverlap: debtAvgOverlap !== null ? Math.round(debtAvgOverlap * 100) / 100 : null,
-    debtFundCount: debtFunds.length,
+    debtFundCount: debtCategoryCount > 0 ? debtCategoryCount : debtFunds.length,
     highConcentrationStocks: highConcStocks.length,
     similarPairs: pairs.slice(0, 10),
     stockConcentration: stockConcentration.slice(0, 15),
