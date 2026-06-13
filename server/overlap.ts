@@ -39,6 +39,8 @@ export interface RedFlag {
 export interface OverlapAnalysisResult {
   diversificationScore: "Good" | "Moderate" | "Poor";
   averageOverlap: number;
+  equityAverageOverlap: number | null;
+  equityFundCount: number;
   highConcentrationStocks: number;
   similarPairs: FundPairOverlap[];
   stockConcentration: StockConcentration[];
@@ -314,6 +316,8 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     return {
       diversificationScore: "Good",
       averageOverlap: 0,
+      equityAverageOverlap: null,
+      equityFundCount: 0,
       highConcentrationStocks: 0,
       similarPairs: [],
       stockConcentration: [],
@@ -343,6 +347,20 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
   const avgOverlap = pairs.length > 0
     ? pairs.reduce((sum, p) => sum + p.overlapScore, 0) / pairs.length
     : 0;
+
+  // ── Equity-only average overlap ──────────────────────────────────────────
+  // A fund is considered "equity" if it has >= 5 stock holdings
+  const isEquityFund = (fund: FundHoldings) => fund.stocks.length >= 5;
+  const equityFunds = funds.filter(m => isEquityFund(m.fund));
+  const equityPairs: FundPairOverlap[] = [];
+  for (let i = 0; i < equityFunds.length; i++) {
+    for (let j = i + 1; j < equityFunds.length; j++) {
+      equityPairs.push(computePairOverlap(equityFunds[i].fund, equityFunds[j].fund));
+    }
+  }
+  const equityAvgOverlap = equityPairs.length > 0
+    ? equityPairs.reduce((sum, p) => sum + p.overlapScore, 0) / equityPairs.length
+    : null;
 
   // ── Stock concentration across portfolio ─────────────────────────────────
   const stockTotals = new Map<string, { total: number; funds: { fund: string; weight: number }[] }>();
@@ -410,6 +428,8 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
   return {
     diversificationScore,
     averageOverlap: Math.round(avgOverlap * 100) / 100,
+    equityAverageOverlap: equityAvgOverlap !== null ? Math.round(equityAvgOverlap * 100) / 100 : null,
+    equityFundCount: equityFunds.length,
     highConcentrationStocks: highConcStocks.length,
     similarPairs: pairs.slice(0, 10),
     stockConcentration: stockConcentration.slice(0, 15),
