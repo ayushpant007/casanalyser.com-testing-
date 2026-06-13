@@ -1777,7 +1777,6 @@ export default function ConciseReport() {
                             <p className="text-2xl sm:text-3xl font-black text-violet-700 leading-none">
                               <AnimatedCounter value={casTotal / 100000} prefix="₹" suffix=" L" decimals={2} />
                             </p>
-                            <p className="text-[10px] text-violet-400 mt-0.5">{fmtCas(casTotal)}</p>
                           </div>
                         </div>
                       );
