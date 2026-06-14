@@ -2549,13 +2549,11 @@ export default function ConciseReport() {
                     const unavailable = value === null || fundCount < 2;
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
 
-                    const zones: { label: string; line2?: string; color: string; from: number; to: number }[] = [
-                      { label: "LOW",    color: "#16a34a", from: 0,  to: 25  },
-                      { label: "MEDIUM", color: "#ca8a04", from: 25, to: 50  },
-                      { label: "HIGH",   color: "#dc2626", from: 50, to: 100 },
-                    ];
-
-                    const activeZone = unavailable ? null : (zones.find(z => pct >= z.from && pct < z.to) ?? zones[2]);
+                    const activeZone =
+                      unavailable ? null
+                      : pct < 25 ? { label: "LOW",    color: "#16a34a" }
+                      : pct < 50 ? { label: "MEDIUM", color: "#d97706" }
+                      :            { label: "HIGH",   color: "#dc2626" };
                     const valueColor = unavailable ? "#94a3b8" : (activeZone?.color ?? "#94a3b8");
 
                     const statusText = unavailable
@@ -2564,138 +2562,190 @@ export default function ConciseReport() {
                       : pct < 50 ? "Medium Overlap"
                       : "High Overlap ⚠";
 
-                    // SVG layout: 260×172, pivot at (130, 158) so semicircle sits nicely
-                    const cx = 130, cy = 158;
-                    const Ro = 108, Ri = 76; // outer/inner radius of the ring
-                    const GAP_DEG = 1.8;     // angular gap between segments
+                    // ── SVG constants ──────────────────────────────────────────
+                    const cx = 150, cy = 148;
+                    const Ro = 118, Ri = 82;   // ring thickness = 36px
+                    const GAP = 3.5;            // gap between segments in degrees
+                    const INNER_R = (Ro + Ri) / 2; // label placement radius
 
                     const toRad = (d: number) => (d * Math.PI) / 180;
-                    // 0% → 180° (left), 100% → 0° (right)
+                    // 0% → 180° (left end), 100% → 0° (right end)
                     const pctToAngle = (p: number) => 180 - (p / 100) * 180;
-
                     const polar = (angleDeg: number, r: number) => ({
                       x: cx + r * Math.cos(toRad(angleDeg)),
                       y: cy - r * Math.sin(toRad(angleDeg)),
                     });
 
-                    // Filled ring-sector path (donut segment)
-                    const sectorPath = (fromPct: number, toPct: number) => {
-                      const a1 = pctToAngle(fromPct) - (fromPct === 0 ? 0 : GAP_DEG / 2);
-                      const a2 = pctToAngle(toPct)   + (toPct === 100 ? 0 : GAP_DEG / 2);
-                      const p1o = polar(a1, Ro), p2o = polar(a2, Ro);
-                      const p1i = polar(a1, Ri), p2i = polar(a2, Ri);
-                      const large = 0; // each zone < 180°
+                    // Three visually-equal 60° segments
+                    const segs = [
+                      { label: "LOW",    color: "#22c55e", dimColor: "#bbf7d0", aFrom: 180, aTo: 120 },
+                      { label: "MED",    color: "#f59e0b", dimColor: "#fef3c7", aFrom: 120, aTo: 60  },
+                      { label: "HIGH",   color: "#ef4444", dimColor: "#fee2e2", aFrom: 60,  aTo: 0   },
+                    ];
+
+                    const arcPath = (aFrom: number, aTo: number, first: boolean, last: boolean) => {
+                      const g1 = first ? aFrom : aFrom - GAP / 2;
+                      const g2 = last  ? aTo   : aTo   + GAP / 2;
+                      const po1 = polar(g1, Ro), po2 = polar(g2, Ro);
+                      const pi1 = polar(g1, Ri), pi2 = polar(g2, Ri);
                       return [
-                        `M ${p1o.x.toFixed(2)} ${p1o.y.toFixed(2)}`,
-                        `A ${Ro} ${Ro} 0 ${large} 0 ${p2o.x.toFixed(2)} ${p2o.y.toFixed(2)}`,
-                        `L ${p2i.x.toFixed(2)} ${p2i.y.toFixed(2)}`,
-                        `A ${Ri} ${Ri} 0 ${large} 1 ${p1i.x.toFixed(2)} ${p1i.y.toFixed(2)}`,
+                        `M ${po1.x.toFixed(2)} ${po1.y.toFixed(2)}`,
+                        `A ${Ro} ${Ro} 0 0 0 ${po2.x.toFixed(2)} ${po2.y.toFixed(2)}`,
+                        `L ${pi2.x.toFixed(2)} ${pi2.y.toFixed(2)}`,
+                        `A ${Ri} ${Ri} 0 0 1 ${pi1.x.toFixed(2)} ${pi1.y.toFixed(2)}`,
                         "Z",
                       ].join(" ");
                     };
 
-                    // Needle as a thin triangle polygon
+                    // Needle: line + triangle tip
                     const needleAngle = pctToAngle(pct);
-                    const tipPt   = polar(needleAngle, Ri - 6);
-                    const perpA   = needleAngle + 90;
-                    const perpB   = needleAngle - 90;
-                    const base1   = polar(perpA, 5);
-                    const base2   = polar(perpB, 5);
-                    const needlePoints = `${tipPt.x.toFixed(2)},${tipPt.y.toFixed(2)} ${base1.x.toFixed(2)},${base1.y.toFixed(2)} ${base2.x.toFixed(2)},${base2.y.toFixed(2)}`;
+                    const needleTip   = polar(needleAngle, Ro - 6);
+                    const nb1 = polar(needleAngle + 90, 5.5);
+                    const nb2 = polar(needleAngle - 90, 5.5);
+                    const nbTail = polar(needleAngle + 180, 14);
+                    const needlePts = [needleTip, nb1, nbTail, nb2].map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 
-                    // Label positions — midpoint angle of each zone, just outside Ro
-                    const LABEL_R = Ro + 16;
+                    // Tick lines at data thresholds (pct=25 → 135°, pct=50 → 90°)
+                    const mkTick = (angleDeg: number) => ({
+                      o: polar(angleDeg, Ro + 5),
+                      i: polar(angleDeg, Ri - 5),
+                    });
+                    const tick25 = mkTick(pctToAngle(25)); // 135°
+                    const tick50 = mkTick(pctToAngle(50)); // 90°
+
+                    // Outer boundary labels: 0%, 25%, 50%, 100%
+                    const MARKER_R = Ro + 16;
+                    const mkMarker = (angleDeg: number) => polar(angleDeg, MARKER_R);
 
                     return (
                       <div
-                        className="flex-1 flex flex-col items-center rounded-2xl bg-white py-4 px-2 min-w-0"
-                        style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 18px 0 rgba(0,0,0,0.07)" }}
+                        className="flex-1 flex flex-col items-center rounded-2xl bg-white py-5 px-3 min-w-0"
+                        style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 20px 0 rgba(0,0,0,0.06)" }}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{label}</p>
 
-                        <svg viewBox="0 0 260 172" className="w-full max-w-[260px]" style={{ overflow: "visible" }}>
+                        <svg viewBox="0 0 300 168" className="w-full max-w-[300px]" style={{ overflow: "visible" }}>
                           <defs>
-                            <filter id="gauge-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                              <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.12" />
+                            <filter id="needle-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                              <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.18" />
                             </filter>
                           </defs>
 
-                          {/* Disabled grey ring (shown when unavailable) */}
-                          {unavailable && (
-                            <path
-                              d={(() => {
-                                const a1 = 180, a2 = 0;
-                                const p1o = polar(a1, Ro), p2o = polar(a2, Ro);
-                                const p1i = polar(a1, Ri), p2i = polar(a2, Ri);
-                                return [
-                                  `M ${p1o.x.toFixed(2)} ${p1o.y.toFixed(2)}`,
-                                  `A ${Ro} ${Ro} 0 0 0 ${p2o.x.toFixed(2)} ${p2o.y.toFixed(2)}`,
-                                  `L ${p2i.x.toFixed(2)} ${p2i.y.toFixed(2)}`,
-                                  `A ${Ri} ${Ri} 0 0 1 ${p1i.x.toFixed(2)} ${p1i.y.toFixed(2)}`,
+                          {/* ── Background track ───────────────────────────────── */}
+                          {(() => {
+                            const po1 = polar(180, Ro), po2 = polar(0, Ro);
+                            const pi1 = polar(180, Ri), pi2 = polar(0, Ri);
+                            return (
+                              <path
+                                d={[
+                                  `M ${po1.x.toFixed(2)} ${po1.y.toFixed(2)}`,
+                                  `A ${Ro} ${Ro} 0 0 0 ${po2.x.toFixed(2)} ${po2.y.toFixed(2)}`,
+                                  `L ${pi2.x.toFixed(2)} ${pi2.y.toFixed(2)}`,
+                                  `A ${Ri} ${Ri} 0 0 1 ${pi1.x.toFixed(2)} ${pi1.y.toFixed(2)}`,
                                   "Z",
-                                ].join(" ");
-                              })()}
-                              fill="#e2e8f0"
-                            />
-                          )}
+                                ].join(" ")}
+                                fill="#f1f5f9"
+                              />
+                            );
+                          })()}
 
-                          {/* Colored zone segments */}
-                          {!unavailable && zones.map((z) => (
+                          {/* ── Colored segments ───────────────────────────────── */}
+                          {segs.map((s, i) => (
                             <path
-                              key={z.label + z.from}
-                              d={sectorPath(z.from, z.to)}
-                              fill={z.color}
-                              filter="url(#gauge-shadow)"
+                              key={s.label}
+                              d={arcPath(s.aFrom, s.aTo, i === 0, i === segs.length - 1)}
+                              fill={unavailable ? s.dimColor : s.color}
+                              opacity={unavailable ? 0.5 : 1}
                             />
                           ))}
 
-                          {/* Zone labels — tangent-rotated along outer rim */}
-                          {zones.map((z) => {
-                            const midAngle = pctToAngle((z.from + z.to) / 2);
-                            const lp = polar(midAngle, LABEL_R);
-                            // rotate text so it reads along the arc (tangent direction)
-                            const textRotation = 90 - midAngle;
-                            const textColor = unavailable ? "#cbd5e1" : z.color;
+                          {/* ── Tick marks at 25% and 50% boundaries ──────────── */}
+                          {!unavailable && (
+                            <>
+                              <line x1={tick25.o.x.toFixed(2)} y1={tick25.o.y.toFixed(2)} x2={tick25.i.x.toFixed(2)} y2={tick25.i.y.toFixed(2)} stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                              <line x1={tick50.o.x.toFixed(2)} y1={tick50.o.y.toFixed(2)} x2={tick50.i.x.toFixed(2)} y2={tick50.i.y.toFixed(2)} stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                            </>
+                          )}
+
+                          {/* ── Zone labels inside segments ────────────────────── */}
+                          {segs.map((s) => {
+                            const midAngle = (s.aFrom + s.aTo) / 2;
+                            const lp = polar(midAngle, INNER_R);
                             return (
                               <text
-                                key={z.label + z.from}
-                                transform={`rotate(${textRotation.toFixed(1)}, ${lp.x.toFixed(2)}, ${lp.y.toFixed(2)})`}
+                                key={s.label}
                                 x={lp.x.toFixed(2)}
                                 y={lp.y.toFixed(2)}
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fontSize="7"
+                                fontSize="8.5"
                                 fontWeight="800"
-                                fill={textColor}
+                                fill="white"
                                 fontFamily="system-ui, sans-serif"
-                                letterSpacing="0.4"
+                                letterSpacing="0.8"
+                                opacity={unavailable ? 0.5 : 1}
                               >
-                                <tspan x={lp.x.toFixed(2)} dy={z.line2 ? "-4" : "0"}>{z.label}</tspan>
-                                {z.line2 && <tspan x={lp.x.toFixed(2)} dy="8">{z.line2}</tspan>}
+                                {s.label}
                               </text>
                             );
                           })}
 
-                          {/* Needle triangle */}
-                          <polygon
-                            points={needlePoints}
-                            fill={unavailable ? "#cbd5e1" : "#111827"}
-                          />
+                          {/* ── Outer boundary percentage markers ─────────────── */}
+                          {[
+                            { pctVal: 0,   angle: 180, anchor: "end"   },
+                            { pctVal: 25,  angle: pctToAngle(25), anchor: "middle" },
+                            { pctVal: 50,  angle: pctToAngle(50), anchor: "middle" },
+                            { pctVal: 100, angle: 0,   anchor: "start" },
+                          ].map(({ pctVal, angle, anchor }) => {
+                            const mp = mkMarker(angle);
+                            return (
+                              <text
+                                key={pctVal}
+                                x={mp.x.toFixed(2)}
+                                y={mp.y.toFixed(2)}
+                                textAnchor={anchor as any}
+                                dominantBaseline="middle"
+                                fontSize="7.5"
+                                fontWeight="600"
+                                fill="#94a3b8"
+                                fontFamily="system-ui, sans-serif"
+                              >
+                                {pctVal}%
+                              </text>
+                            );
+                          })}
 
-                          {/* Pivot circles */}
-                          <circle cx={cx} cy={cy} r="11" fill={unavailable ? "#cbd5e1" : "#111827"} />
-                          <circle cx={cx} cy={cy} r="5.5" fill="white" />
+                          {/* ── Needle ─────────────────────────────────────────── */}
+                          {!unavailable && (
+                            <polygon
+                              points={needlePts}
+                              fill="#1e293b"
+                              filter="url(#needle-shadow)"
+                            />
+                          )}
+
+                          {/* ── Pivot hub ──────────────────────────────────────── */}
+                          <circle cx={cx} cy={cy} r="13" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
+                          <circle cx={cx} cy={cy} r="7"  fill="white" />
+                          <circle cx={cx} cy={cy} r="2.5" fill={unavailable ? "#cbd5e1" : valueColor} />
                         </svg>
 
-                        {/* Value & status below gauge */}
-                        <div className="text-center -mt-1">
-                          <div className="text-2xl font-black tabular-nums leading-tight" style={{ color: valueColor }}>
+                        {/* ── Value & status below gauge ──────────────────────── */}
+                        <div className="text-center -mt-3">
+                          <div className="text-3xl font-black tabular-nums leading-tight" style={{ color: valueColor }}>
                             {unavailable ? "—" : `${pct.toFixed(1)}%`}
                           </div>
-                          <div className="text-[11px] font-semibold mt-0.5" style={{ color: valueColor }}>
+                          <div
+                            className="inline-flex items-center gap-1 mt-1 px-3 py-0.5 rounded-full text-[11px] font-bold"
+                            style={{
+                              backgroundColor: unavailable ? "#f1f5f9" : valueColor + "18",
+                              color: unavailable ? "#94a3b8" : valueColor,
+                              border: `1px solid ${unavailable ? "#e2e8f0" : valueColor + "40"}`,
+                            }}
+                          >
                             {statusText}
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">
+                          <div className="text-[10px] text-slate-400 mt-1.5">
                             {unavailable
                               ? (label.includes("Debt") ? "No debt funds in holdings DB" : "Need ≥ 2 funds")
                               : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
