@@ -2550,23 +2550,19 @@ export default function ConciseReport() {
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
 
                     const zones: { label: string; line2?: string; color: string; from: number; to: number }[] = [
-                      { label: "VERY", line2: "LOW",  color: "#16a34a", from: 0,  to: 20  },
-                      { label: "LOW",                 color: "#65a30d", from: 20, to: 40  },
-                      { label: "MODERATE",            color: "#ca8a04", from: 40, to: 60  },
-                      { label: "HIGH",                color: "#ea580c", from: 60, to: 80  },
-                      { label: "VERY", line2: "HIGH", color: "#dc2626", from: 80, to: 100 },
+                      { label: "LOW",    color: "#16a34a", from: 0,  to: 25  },
+                      { label: "MEDIUM", color: "#ca8a04", from: 25, to: 50  },
+                      { label: "HIGH",   color: "#dc2626", from: 50, to: 100 },
                     ];
 
-                    const activeZone = unavailable ? null : (zones.find(z => pct >= z.from && pct < z.to) ?? zones[4]);
+                    const activeZone = unavailable ? null : (zones.find(z => pct >= z.from && pct < z.to) ?? zones[2]);
                     const valueColor = unavailable ? "#94a3b8" : (activeZone?.color ?? "#94a3b8");
 
                     const statusText = unavailable
                       ? (label.includes("Debt") ? "No debt funds in holdings database" : "Insufficient data")
-                      : pct < 20 ? "Very Low Overlap ✓"
-                      : pct < 40 ? "Low Overlap ✓"
-                      : pct < 60 ? "Moderate Overlap"
-                      : pct < 80 ? "High Overlap ⚠"
-                      : "Very High Overlap ⚠";
+                      : pct < 25 ? "Low Overlap ✓"
+                      : pct < 50 ? "Medium Overlap"
+                      : "High Overlap ⚠";
 
                     // SVG layout: 260×172, pivot at (130, 158) so semicircle sits nicely
                     const cx = 130, cy = 158;
