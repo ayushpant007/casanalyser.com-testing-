@@ -2094,168 +2094,97 @@ export default function ConciseReport() {
                 {/* White body */}
                 <div className="bg-white px-4 sm:px-7 py-5 space-y-5">
 
-                  {/* Line chart */}
+                  {/* Two horizontal bars */}
                   {(() => {
                     const BASE = 100000;
-                    const portMonthly = Math.pow(1 + weightedReturn / 100, 1 / 12) - 1;
-                    const niftyMonthly = Math.pow(1 + niftyBenchmark / 100, 1 / 12) - 1;
-                    const fmtVal = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
-                    const fmtY = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v / 1000).toFixed(0)}K`;
-
-                    // Key milestone points only
-                    const milestones = is3Y
-                      ? [
-                          { label: "Start",  months: 0  },
-                          { label: "6M",     months: 6  },
-                          { label: "Year 1", months: 12 },
-                          { label: "18M",    months: 18 },
-                          { label: "Year 2", months: 24 },
-                          { label: "30M",    months: 30 },
-                          { label: "Year 3", months: 36 },
-                        ]
-                      : [
-                          { label: "Start", months: 0  },
-                          { label: "3M",    months: 3  },
-                          { label: "6M",    months: 6  },
-                          { label: "9M",    months: 9  },
-                          { label: "12M",   months: 12 },
-                        ];
-
-                    const chartData = milestones.map(({ label, months }) => ({
-                      label,
-                      portfolio: Math.round(BASE * Math.pow(1 + portMonthly, months)),
-                      nifty:     Math.round(BASE * Math.pow(1 + niftyMonthly, months)),
-                    }));
-
-                    const allVals = chartData.flatMap(d => [d.portfolio, d.nifty]);
-                    const maxVal  = Math.max(...allVals);
-                    const yMax    = Math.ceil((maxVal * 1.12) / 5000) * 5000;
-                    const yMin    = Math.floor((BASE * 0.88) / 5000) * 5000;
-
-                    const portEnd  = chartData[chartData.length - 1].portfolio;
-                    const niftyEnd = chartData[chartData.length - 1].nifty;
-
-                    // Custom rounded-top bar shape
-                    const RoundedBar = (props: any) => {
-                      const { x, y, width, height, fill } = props;
-                      if (!height || height <= 0) return null;
-                      const r = Math.min(5, width / 2);
-                      return (
-                        <path
-                          d={`M${x + r},${y} h${width - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${height - r} h${-width} v${-(height - r)} a${r},${r} 0 0 1 ${r},${-r}z`}
-                          fill={fill}
-                        />
-                      );
+                    const portEnd  = Math.round(BASE * Math.pow(1 + weightedReturn / 100, is3Y ? 3 : 1));
+                    const niftyEnd = Math.round(BASE * Math.pow(1 + niftyBenchmark / 100, is3Y ? 3 : 1));
+                    const portReturn  = portEnd - BASE;
+                    const niftyReturn = niftyEnd - BASE;
+                    const portPct  = ((portEnd - BASE) / BASE) * 100;
+                    const niftyPct = ((niftyEnd - BASE) / BASE) * 100;
+                    const maxPct   = Math.max(Math.abs(portPct), Math.abs(niftyPct), 1);
+                    const fmtRsShort = (v: number) => {
+                      const abs = Math.abs(v);
+                      const s = abs >= 100000 ? `₹${(abs / 100000).toFixed(2)}L` : `₹${(abs / 1000).toFixed(1)}K`;
+                      return v < 0 ? `−${s}` : `+${s}`;
                     };
+                    const fmtEnd = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
 
-                    return (
-                      <div className="rounded-2xl overflow-hidden bg-white" style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 24px 0 rgba(99,102,241,0.07)" }}>
-                        {/* Header */}
-                        <div className="px-5 pt-4 pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                              Simulated Growth of ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
-                            </p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-100">
-                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4f46e5)" }} />
-                                <span className="text-[12px] font-black text-indigo-700">{fmtVal(portEnd)}</span>
-                                <span className="text-[9px] text-indigo-400 font-bold">Portfolio</span>
-                              </div>
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
-                                <span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-400" />
-                                <span className="text-[12px] font-black text-slate-600">{fmtVal(niftyEnd)}</span>
-                                <span className="text-[9px] text-slate-400 font-bold">Nifty 500</span>
-                              </div>
-                            </div>
+                    const sentence = isBeating
+                      ? `You invested ₹1L. Your portfolio grew it to ${fmtEnd(portEnd)} — beating Nifty 500 by ${fmtRsShort(Math.abs(portReturn - niftyReturn))} over ${periodLabel}.`
+                      : `You invested ₹1L. Your portfolio grew it to ${fmtEnd(portEnd)}, while Nifty 500 would have reached ${fmtEnd(niftyEnd)} — you missed ${fmtRsShort(Math.abs(portReturn - niftyReturn))} over ${periodLabel}.`;
+
+                    const Bar = ({ label, value, endVal, pct, color, trackColor, badge }: {
+                      label: string; value: number; endVal: number; pct: number;
+                      color: string; trackColor: string; badge?: React.ReactNode;
+                    }) => (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+                            <span className="text-xs font-bold text-slate-700">{label}</span>
+                            {badge}
                           </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black tabular-nums" style={{ color: pct >= 0 ? "#10b981" : "#ef4444" }}>
+                              {pct >= 0 ? "+" : ""}{pct.toFixed(1)}%
+                            </span>
+                            <span className="text-xs font-semibold text-slate-400 tabular-nums">→ {fmtEnd(endVal)}</span>
+                          </div>
+                        </div>
+                        <div className="relative h-9 rounded-xl overflow-hidden" style={{ background: trackColor }}>
                           <div
-                            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl self-start sm:self-center"
+                            className="absolute inset-y-0 left-0 rounded-xl flex items-center justify-end pr-3 transition-all duration-700"
                             style={{
-                              background: isBeating ? "#ecfdf5" : "#fef2f2",
-                              border: `1.5px solid ${isBeating ? "#a7f3d0" : "#fecaca"}`,
+                              width: `${Math.max(4, (Math.abs(pct) / maxPct) * 100)}%`,
+                              background: color,
                             }}
                           >
-                            <span className="text-2xl font-black leading-none" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
-                              {isBeating ? "▲" : "▼"}
+                            <span className="text-[11px] font-black text-white tabular-nums drop-shadow">
+                              {fmtRsShort(value)}
                             </span>
-                            <div>
-                              <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: isBeating ? "#059669" : "#dc2626" }}>Alpha</div>
-                              <div className="text-lg font-black leading-tight" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
-                                {isBeating ? "+" : ""}{alpha.toFixed(2)}%
-                              </div>
-                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+
+                    return (
+                      <div className="rounded-2xl overflow-hidden bg-white space-y-4 px-5 py-5" style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 24px 0 rgba(99,102,241,0.07)" }}>
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                            If you had invested ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
+                          </p>
+                          <div
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
+                            style={{ background: isBeating ? "#ecfdf5" : "#fef2f2", border: `1px solid ${isBeating ? "#a7f3d0" : "#fecaca"}` }}
+                          >
+                            <span className="font-black text-sm" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
+                              {isBeating ? "▲" : "▼"} Alpha {isBeating ? "+" : ""}{alpha.toFixed(2)}%
+                            </span>
                           </div>
                         </div>
 
-                        {/* Grouped Bar Chart */}
-                        <ResponsiveContainer width="100%" height={240}>
-                          <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }} barCategoryGap="30%" barGap={4}>
-                            <defs>
-                              <linearGradient id="barPortGradW" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#818cf8" stopOpacity={1} />
-                                <stop offset="100%" stopColor="#4338ca" stopOpacity={0.85} />
-                              </linearGradient>
-                              <linearGradient id="barNiftyGradW" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#cbd5e1" stopOpacity={1} />
-                                <stop offset="100%" stopColor="#94a3b8" stopOpacity={0.8} />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 4" stroke="#f1f5f9" vertical={false} />
-                            <XAxis
-                              dataKey="label"
-                              tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 700 }}
-                              axisLine={false}
-                              tickLine={false}
-                            />
-                            <YAxis
-                              domain={[yMin, yMax]}
-                              tickFormatter={fmtY}
-                              tick={{ fontSize: 10, fill: "#cbd5e1", fontWeight: 600 }}
-                              axisLine={false}
-                              tickLine={false}
-                              width={50}
-                            />
-                            <RechartsTooltip
-                              contentStyle={{
-                                fontSize: 12,
-                                borderRadius: 12,
-                                border: "1px solid #e2e8f0",
-                                background: "#fff",
-                                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                              }}
-                              formatter={(value: any, name: string) => [
-                                <span style={{ color: name === "portfolio" ? "#4f46e5" : "#64748b", fontWeight: 700 }}>
-                                  ₹{Number(value).toLocaleString("en-IN")}
-                                </span>,
-                                name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI",
-                              ]}
-                              labelStyle={{ fontWeight: 700, color: "#334155", marginBottom: 4, fontSize: 11 }}
-                              cursor={{ fill: "rgba(99,102,241,0.04)", radius: 6 }}
-                            />
-                            <Bar dataKey="nifty"     shape={<RoundedBar />} fill="url(#barNiftyGradW)" maxBarSize={34} />
-                            <Bar dataKey="portfolio" shape={<RoundedBar />} fill="url(#barPortGradW)"  maxBarSize={34}
-                              label={{
-                                position: "top",
-                                formatter: (v: number) => fmtVal(v),
-                                fill: "#6366f1",
-                                fontSize: 9,
-                                fontWeight: 800,
-                              }}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        <Bar
+                          label="Your Portfolio"
+                          value={portReturn}
+                          endVal={portEnd}
+                          pct={portPct}
+                          color="linear-gradient(90deg,#6366f1,#4338ca)"
+                          trackColor="#eef2ff"
+                        />
+                        <Bar
+                          label="Nifty 500"
+                          value={niftyReturn}
+                          endVal={niftyEnd}
+                          pct={niftyPct}
+                          color="linear-gradient(90deg,#94a3b8,#64748b)"
+                          trackColor="#f8fafc"
+                        />
 
-                        {/* Legend */}
-                        <div className="px-5 pb-4 flex items-center justify-center gap-6 border-t border-slate-100 pt-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4338ca)" }} />
-                            <span className="text-[10px] font-semibold text-slate-500">Your Portfolio</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#cbd5e1,#94a3b8)" }} />
-                            <span className="text-[10px] font-semibold text-slate-400">Nifty 500</span>
-                          </div>
+                        <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 mt-1" style={{ background: isBeating ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.06)", border: `1px solid ${isBeating ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}` }}>
+                          <span className="text-base flex-shrink-0 mt-0.5">{isBeating ? "🎉" : "📉"}</span>
+                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{sentence}</p>
                         </div>
                       </div>
                     );
