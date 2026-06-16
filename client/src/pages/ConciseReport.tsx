@@ -2008,8 +2008,15 @@ export default function ConciseReport() {
             }, 0);
 
             const alpha = weightedReturn - niftyBenchmark;
-            const niftyAbsoluteReturn = (niftyBenchmark / 100) * eligibleTotalInvested;
-            const portfolioAbsoluteReturn = (weightedReturn / 100) * eligibleTotalInvested;
+            const niftyAbsoluteReturn = is3Y
+              ? eligibleTotalInvested * (Math.pow(1 + niftyBenchmark / 100, 3) - 1)
+              : (niftyBenchmark / 100) * eligibleTotalInvested;
+            const portfolioAbsoluteReturn = is3Y
+              ? activeList.reduce((sum: number, mf: any) => {
+                  const cagr = parseFloat(String(storedPerformances[mf.isin]?.cagr?.[cagrKey]));
+                  return sum + (mf.invested_amount || 0) * (Math.pow(1 + cagr / 100, 3) - 1);
+                }, 0)
+              : (weightedReturn / 100) * eligibleTotalInvested;
             const alphaAbsolute = portfolioAbsoluteReturn - niftyAbsoluteReturn;
 
             const isBeating = alpha >= 0;
