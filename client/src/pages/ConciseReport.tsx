@@ -2183,6 +2183,16 @@ export default function ConciseReport() {
                           <span className="text-base flex-shrink-0 mt-0.5">{isBeating ? "🎉" : "📉"}</span>
                           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{sentence}</p>
                         </div>
+
+                        {!isBeating && (
+                          <div className="flex items-start gap-2.5 rounded-xl px-4 py-3" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                            <span className="text-base flex-shrink-0 mt-0.5">💸</span>
+                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                              <span className="font-semibold text-amber-700">Opportunity Cost:</span> By underperforming the benchmark, this portfolio may have missed out on approximately{" "}
+                              <span className="font-bold text-amber-700">{fmtRs(Math.abs(alphaAbsolute))}</span> in additional wealth creation.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   })()}
