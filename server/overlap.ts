@@ -289,24 +289,25 @@ function computePairOverlap(fundA: FundHoldings, fundB: FundHoldings): FundPairO
 export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
   const { nameMap, isinMap } = loadHoldings();
 
-  const matched: { schemeName: string; fund: FundHoldings }[] = [];
+  const matched: { schemeName: string; fund: FundHoldings; fundCategory: string }[] = [];
   const unmatched: string[] = [];
 
   for (const mf of mfSnapshot) {
     const schemeName = (mf.scheme_name || "").trim();
     const schemeISIN = (mf.isin || "").trim();
+    const fundCategory = (mf.fund_category || "").toLowerCase().trim();
     if (!schemeName) continue;
 
     const fund = matchFund(schemeName, schemeISIN, nameMap, isinMap);
     if (fund) {
-      matched.push({ schemeName, fund });
+      matched.push({ schemeName, fund, fundCategory });
     } else {
       unmatched.push(schemeName);
     }
   }
 
   // Deduplicate: same CSV fund matched by multiple CAS schemes
-  const uniqueMap = new Map<string, { schemeName: string; fund: FundHoldings }>();
+  const uniqueMap = new Map<string, { schemeName: string; fund: FundHoldings; fundCategory: string }>();
   for (const m of matched) {
     const key = normalizeFundName(m.fund.fundName);
     if (!uniqueMap.has(key)) uniqueMap.set(key, m);
@@ -353,9 +354,13 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     : 0;
 
   // ── Equity-only average overlap ──────────────────────────────────────────
-  // A fund is considered "equity" if it has >= 5 stock holdings
-  const isEquityFund = (fund: FundHoldings) => fund.stocks.length >= 5;
-  const equityFunds = funds.filter(m => isEquityFund(m.fund));
+  // Use CAS fund_category to classify; fall back to stock count for untagged funds
+  const isDebtByCategory = (m: { fundCategory: string; fund: FundHoldings }) =>
+    m.fundCategory === "debt" || m.fundCategory === "liquid";
+  const isEquityByCategory = (m: { fundCategory: string; fund: FundHoldings }) =>
+    !isDebtByCategory(m);
+
+  const equityFunds = funds.filter(m => isEquityByCategory(m));
   const equityPairs: FundPairOverlap[] = [];
   for (let i = 0; i < equityFunds.length; i++) {
     for (let j = i + 1; j < equityFunds.length; j++) {
@@ -370,8 +375,8 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     : null;
 
   // ── Debt-only average overlap ─────────────────────────────────────────────
-  // Debt funds = matched funds with < 5 stock holdings in the holdings DB
-  const debtFunds = funds.filter(m => !isEquityFund(m.fund));
+  // Use CAS fund_category to identify debt funds
+  const debtFunds = funds.filter(m => isDebtByCategory(m));
   const debtPairs: FundPairOverlap[] = [];
   for (let i = 0; i < debtFunds.length; i++) {
     for (let j = i + 1; j < debtFunds.length; j++) {
@@ -379,9 +384,12 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     }
   }
   const overlappingDebtPairs = debtPairs.filter(p => p.overlapScore > 0);
-  const debtAvgOverlap = overlappingDebtPairs.length > 0
-    ? overlappingDebtPairs.reduce((sum, p) => sum + p.overlapScore, 0) / overlappingDebtPairs.length
-    : null;
+  // If ≥2 debt funds exist but none overlap, return 0 (not null) — 0% is meaningful info
+  const debtAvgOverlap = debtFunds.length < 2
+    ? null
+    : overlappingDebtPairs.length > 0
+      ? overlappingDebtPairs.reduce((sum, p) => sum + p.overlapScore, 0) / overlappingDebtPairs.length
+      : 0;
 
   // ── Stock concentration across portfolio ─────────────────────────────────
   const stockTotals = new Map<string, { total: number; funds: { fund: string; weight: number }[] }>();
