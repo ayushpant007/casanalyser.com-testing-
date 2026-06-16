@@ -2149,39 +2149,39 @@ export default function ConciseReport() {
                     };
 
                     return (
-                      <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                      <div className="rounded-2xl overflow-hidden bg-white" style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 24px 0 rgba(99,102,241,0.07)" }}>
                         {/* Header */}
-                        <div className="px-4 pt-4 pb-3 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="px-5 pt-4 pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div>
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300/70 mb-1">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">
                               Simulated Growth of ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
                             </p>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(99,102,241,0.2)", border: "1px solid rgba(129,140,248,0.35)" }}>
-                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#6366f1)" }} />
-                                <span className="text-[11px] font-black text-indigo-200">{fmtVal(portEnd)}</span>
-                                <span className="text-[9px] text-indigo-400 font-semibold">Portfolio</span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-100">
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4f46e5)" }} />
+                                <span className="text-[12px] font-black text-indigo-700">{fmtVal(portEnd)}</span>
+                                <span className="text-[9px] text-indigo-400 font-bold">Portfolio</span>
                               </div>
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.18)" }}>
-                                <span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-500" />
-                                <span className="text-[11px] font-black text-slate-300">{fmtVal(niftyEnd)}</span>
-                                <span className="text-[9px] text-slate-500 font-semibold">Nifty 500</span>
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-400" />
+                                <span className="text-[12px] font-black text-slate-600">{fmtVal(niftyEnd)}</span>
+                                <span className="text-[9px] text-slate-400 font-bold">Nifty 500</span>
                               </div>
                             </div>
                           </div>
                           <div
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl self-start sm:self-center"
+                            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl self-start sm:self-center"
                             style={{
-                              background: isBeating ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.12)",
-                              border: `1px solid ${isBeating ? "rgba(52,211,153,0.3)" : "rgba(252,165,165,0.25)"}`,
+                              background: isBeating ? "#ecfdf5" : "#fef2f2",
+                              border: `1.5px solid ${isBeating ? "#a7f3d0" : "#fecaca"}`,
                             }}
                           >
-                            <span className="text-lg font-black" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
+                            <span className="text-2xl font-black leading-none" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
                               {isBeating ? "▲" : "▼"}
                             </span>
                             <div>
-                              <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>Alpha</div>
-                              <div className="text-base font-black leading-tight" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
+                              <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: isBeating ? "#059669" : "#dc2626" }}>Alpha</div>
+                              <div className="text-lg font-black leading-tight" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>
                                 {isBeating ? "+" : ""}{alpha.toFixed(2)}%
                               </div>
                             </div>
@@ -2189,29 +2189,29 @@ export default function ConciseReport() {
                         </div>
 
                         {/* Grouped Bar Chart */}
-                        <ResponsiveContainer width="100%" height={230}>
-                          <BarChart data={chartData} margin={{ top: 16, right: 16, left: 0, bottom: 0 }} barCategoryGap="28%" barGap={3}>
+                        <ResponsiveContainer width="100%" height={240}>
+                          <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }} barCategoryGap="30%" barGap={4}>
                             <defs>
-                              <linearGradient id="barPortGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#a5b4fc" stopOpacity={1} />
-                                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.9} />
+                              <linearGradient id="barPortGradW" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#818cf8" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#4338ca" stopOpacity={0.85} />
                               </linearGradient>
-                              <linearGradient id="barNiftyGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.9} />
-                                <stop offset="100%" stopColor="#475569" stopOpacity={0.7} />
+                              <linearGradient id="barNiftyGradW" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#cbd5e1" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#94a3b8" stopOpacity={0.8} />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="1 5" stroke="rgba(148,163,184,0.1)" vertical={false} />
+                            <CartesianGrid strokeDasharray="3 4" stroke="#f1f5f9" vertical={false} />
                             <XAxis
                               dataKey="label"
-                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.75)", fontWeight: 700 }}
+                              tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 700 }}
                               axisLine={false}
                               tickLine={false}
                             />
                             <YAxis
                               domain={[yMin, yMax]}
                               tickFormatter={fmtY}
-                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.55)", fontWeight: 600 }}
+                              tick={{ fontSize: 10, fill: "#cbd5e1", fontWeight: 600 }}
                               axisLine={false}
                               tickLine={false}
                               width={50}
@@ -2220,41 +2220,41 @@ export default function ConciseReport() {
                               contentStyle={{
                                 fontSize: 12,
                                 borderRadius: 12,
-                                border: "1px solid rgba(99,102,241,0.35)",
-                                background: "rgba(15,23,42,0.97)",
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                                border: "1px solid #e2e8f0",
+                                background: "#fff",
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                               }}
                               formatter={(value: any, name: string) => [
-                                <span style={{ color: name === "portfolio" ? "#a5b4fc" : "#94a3b8", fontWeight: 700 }}>
+                                <span style={{ color: name === "portfolio" ? "#4f46e5" : "#64748b", fontWeight: 700 }}>
                                   ₹{Number(value).toLocaleString("en-IN")}
                                 </span>,
                                 name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI",
                               ]}
-                              labelStyle={{ fontWeight: 700, color: "#e2e8f0", marginBottom: 6, fontSize: 11 }}
-                              cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                              labelStyle={{ fontWeight: 700, color: "#334155", marginBottom: 4, fontSize: 11 }}
+                              cursor={{ fill: "rgba(99,102,241,0.04)", radius: 6 }}
                             />
-                            <Bar dataKey="nifty"     shape={<RoundedBar />} fill="url(#barNiftyGrad)"  radius={[5,5,0,0]} maxBarSize={32} />
-                            <Bar dataKey="portfolio" shape={<RoundedBar />} fill="url(#barPortGrad)"   radius={[5,5,0,0]} maxBarSize={32}
+                            <Bar dataKey="nifty"     shape={<RoundedBar />} fill="url(#barNiftyGradW)" maxBarSize={34} />
+                            <Bar dataKey="portfolio" shape={<RoundedBar />} fill="url(#barPortGradW)"  maxBarSize={34}
                               label={{
                                 position: "top",
                                 formatter: (v: number) => fmtVal(v),
-                                fill: "#a5b4fc",
+                                fill: "#6366f1",
                                 fontSize: 9,
-                                fontWeight: 700,
+                                fontWeight: 800,
                               }}
                             />
                           </BarChart>
                         </ResponsiveContainer>
 
                         {/* Legend */}
-                        <div className="px-4 pb-4 flex items-center justify-center gap-6">
+                        <div className="px-5 pb-4 flex items-center justify-center gap-6 border-t border-slate-100 pt-3">
                           <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4f46e5)" }} />
-                            <span className="text-[10px] font-semibold text-slate-400">Your Portfolio</span>
+                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4338ca)" }} />
+                            <span className="text-[10px] font-semibold text-slate-500">Your Portfolio</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <span className="w-3 h-3 rounded-sm inline-block bg-slate-500 opacity-80" />
-                            <span className="text-[10px] font-semibold text-slate-500">Nifty 500</span>
+                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#cbd5e1,#94a3b8)" }} />
+                            <span className="text-[10px] font-semibold text-slate-400">Nifty 500</span>
                           </div>
                         </div>
                       </div>
