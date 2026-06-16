@@ -2845,49 +2845,6 @@ export default function ConciseReport() {
             )}
           </div>
 
-          {/* ── SIP Health Panel ──────────────────────────────────────────── */}
-          <div ref={sipHealthRef} />
-          {sipHealthItems.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-700 to-blue-700 px-6 py-5 text-white">
-                <div className="flex items-center gap-2 mb-1">
-                  <Activity className="w-4 h-4" />
-                  <h3 className="text-lg font-bold">SIP Health Check</h3>
-                </div>
-                <p className="text-indigo-200 text-xs">How your SIP funds are performing vs benchmark</p>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {sipHealthItems.map((item: any, i: number) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3.5" data-testid={`row-sip-health-${i}`}>
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.healthy ? "bg-emerald-400" : "bg-rose-400"}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
-                      <p className="text-xs text-slate-500">SIP ₹{item.amount?.toLocaleString("en-IN")} / mo</p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-sm font-bold ${item.healthy ? "text-emerald-600" : "text-rose-500"}`}>
-                        {item.cagr !== null ? `${Number(item.cagr).toFixed(2)}%` : "—"}
-                      </p>
-                      <p className="text-[10px] text-slate-400">1Y CAGR</p>
-                    </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border flex-shrink-0 ${item.healthy ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-600 border-rose-200"}`}>
-                      {item.healthy ? "Healthy" : "Review"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {/* SIP disclaimer */}
-              <div
-                className="mx-4 mb-4 mt-1 px-4 py-3 rounded-xl flex items-start gap-2.5"
-                style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}
-              >
-                <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Your SIP health score is only an initial assessment based on recent performance trends. A detailed consultation is recommended for comprehensive portfolio evaluation and rebalancing guidance.
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* performance anchor */}
           <div ref={performanceRef} />
