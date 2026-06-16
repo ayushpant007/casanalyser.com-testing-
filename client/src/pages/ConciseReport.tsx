@@ -2118,9 +2118,9 @@ export default function ConciseReport() {
                     const portCurrentVal = eligibleTotalInvested + portfolioAbsoluteReturn;
                     const niftyCurrentVal = eligibleTotalInvested + niftyAbsoluteReturn;
 
-                    const Bar = ({ label, value, endVal, pct, color, trackColor, badge, investedAmt, currentAmt }: {
+                    const Bar = ({ label, value, endVal, pct, color, trackColor, badge, investedAmt, currentAmt, textColor }: {
                       label: string; value: number; endVal: number; pct: number;
-                      color: string; trackColor: string; badge?: React.ReactNode; investedAmt?: number; currentAmt?: number;
+                      color: string; trackColor: string; badge?: React.ReactNode; investedAmt?: number; currentAmt?: number; textColor?: string;
                     }) => (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -2131,7 +2131,7 @@ export default function ConciseReport() {
                           </div>
                           <div className="flex items-center gap-2">
                             {investedAmt !== undefined && currentAmt !== undefined && (
-                              <span className="text-xs font-bold tabular-nums" style={{ color: pct >= 0 ? "#10b981" : "#ef4444" }}>
+                              <span className="text-xs font-bold tabular-nums" style={{ color: textColor ?? (pct >= 0 ? "#10b981" : "#ef4444") }}>
                                 {fmtRs(investedAmt)} → {fmtRs(currentAmt)}
                               </span>
                             )}
@@ -2172,6 +2172,7 @@ export default function ConciseReport() {
                           trackColor={isBeating ? "#ecfdf5" : "#fef2f2"}
                           investedAmt={eligibleTotalInvested}
                           currentAmt={portCurrentVal}
+                          textColor={isBeating ? "#10b981" : "#ef4444"}
                         />
                         <Bar
                           label="Nifty 500"
