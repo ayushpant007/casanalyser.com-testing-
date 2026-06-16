@@ -2115,9 +2115,9 @@ export default function ConciseReport() {
                       ? `You invested ${fmtRs(eligibleTotalInvested)}. Your portfolio earned ${fmtRs(portfolioAbsoluteReturn)}, while Nifty 500 would have earned ${fmtRs(niftyAbsoluteReturn)}. Hence you earned ${fmtRs(Math.abs(alphaAbsolute))} extra over ${periodLabel}.`
                       : `You invested ${fmtRs(eligibleTotalInvested)}. Your portfolio earned ${fmtRs(portfolioAbsoluteReturn)}, while Nifty 500 would have earned ${fmtRs(niftyAbsoluteReturn)}. Hence you missed ${fmtRs(Math.abs(alphaAbsolute))} over ${periodLabel}.`;
 
-                    const Bar = ({ label, value, endVal, pct, color, trackColor, badge }: {
+                    const Bar = ({ label, value, endVal, pct, color, trackColor, badge, absAmt }: {
                       label: string; value: number; endVal: number; pct: number;
-                      color: string; trackColor: string; badge?: React.ReactNode;
+                      color: string; trackColor: string; badge?: React.ReactNode; absAmt?: number;
                     }) => (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -2130,7 +2130,9 @@ export default function ConciseReport() {
                             <span className="text-sm font-black tabular-nums" style={{ color: pct >= 0 ? "#10b981" : "#ef4444" }}>
                               {pct >= 0 ? "+" : ""}{pct.toFixed(1)}%
                             </span>
-                            <span className="text-xs font-semibold text-slate-400 tabular-nums">→ {fmtEnd(endVal)}</span>
+                            {absAmt !== undefined && (
+                              <span className="text-xs font-bold text-slate-800 tabular-nums">→ {fmtRs(absAmt)}</span>
+                            )}
                           </div>
                         </div>
                         <div className="relative h-9 rounded-xl overflow-hidden" style={{ background: trackColor }}>
@@ -2169,6 +2171,7 @@ export default function ConciseReport() {
                           pct={portPct}
                           color="linear-gradient(90deg,#6366f1,#4338ca)"
                           trackColor="#eef2ff"
+                          absAmt={portfolioAbsoluteReturn}
                         />
                         <Bar
                           label="Nifty 500"
@@ -2177,6 +2180,7 @@ export default function ConciseReport() {
                           pct={niftyPct}
                           color="linear-gradient(90deg,#94a3b8,#64748b)"
                           trackColor="#f8fafc"
+                          absAmt={niftyAbsoluteReturn}
                         />
 
                         <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 mt-1" style={{ background: isBeating ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.06)", border: `1px solid ${isBeating ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}` }}>
