@@ -2181,7 +2181,13 @@ export default function ConciseReport() {
 
                         <div className="flex items-start gap-2.5 rounded-xl px-4 py-3 mt-1" style={{ background: isBeating ? "rgba(16,185,129,0.07)" : "rgba(239,68,68,0.06)", border: `1px solid ${isBeating ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}` }}>
                           <span className="text-base flex-shrink-0 mt-0.5">{isBeating ? "🎉" : "📉"}</span>
-                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">{sentence}</p>
+                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                            You invested <span className="font-bold text-slate-900">{fmtRs(eligibleTotalInvested)}</span>. Your portfolio earned{" "}
+                            <span className="font-bold text-emerald-600">{fmtRs(portfolioAbsoluteReturn)}</span>, while Nifty 500 would have earned{" "}
+                            <span className="font-bold text-slate-900">{fmtRs(niftyAbsoluteReturn)}</span>. Hence you {isBeating ? "earned" : "missed"}{" "}
+                            <span className="font-bold" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>{fmtRs(Math.abs(alphaAbsolute))}</span>{" "}
+                            {isBeating ? "extra" : ""} over <span className="font-bold text-slate-900">{periodLabel}</span>.
+                          </p>
                         </div>
 
                         {!isBeating && (
