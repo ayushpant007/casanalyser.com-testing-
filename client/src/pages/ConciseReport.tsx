@@ -2643,9 +2643,9 @@ export default function ConciseReport() {
 
                         {/* ── SVG Speedometer ── */}
                         <svg
-                          viewBox={`0 0 ${W} ${H}`}
+                          viewBox={`-30 0 ${W + 60} ${H}`}
                           width="100%"
-                          style={{ display: "block", overflow: "visible", maxWidth: 480 }}
+                          style={{ display: "block", overflow: "hidden", maxWidth: 480 }}
                         >
                           <defs>
                             {/* Needle drop-shadow */}
