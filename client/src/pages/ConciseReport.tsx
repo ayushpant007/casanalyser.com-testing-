@@ -2128,52 +2128,132 @@ export default function ConciseReport() {
                     const yMax = Math.ceil((maxVal + pad) / 1000) * 1000;
                     const fmtY = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v / 1000).toFixed(0)}K`;
 
+                    const portEnd = chartData[chartData.length - 1].portfolio;
+                    const niftyEnd = chartData[chartData.length - 1].nifty;
+                    const fmtVal = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
+
                     return (
-                      <div>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                            Simulated Growth of ₹1 Lakh · {is3Y ? "36 Months" : "12 Months"}
-                          </p>
+                      <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                        {/* Header row */}
+                        <div className="px-4 pt-4 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300/70">
+                              Simulated Growth of ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
+                            </p>
+                          </div>
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5">
-                              <span className="w-5 h-0.5 rounded-full bg-indigo-500 inline-block" />
-                              <span className="text-[10px] font-semibold text-slate-500">Your Portfolio</span>
+                              <span className="w-5 h-[3px] rounded-full inline-block" style={{ background: "linear-gradient(90deg,#818cf8,#6366f1)" }} />
+                              <span className="text-[10px] font-semibold text-slate-300">Your Portfolio</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <span className="w-5 h-0.5 rounded-full bg-slate-400 inline-block" style={{ borderStyle: "dashed" }} />
-                              <span className="text-[10px] font-semibold text-slate-500">Nifty 500</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className="w-5 h-3 rounded-sm inline-block opacity-80"
-                                style={{ backgroundColor: isBeating ? "rgba(16,185,129,0.4)" : "rgba(239,68,68,0.35)" }}
-                              />
-                              <span className="text-[10px] font-semibold" style={{ color: isBeating ? "#10b981" : "#ef4444" }}>Alpha</span>
+                              <span className="w-5 h-[2px] rounded-full inline-block opacity-60" style={{ background: "#94a3b8", borderTop: "2px dashed #94a3b8" }} />
+                              <span className="text-[10px] font-semibold text-slate-400">Nifty 500</span>
                             </div>
                           </div>
                         </div>
-                        <ResponsiveContainer width="100%" height={200}>
-                          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+
+                        {/* End-value callout pills */}
+                        <div className="px-4 pb-2 flex items-center gap-3 flex-wrap">
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(129,140,248,0.3)" }}>
+                            <span className="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />
+                            <span className="text-[11px] font-black text-indigo-200">{fmtVal(portEnd)}</span>
+                            <span className="text-[9px] text-indigo-400 font-semibold">Portfolio</span>
+                          </div>
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.2)" }}>
+                            <span className="w-2 h-2 rounded-full bg-slate-400" />
+                            <span className="text-[11px] font-black text-slate-300">{fmtVal(niftyEnd)}</span>
+                            <span className="text-[9px] text-slate-500 font-semibold">Nifty 500</span>
+                          </div>
+                          <div
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl ml-auto"
+                            style={{
+                              background: isBeating ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.12)",
+                              border: `1px solid ${isBeating ? "rgba(52,211,153,0.3)" : "rgba(252,165,165,0.25)"}`,
+                            }}
+                          >
+                            <span className="text-[9px] font-bold" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>
+                              {isBeating ? "▲" : "▼"} Alpha
+                            </span>
+                            <span className="text-[11px] font-black" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
+                              {isBeating ? "+" : ""}{alpha.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Chart */}
+                        <ResponsiveContainer width="100%" height={220}>
+                          <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                             <defs>
-                              <linearGradient id="portfolioGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.18} />
-                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                              <linearGradient id="portfolioGradDark" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#818cf8" stopOpacity={0.35} />
+                                <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
                               </linearGradient>
-                              <linearGradient id="niftyGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.12} />
-                                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
+                              <linearGradient id="niftyGradDark" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.15} />
+                                <stop offset="100%" stopColor="#94a3b8" stopOpacity={0.01} />
                               </linearGradient>
+                              <filter id="glow">
+                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur" />
+                                  <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                              </filter>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                            <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 }} axisLine={false} tickLine={false} />
-                            <YAxis domain={[yMin, yMax]} tickFormatter={fmtY} tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 600 }} axisLine={false} tickLine={false} width={46} />
-                            <RechartsTooltip
-                              contentStyle={{ fontSize: 11, borderRadius: 10, border: "1px solid #e2e8f0", background: "#fff", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
-                              formatter={(value: any, name: string) => [`₹${Number(value).toLocaleString("en-IN")}`, name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI"]}
-                              labelStyle={{ fontWeight: 700, color: "#334155", marginBottom: 4 }}
+                            <CartesianGrid strokeDasharray="1 4" stroke="rgba(148,163,184,0.12)" vertical={false} />
+                            <XAxis
+                              dataKey="month"
+                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.7)", fontWeight: 700 }}
+                              axisLine={false}
+                              tickLine={false}
                             />
-                            <Area type="monotone" dataKey="nifty" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 4" fill="url(#niftyGrad)" dot={false} activeDot={{ r: 4, fill: "#94a3b8" }} />
-                            <Area type="monotone" dataKey="portfolio" stroke="#6366f1" strokeWidth={2.5} fill="url(#portfolioGrad)" dot={false} activeDot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} />
+                            <YAxis
+                              domain={[yMin, yMax]}
+                              tickFormatter={fmtY}
+                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.6)", fontWeight: 600 }}
+                              axisLine={false}
+                              tickLine={false}
+                              width={48}
+                            />
+                            <RechartsTooltip
+                              contentStyle={{
+                                fontSize: 12,
+                                borderRadius: 12,
+                                border: "1px solid rgba(99,102,241,0.3)",
+                                background: "rgba(15,23,42,0.95)",
+                                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                                backdropFilter: "blur(8px)",
+                              }}
+                              formatter={(value: any, name: string) => [
+                                <span style={{ color: name === "portfolio" ? "#a5b4fc" : "#94a3b8", fontWeight: 700 }}>
+                                  ₹{Number(value).toLocaleString("en-IN")}
+                                </span>,
+                                name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI",
+                              ]}
+                              labelStyle={{ fontWeight: 700, color: "#e2e8f0", marginBottom: 6, fontSize: 11 }}
+                              cursor={{ stroke: "rgba(148,163,184,0.2)", strokeWidth: 1, strokeDasharray: "4 2" }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="nifty"
+                              stroke="#64748b"
+                              strokeWidth={1.5}
+                              strokeDasharray="5 3"
+                              fill="url(#niftyGradDark)"
+                              dot={false}
+                              activeDot={{ r: 4, fill: "#94a3b8", stroke: "#1e293b", strokeWidth: 2 }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="portfolio"
+                              stroke="#818cf8"
+                              strokeWidth={2.5}
+                              fill="url(#portfolioGradDark)"
+                              dot={false}
+                              filter="url(#glow)"
+                              activeDot={{ r: 5, fill: "#818cf8", stroke: "#1e293b", strokeWidth: 2 }}
+                            />
                             <Customized component={(props: any) => {
                               const items = props.formattedGraphicalItems;
                               if (!items || items.length < 2) return null;
@@ -2182,72 +2262,31 @@ export default function ConciseReport() {
                               if (!niftyPts.length || !portPts.length) return null;
                               const forward  = portPts.map(p => `${p.x},${p.y}`).join(" ");
                               const backward = [...niftyPts].reverse().map(p => `${p.x},${p.y}`).join(" ");
+                              const alphaColor = isBeating ? "rgba(52,211,153,0.12)" : "rgba(239,68,68,0.1)";
 
-                              // Label at ~60% along the line (right-ish of center, in the gap)
-                              const midIdx = Math.floor(portPts.length * 0.6);
-                              const portMid  = portPts[midIdx];
-                              const niftyMid = niftyPts[midIdx];
-                              const labelX = portMid?.x ?? 0;
-                              const labelY = portMid && niftyMid ? (portMid.y + niftyMid.y) / 2 : 0;
-                              const labelText = `α=${isBeating ? "+" : ""}${alpha.toFixed(2)}%`;
-                              const color = isBeating ? "#059669" : "#dc2626";
-                              const bgColor = isBeating ? "rgba(236,253,245,0.92)" : "rgba(254,242,242,0.92)";
-                              const borderColor = isBeating ? "#6ee7b7" : "#fca5a5";
-                              const textW = labelText.length * 6.5 + 14;
-                              const textH = 18;
+                              // End-point dot + label on the portfolio line
+                              const lastPort  = portPts[portPts.length - 1];
+                              const lastNifty = niftyPts[niftyPts.length - 1];
 
                               return (
                                 <g>
-                                  <polygon
-                                    points={`${forward} ${backward}`}
-                                    fill={isBeating ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.15)"}
-                                  />
-                                  {portMid && niftyMid && Math.abs(portMid.y - niftyMid.y) > 6 && (
-                                    <g>
-                                      <rect
-                                        x={labelX - textW / 2}
-                                        y={labelY - textH / 2}
-                                        width={textW}
-                                        height={textH}
-                                        rx={5}
-                                        fill={bgColor}
-                                        stroke={borderColor}
-                                        strokeWidth={1}
-                                      />
-                                      <text
-                                        x={labelX}
-                                        y={labelY + 4.5}
-                                        textAnchor="middle"
-                                        fontSize={10}
-                                        fontWeight="700"
-                                        fontFamily="inherit"
-                                        fill={color}
-                                      >
-                                        {labelText}
-                                      </text>
-                                    </g>
+                                  <polygon points={`${forward} ${backward}`} fill={alphaColor} />
+                                  {/* Glowing end dot for portfolio */}
+                                  {lastPort && (
+                                    <>
+                                      <circle cx={lastPort.x} cy={lastPort.y} r={8} fill="rgba(129,140,248,0.15)" />
+                                      <circle cx={lastPort.x} cy={lastPort.y} r={4} fill="#818cf8" stroke="#1e293b" strokeWidth={2} />
+                                    </>
+                                  )}
+                                  {/* End dot for nifty */}
+                                  {lastNifty && (
+                                    <circle cx={lastNifty.x} cy={lastNifty.y} r={3.5} fill="#64748b" stroke="#1e293b" strokeWidth={1.5} />
                                   )}
                                 </g>
                               );
                             }} />
                           </AreaChart>
                         </ResponsiveContainer>
-                        <div className="flex items-center justify-end gap-5 mt-1 pr-1">
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-indigo-500 font-bold">
-                              Portfolio end: {chartData[chartData.length - 1].portfolio >= 100000
-                                ? `₹${(chartData[chartData.length - 1].portfolio / 100000).toFixed(2)}L`
-                                : `₹${(chartData[chartData.length - 1].portfolio / 1000).toFixed(2)}K`}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400 font-semibold">
-                              Nifty 500 end: {chartData[chartData.length - 1].nifty >= 100000
-                                ? `₹${(chartData[chartData.length - 1].nifty / 100000).toFixed(2)}L`
-                                : `₹${(chartData[chartData.length - 1].nifty / 1000).toFixed(2)}K`}
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     );
                   })()}
