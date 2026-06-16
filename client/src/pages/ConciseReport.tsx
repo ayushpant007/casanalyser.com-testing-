@@ -2776,16 +2776,12 @@ export default function ConciseReport() {
                     );
                   };
 
-                  const debtUnavailable = overlapData.debtAverageOverlap === null || overlapData.debtFundCount < 2;
-
                   return (
                     <div className="px-3 sm:px-5 py-5 border-b border-slate-100">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Overlap Meters</p>
                       <div className="flex flex-col sm:flex-row gap-4">
                         <DialGauge label="Equity Funds" value={overlapData.equityAverageOverlap} fundCount={overlapData.equityFundCount} />
-                        {!debtUnavailable && (
-                          <DialGauge label="Debt Funds" value={overlapData.debtAverageOverlap} fundCount={overlapData.debtFundCount} />
-                        )}
+                        <DialGauge label="Debt Funds" value={overlapData.debtAverageOverlap} fundCount={overlapData.debtFundCount} />
                       </div>
                       {/* High Conc Stocks strip */}
                       <div className="mt-4 flex items-center justify-between rounded-xl px-4 py-2.5 border border-slate-100 bg-slate-50">
