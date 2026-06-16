@@ -2553,161 +2553,224 @@ export default function ConciseReport() {
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
 
                     const zone =
-                      unavailable      ? { label: "—",                color: "#94a3b8", textColor: "#94a3b8" }
-                      : pct < 25       ? { label: "LOW OVERLAP",      color: "#22c55e", textColor: "#16a34a" }
-                      : pct < 50       ? { label: "MODERATE OVERLAP", color: "#eab308", textColor: "#ca8a04" }
-                      : pct < 75       ? { label: "HIGH OVERLAP",     color: "#f97316", textColor: "#ea580c" }
-                      :                  { label: "MAXIMUM OVERLAP",  color: "#ef4444", textColor: "#dc2626" };
+                      unavailable ? { label: "INSUFFICIENT DATA", color: "#64748b" }
+                      : pct < 25  ? { label: "LOW OVERLAP",       color: "#22c55e" }
+                      : pct < 50  ? { label: "MODERATE OVERLAP",  color: "#eab308" }
+                      : pct < 75  ? { label: "HIGH OVERLAP",      color: "#f97316" }
+                      :             { label: "MAXIMUM OVERLAP",   color: "#ef4444" };
 
-                    // ── SVG geometry ─────────────────────────────────────────
-                    // Coordinate center and radii — made large/thick to match reference
-                    const W = 400, H = 240;
-                    const cx = W / 2, cy = H - 40;   // center near bottom
-                    const Ro = 160, Ri = 95;           // very thick ring (65px)
-                    const OUTER_R = Ro + 14;           // dark outer border
-                    const INNER_R = (Ro + Ri) / 2;    // label mid-radius
-                    const GAP = 3;
+                    // ── Pure SVG speedometer geometry ────────────────────────
+                    // viewBox origin at top-left; center placed near the bottom
+                    const W = 500, H = 300;
+                    const cx = 250, cy = 265;   // pivot center (near bottom)
+                    const Ro = 195, Ri = 108;   // outer/inner radii → 87px thick ring
+                    const BORDER = Ro + 14;     // outer decorative border radius
+                    const MID_R  = (Ro + Ri) / 2; // label placement radius
+                    const MARK_R = BORDER + 22;   // pct label placement radius
+                    const GAP    = 4;             // gap in degrees between segments
 
                     const toRad = (d: number) => (d * Math.PI) / 180;
+                    // 0 % → angle 180° (left), 100 % → angle 0° (right)
                     const pctToAngle = (p: number) => 180 - (p / 100) * 180;
-                    const polar = (angleDeg: number, r: number) => ({
-                      x: cx + r * Math.cos(toRad(angleDeg)),
-                      y: cy - r * Math.sin(toRad(angleDeg)),
+
+                    // Point on circle at angleDeg degrees (standard math, y-flipped for SVG)
+                    const pt = (angleDeg: number, r: number) => ({
+                      x: +(cx + r * Math.cos(toRad(angleDeg))).toFixed(3),
+                      y: +(cy - r * Math.sin(toRad(angleDeg))).toFixed(3),
                     });
 
-                    // 4 equal 45° segments (0-25, 25-50, 50-75, 75-100)
-                    const segs = [
-                      { lines: ["LOW", "OVERLAP"],      color: "#22c55e", aFrom: 180, aTo: 135 },
-                      { lines: ["MODERATE", "OVERLAP"], color: "#eab308", aFrom: 135, aTo: 90  },
-                      { lines: ["HIGH", "OVERLAP"],     color: "#f97316", aFrom: 90,  aTo: 45  },
-                      { lines: ["MAXIMUM", "OVERLAP"],  color: "#ef4444", aFrom: 45,  aTo: 0   },
-                    ];
-
-                    const arcPath = (aFrom: number, aTo: number, first: boolean, last: boolean) => {
-                      const g1 = first ? aFrom : aFrom - GAP / 2;
-                      const g2 = last  ? aTo   : aTo   + GAP / 2;
-                      const po1 = polar(g1, Ro), po2 = polar(g2, Ro);
-                      const pi1 = polar(g1, Ri), pi2 = polar(g2, Ri);
-                      return [
-                        `M ${po1.x.toFixed(2)} ${po1.y.toFixed(2)}`,
-                        `A ${Ro} ${Ro} 0 0 0 ${po2.x.toFixed(2)} ${po2.y.toFixed(2)}`,
-                        `L ${pi2.x.toFixed(2)} ${pi2.y.toFixed(2)}`,
-                        `A ${Ri} ${Ri} 0 0 1 ${pi1.x.toFixed(2)} ${pi1.y.toFixed(2)}`,
-                        "Z",
-                      ].join(" ");
+                    // Donut arc segment from aFrom→aTo (both in degrees, aFrom > aTo)
+                    // sweep=0 on outer arc (CCW in SVG = going left→top→right)
+                    // sweep=1 on inner arc (CW in SVG = returns right→top→left)
+                    const seg = (aFrom: number, aTo: number, first: boolean, last: boolean) => {
+                      const a1 = first ? aFrom : aFrom - GAP / 2;
+                      const a2 = last  ? aTo   : aTo   + GAP / 2;
+                      const o1 = pt(a1, Ro), o2 = pt(a2, Ro);
+                      const i1 = pt(a1, Ri), i2 = pt(a2, Ri);
+                      return `M${o1.x},${o1.y} A${Ro},${Ro} 0 0,0 ${o2.x},${o2.y} L${i2.x},${i2.y} A${Ri},${Ri} 0 0,1 ${i1.x},${i1.y}Z`;
                     };
 
-                    // Long, thick needle pointing from center toward Ro
-                    const needleAngle = pctToAngle(pct);
-                    const needleTip  = polar(needleAngle, Ro + 2);
-                    const nb1  = polar(needleAngle + 90, 9);
-                    const nb2  = polar(needleAngle - 90, 9);
-                    const tail = polar(needleAngle + 180, 22);
-                    const needlePts = [needleTip, nb1, tail, nb2].map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+                    // Full-180° donut helper (no gaps)
+                    const fullArc = (ro: number, ri: number) => {
+                      const o1 = pt(180, ro), o2 = pt(0, ro);
+                      const i1 = pt(180, ri), i2 = pt(0, ri);
+                      return `M${o1.x},${o1.y} A${ro},${ro} 0 0,0 ${o2.x},${o2.y} L${i2.x},${i2.y} A${ri},${ri} 0 0,1 ${i1.x},${i1.y}Z`;
+                    };
 
-                    // Percentage labels just outside the arc
-                    const LABEL_R = OUTER_R + 18;
-                    const markers = [
-                      { val: "0%",   angle: 180, anchor: "end",    color: "#22c55e" },
-                      { val: "25%",  angle: 135, anchor: "end",    color: "#eab308" },
-                      { val: "50%",  angle: 90,  anchor: "middle", color: "#f97316" },
-                      { val: "75%",  angle: 45,  anchor: "start",  color: "#ef4444" },
-                      { val: "100%", angle: 0,   anchor: "start",  color: "#ef4444" },
+                    // Zone segments data
+                    const SEGS = [
+                      { line1: "LOW",      line2: "OVERLAP",  color: "#22c55e", aFrom: 180, aTo: 135 },
+                      { line1: "MODERATE", line2: "OVERLAP",  color: "#eab308", aFrom: 135, aTo: 90  },
+                      { line1: "HIGH",     line2: "OVERLAP",  color: "#f97316", aFrom: 90,  aTo: 45  },
+                      { line1: "MAXIMUM",  line2: "OVERLAP",  color: "#ef4444", aFrom: 45,  aTo: 0   },
                     ];
+
+                    // Needle — long thin triangle pointing from hub to just past Ro
+                    const needleDeg = pctToAngle(pct);
+                    const nTip  = pt(needleDeg, Ro + 4);
+                    const nL    = pt(needleDeg + 90, 6);
+                    const nR    = pt(needleDeg - 90, 6);
+                    const nTail = pt(needleDeg + 180, 20);
+                    const ndlPts = `${nTip.x},${nTip.y} ${nL.x},${nL.y} ${nTail.x},${nTail.y} ${nR.x},${nR.y}`;
+
+                    // % boundary markers outside arc
+                    const PCTS = [
+                      { v: "0%",   a: 180, anchor: "end"    as const, c: "#22c55e" },
+                      { v: "25%",  a: 135, anchor: "end"    as const, c: "#eab308" },
+                      { v: "50%",  a: 90,  anchor: "middle" as const, c: "#f97316" },
+                      { v: "75%",  a: 45,  anchor: "start"  as const, c: "#ef4444" },
+                      { v: "100%", a: 0,   anchor: "start"  as const, c: "#ef4444" },
+                    ];
+
+                    // unique filter IDs per gauge instance to avoid collisions
+                    const fid = label.replace(/\s+/g, "-").toLowerCase();
 
                     return (
                       <div
-                        className="flex-1 flex flex-col items-center rounded-2xl py-6 px-3 min-w-0"
-                        style={{ background: "#0d1117", border: "2px solid #1f2937", boxShadow: "0 12px 40px 0 rgba(0,0,0,0.5)" }}
+                        className="flex-1 flex flex-col items-center rounded-2xl py-5 px-2 min-w-0"
+                        style={{
+                          background: "linear-gradient(180deg,#0d1117 0%,#0a0d14 100%)",
+                          border: "2px solid #1e293b",
+                          boxShadow: "0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+                        }}
                       >
-                        <p className="text-[12px] font-black uppercase tracking-[0.25em] text-white mb-1">{label}</p>
+                        {/* Title */}
+                        <p style={{
+                          color: "#fff", fontWeight: 900, fontSize: 13,
+                          letterSpacing: "0.22em", textTransform: "uppercase",
+                          textAlign: "center", marginBottom: 4,
+                        }}>{label}</p>
 
-                        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[420px]" style={{ overflow: "visible" }}>
+                        {/* ── SVG Speedometer ── */}
+                        <svg
+                          viewBox={`0 0 ${W} ${H}`}
+                          width="100%"
+                          style={{ display: "block", overflow: "visible", maxWidth: 480 }}
+                        >
                           <defs>
-                            <filter id="ndl-dropshadow" x="-40%" y="-40%" width="180%" height="180%">
-                              <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#000" floodOpacity="0.7" />
+                            {/* Needle drop-shadow */}
+                            <filter id={`ndl-${fid}`} x="-50%" y="-50%" width="200%" height="200%">
+                              <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000" floodOpacity="0.9"/>
                             </filter>
+                            {/* Subtle glow on active zone segments */}
+                            <filter id={`glow-${fid}`} x="-15%" y="-15%" width="130%" height="130%">
+                              <feGaussianBlur stdDeviation="3" result="b"/>
+                              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            {/* Hub radial gradient */}
+                            <radialGradient id={`hub-${fid}`} cx="40%" cy="35%">
+                              <stop offset="0%" stopColor="#4b5563"/>
+                              <stop offset="100%" stopColor="#111827"/>
+                            </radialGradient>
+                            {/* Clip to the upper semicircle for background shapes */}
+                            <clipPath id={`clip-${fid}`}>
+                              <rect x={cx - BORDER - 30} y={cy - BORDER - 30} width={(BORDER + 30) * 2} height={BORDER + 35}/>
+                            </clipPath>
                           </defs>
 
-                          {/* Outermost dark decorative ring */}
-                          {(() => {
-                            const o1 = polar(180, OUTER_R), o2 = polar(0, OUTER_R);
-                            const i1 = polar(180, Ro + 1), i2 = polar(0, Ro + 1);
-                            return <path d={[`M${o1.x.toFixed(2)},${o1.y.toFixed(2)}`,`A${OUTER_R},${OUTER_R} 0 0 0 ${o2.x.toFixed(2)},${o2.y.toFixed(2)}`,`L${i2.x.toFixed(2)},${i2.y.toFixed(2)}`,`A${Ro+1},${Ro+1} 0 0 1 ${i1.x.toFixed(2)},${i1.y.toFixed(2)}Z`].join(" ")} fill="#1c2333" />;
-                          })()}
+                          {/* ── 1. Outer decorative dark border ring ── */}
+                          <path d={fullArc(BORDER, Ro + 1)} fill="#161f2e"/>
 
-                          {/* Dark track background for segments */}
-                          {(() => {
-                            const po1 = polar(180, Ro), po2 = polar(0, Ro);
-                            const pi1 = polar(180, Ri), pi2 = polar(0, Ri);
-                            return <path d={[`M${po1.x.toFixed(2)},${po1.y.toFixed(2)}`,`A${Ro},${Ro} 0 0 0 ${po2.x.toFixed(2)},${po2.y.toFixed(2)}`,`L${pi2.x.toFixed(2)},${pi2.y.toFixed(2)}`,`A${Ri},${Ri} 0 0 1 ${pi1.x.toFixed(2)},${pi1.y.toFixed(2)}Z`].join(" ")} fill="#2d3748" />;
-                          })()}
+                          {/* ── 2. Gray background track (full 180° donut) ── */}
+                          <path d={fullArc(Ro, Ri)} fill="#1e2d3d"/>
 
-                          {/* Inner dark track (hub area) */}
-                          {(() => {
-                            const po1 = polar(180, Ri - 2), po2 = polar(0, Ri - 2);
-                            const pi1 = polar(180, Ri - 16), pi2 = polar(0, Ri - 16);
-                            return <path d={[`M${po1.x.toFixed(2)},${po1.y.toFixed(2)}`,`A${Ri-2},${Ri-2} 0 0 0 ${po2.x.toFixed(2)},${po2.y.toFixed(2)}`,`L${pi2.x.toFixed(2)},${pi2.y.toFixed(2)}`,`A${Ri-16},${Ri-16} 0 0 1 ${pi1.x.toFixed(2)},${pi1.y.toFixed(2)}Z`].join(" ")} fill="#1c2333" />;
-                          })()}
-
-                          {/* Colored segments */}
-                          {segs.map((s, i) => (
-                            <path key={s.lines[0]} d={arcPath(s.aFrom, s.aTo, i === 0, i === segs.length - 1)}
-                              fill={s.color} opacity={unavailable ? 0.2 : 1} />
+                          {/* ── 3. Colored zone segments ── */}
+                          {SEGS.map((s, i) => (
+                            <path
+                              key={s.line1 + i}
+                              d={seg(s.aFrom, s.aTo, i === 0, i === SEGS.length - 1)}
+                              fill={s.color}
+                              opacity={unavailable ? 0.18 : 1}
+                              filter={!unavailable ? `url(#glow-${fid})` : undefined}
+                            />
                           ))}
 
-                          {/* Zone labels — two bold lines per segment */}
-                          {segs.map((s) => {
+                          {/* ── 4. Zone text labels inside segments (two lines) ── */}
+                          {SEGS.map((s, i) => {
                             const mid = (s.aFrom + s.aTo) / 2;
-                            const lp  = polar(mid, INNER_R);
+                            const lp  = pt(mid, MID_R);
                             return (
-                              <g key={s.lines[0]}>
-                                <text x={lp.x.toFixed(2)} y={(lp.y - 7).toFixed(2)} textAnchor="middle" dominantBaseline="middle"
-                                  fontSize="9.5" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif" letterSpacing="1"
-                                  opacity={unavailable ? 0.35 : 1}>{s.lines[0]}</text>
-                                <text x={lp.x.toFixed(2)} y={(lp.y + 7).toFixed(2)} textAnchor="middle" dominantBaseline="middle"
-                                  fontSize="9.5" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif" letterSpacing="1"
-                                  opacity={unavailable ? 0.35 : 1}>{s.lines[1]}</text>
+                              <g key={`lbl-${i}`} opacity={unavailable ? 0.25 : 1}>
+                                <text
+                                  x={lp.x} y={lp.y - 8}
+                                  textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="10" fontWeight="900" fill="#fff"
+                                  fontFamily="system-ui,-apple-system,sans-serif"
+                                  letterSpacing="0.8"
+                                >{s.line1}</text>
+                                <text
+                                  x={lp.x} y={lp.y + 8}
+                                  textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="10" fontWeight="900" fill="#fff"
+                                  fontFamily="system-ui,-apple-system,sans-serif"
+                                  letterSpacing="0.8"
+                                >{s.line2}</text>
                               </g>
                             );
                           })}
 
-                          {/* Boundary percentage labels */}
-                          {markers.map(({ val, angle, anchor, color }) => {
-                            const mp = polar(angle, LABEL_R);
+                          {/* ── 5. % boundary labels outside the arc ── */}
+                          {PCTS.map(({ v, a, anchor, c }) => {
+                            const mp = pt(a, MARK_R);
                             return (
-                              <text key={val} x={mp.x.toFixed(2)} y={mp.y.toFixed(2)}
-                                textAnchor={anchor as any} dominantBaseline="middle"
-                                fontSize="11" fontWeight="800" fill={color} fontFamily="system-ui,sans-serif">
-                                {val}
-                              </text>
+                              <text
+                                key={v} x={mp.x} y={mp.y}
+                                textAnchor={anchor} dominantBaseline="middle"
+                                fontSize="12.5" fontWeight="800" fill={c}
+                                fontFamily="system-ui,-apple-system,sans-serif"
+                              >{v}</text>
                             );
                           })}
 
-                          {/* Needle */}
+                          {/* ── 6. Needle ── */}
                           {!unavailable && (
-                            <polygon points={needlePts} fill="#0d1117" filter="url(#ndl-dropshadow)" />
+                            <polygon
+                              points={ndlPts}
+                              fill="#0d1117"
+                              filter={`url(#ndl-${fid})`}
+                              style={{ transition: "all 0.6s cubic-bezier(0.34,1.56,0.64,1)" }}
+                            />
                           )}
 
-                          {/* Pivot hub — layered circles */}
-                          <circle cx={cx} cy={cy} r="22" fill="#1c2333" />
-                          <circle cx={cx} cy={cy} r="15" fill="#374151" />
-                          <circle cx={cx} cy={cy} r="7"  fill={unavailable ? "#4b5563" : zone.color} />
+                          {/* ── 7. Hub — concentric circles at pivot ── */}
+                          <circle cx={cx} cy={cy} r={26} fill="#161f2e"/>
+                          <circle cx={cx} cy={cy} r={19} fill={`url(#hub-${fid})`}/>
+                          <circle cx={cx} cy={cy} r={10} fill={unavailable ? "#374151" : zone.color}
+                            style={{ filter: unavailable ? "none" : `drop-shadow(0 0 6px ${zone.color})` }}
+                          />
+
+                          {/* ── 8. Flat base line ── */}
+                          <line
+                            x1={cx - BORDER - 2} y1={cy}
+                            x2={cx + BORDER + 2} y2={cy}
+                            stroke="#161f2e" strokeWidth="8" strokeLinecap="round"
+                          />
                         </svg>
 
-                        {/* Value + zone label below the SVG */}
-                        <div className="text-center" style={{ marginTop: "-12px" }}>
-                          <div className="text-5xl font-black tabular-nums leading-none" style={{ color: unavailable ? "#6b7280" : zone.color }}>
+                        {/* ── Value & status below SVG ── */}
+                        <div style={{ textAlign: "center", marginTop: -8 }}>
+                          <div style={{
+                            fontSize: 52, fontWeight: 900, lineHeight: 1,
+                            color: unavailable ? "#475569" : zone.color,
+                            fontVariantNumeric: "tabular-nums",
+                            textShadow: unavailable ? "none" : `0 0 20px ${zone.color}55`,
+                          }}>
                             {unavailable ? "—" : `${pct.toFixed(1)}%`}
                           </div>
-                          <div className="text-[12px] font-black uppercase tracking-[0.18em] mt-2" style={{ color: unavailable ? "#6b7280" : zone.color }}>
+                          <div style={{
+                            marginTop: 8, fontSize: 12, fontWeight: 900,
+                            letterSpacing: "0.18em", textTransform: "uppercase",
+                            color: unavailable ? "#475569" : zone.color,
+                          }}>
                             {unavailable
-                              ? (label.includes("Debt") ? "No Debt Funds" : "Need ≥ 2 Funds")
+                              ? (label.toLowerCase().includes("debt") ? "No Debt Funds" : "Need ≥ 2 Funds")
                               : zone.label}
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-1 tracking-wider">
-                            {!unavailable && `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
-                          </div>
+                          {!unavailable && (
+                            <div style={{ marginTop: 4, fontSize: 10, color: "#475569", letterSpacing: "0.1em" }}>
+                              {fundCount} fund{fundCount !== 1 ? "s" : ""} analyzed
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
