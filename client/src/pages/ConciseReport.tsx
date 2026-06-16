@@ -2143,9 +2143,6 @@ export default function ConciseReport() {
                               background: color,
                             }}
                           >
-                            <span className="text-[11px] font-black text-white tabular-nums drop-shadow">
-                              {fmtRsShort(value)}
-                            </span>
                           </div>
                         </div>
                       </div>
