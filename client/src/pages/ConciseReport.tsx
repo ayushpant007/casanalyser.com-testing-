@@ -2112,8 +2112,8 @@ export default function ConciseReport() {
                     const fmtEnd = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
 
                     const sentence = isBeating
-                      ? `You invested ₹1L. Your portfolio grew it to ${fmtEnd(portEnd)} — beating Nifty 500 by ${fmtRsShort(Math.abs(portReturn - niftyReturn))} over ${periodLabel}.`
-                      : `You invested ₹1L. Your portfolio grew it to ${fmtEnd(portEnd)}, while Nifty 500 would have reached ${fmtEnd(niftyEnd)} — you missed ${fmtRsShort(Math.abs(portReturn - niftyReturn))} over ${periodLabel}.`;
+                      ? `You invested ${fmtRs(eligibleTotalInvested)}. Your portfolio earned ${fmtRs(portfolioAbsoluteReturn)}, while Nifty 500 would have earned ${fmtRs(niftyAbsoluteReturn)}. Hence you earned ${fmtRs(Math.abs(alphaAbsolute))} extra over ${periodLabel}.`
+                      : `You invested ${fmtRs(eligibleTotalInvested)}. Your portfolio earned ${fmtRs(portfolioAbsoluteReturn)}, while Nifty 500 would have earned ${fmtRs(niftyAbsoluteReturn)}. Hence you missed ${fmtRs(Math.abs(alphaAbsolute))} over ${periodLabel}.`;
 
                     const Bar = ({ label, value, endVal, pct, color, trackColor, badge }: {
                       label: string; value: number; endVal: number; pct: number;
