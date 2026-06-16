@@ -2587,14 +2587,14 @@ export default function ConciseReport() {
                       const a2 = last  ? aTo   : aTo   + GAP / 2;
                       const o1 = pt(a1, Ro), o2 = pt(a2, Ro);
                       const i1 = pt(a1, Ri), i2 = pt(a2, Ri);
-                      return `M${o1.x},${o1.y} A${Ro},${Ro} 0 0,0 ${o2.x},${o2.y} L${i2.x},${i2.y} A${Ri},${Ri} 0 0,1 ${i1.x},${i1.y}Z`;
+                      return `M${o1.x},${o1.y} A${Ro},${Ro} 0 0,1 ${o2.x},${o2.y} L${i2.x},${i2.y} A${Ri},${Ri} 0 0,0 ${i1.x},${i1.y}Z`;
                     };
 
                     // Full-180° donut helper (no gaps)
                     const fullArc = (ro: number, ri: number) => {
                       const o1 = pt(180, ro), o2 = pt(0, ro);
                       const i1 = pt(180, ri), i2 = pt(0, ri);
-                      return `M${o1.x},${o1.y} A${ro},${ro} 0 0,0 ${o2.x},${o2.y} L${i2.x},${i2.y} A${ri},${ri} 0 0,1 ${i1.x},${i1.y}Z`;
+                      return `M${o1.x},${o1.y} A${ro},${ro} 0 0,1 ${o2.x},${o2.y} L${i2.x},${i2.y} A${ri},${ri} 0 0,0 ${i1.x},${i1.y}Z`;
                     };
 
                     // Zone segments data
