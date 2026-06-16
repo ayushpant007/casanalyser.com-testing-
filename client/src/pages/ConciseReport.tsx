@@ -1767,7 +1767,7 @@ export default function ConciseReport() {
                               <IndianRupee className="w-5 h-5 text-violet-600" />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value</p>
+                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value(Includes ,mutual fund , stocks , demat , etc)</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
