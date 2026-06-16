@@ -2099,131 +2099,130 @@ export default function ConciseReport() {
                     const BASE = 100000;
                     const portMonthly = Math.pow(1 + weightedReturn / 100, 1 / 12) - 1;
                     const niftyMonthly = Math.pow(1 + niftyBenchmark / 100, 1 / 12) - 1;
-                    const totalPoints = is3Y ? 37 : 13;
-                    const ALL_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                    const currentMonthIdx = new Date().getMonth(); // 0 = Jan
-                    const chartData = Array.from({ length: totalPoints }, (_, i) => {
-                      let label = "";
-                      if (!is3Y) {
-                        label = ALL_MONTHS[(currentMonthIdx + i) % 12];
-                      } else {
-                        if (i === 0) label = "Start";
-                        else if (i === 12) label = "Yr 1";
-                        else if (i === 24) label = "Yr 2";
-                        else if (i === 36) label = "Yr 3";
-                        else label = "";
-                      }
-                      return {
-                        month: label,
-                        portfolio: parseFloat((BASE * Math.pow(1 + portMonthly, i)).toFixed(0)),
-                        nifty: parseFloat((BASE * Math.pow(1 + niftyMonthly, i)).toFixed(0)),
-                      };
-                    });
-
-                    const allVals = chartData.flatMap(d => [d.portfolio, d.nifty]);
-                    const minVal = Math.min(...allVals);
-                    const maxVal = Math.max(...allVals);
-                    const pad = (maxVal - minVal) * 0.1 || 500;
-                    const yMin = Math.floor((minVal - pad) / 1000) * 1000;
-                    const yMax = Math.ceil((maxVal + pad) / 1000) * 1000;
+                    const fmtVal = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
                     const fmtY = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v / 1000).toFixed(0)}K`;
 
-                    const portEnd = chartData[chartData.length - 1].portfolio;
+                    // Key milestone points only
+                    const milestones = is3Y
+                      ? [
+                          { label: "Start",  months: 0  },
+                          { label: "6M",     months: 6  },
+                          { label: "Year 1", months: 12 },
+                          { label: "18M",    months: 18 },
+                          { label: "Year 2", months: 24 },
+                          { label: "30M",    months: 30 },
+                          { label: "Year 3", months: 36 },
+                        ]
+                      : [
+                          { label: "Start", months: 0  },
+                          { label: "3M",    months: 3  },
+                          { label: "6M",    months: 6  },
+                          { label: "9M",    months: 9  },
+                          { label: "12M",   months: 12 },
+                        ];
+
+                    const chartData = milestones.map(({ label, months }) => ({
+                      label,
+                      portfolio: Math.round(BASE * Math.pow(1 + portMonthly, months)),
+                      nifty:     Math.round(BASE * Math.pow(1 + niftyMonthly, months)),
+                    }));
+
+                    const allVals = chartData.flatMap(d => [d.portfolio, d.nifty]);
+                    const maxVal  = Math.max(...allVals);
+                    const yMax    = Math.ceil((maxVal * 1.12) / 5000) * 5000;
+                    const yMin    = Math.floor((BASE * 0.88) / 5000) * 5000;
+
+                    const portEnd  = chartData[chartData.length - 1].portfolio;
                     const niftyEnd = chartData[chartData.length - 1].nifty;
-                    const fmtVal = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(2)}L` : `₹${(v / 1000).toFixed(1)}K`;
+
+                    // Custom rounded-top bar shape
+                    const RoundedBar = (props: any) => {
+                      const { x, y, width, height, fill } = props;
+                      if (!height || height <= 0) return null;
+                      const r = Math.min(5, width / 2);
+                      return (
+                        <path
+                          d={`M${x + r},${y} h${width - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${height - r} h${-width} v${-(height - r)} a${r},${r} 0 0 1 ${r},${-r}z`}
+                          fill={fill}
+                        />
+                      );
+                    };
 
                     return (
                       <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                        {/* Header row */}
-                        <div className="px-4 pt-4 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        {/* Header */}
+                        <div className="px-4 pt-4 pb-3 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div>
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300/70">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-indigo-300/70 mb-1">
                               Simulated Growth of ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
                             </p>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-5 h-[3px] rounded-full inline-block" style={{ background: "linear-gradient(90deg,#818cf8,#6366f1)" }} />
-                              <span className="text-[10px] font-semibold text-slate-300">Your Portfolio</span>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(99,102,241,0.2)", border: "1px solid rgba(129,140,248,0.35)" }}>
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#6366f1)" }} />
+                                <span className="text-[11px] font-black text-indigo-200">{fmtVal(portEnd)}</span>
+                                <span className="text-[9px] text-indigo-400 font-semibold">Portfolio</span>
+                              </div>
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.18)" }}>
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block bg-slate-500" />
+                                <span className="text-[11px] font-black text-slate-300">{fmtVal(niftyEnd)}</span>
+                                <span className="text-[9px] text-slate-500 font-semibold">Nifty 500</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-5 h-[2px] rounded-full inline-block opacity-60" style={{ background: "#94a3b8", borderTop: "2px dashed #94a3b8" }} />
-                              <span className="text-[10px] font-semibold text-slate-400">Nifty 500</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* End-value callout pills */}
-                        <div className="px-4 pb-2 flex items-center gap-3 flex-wrap">
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(99,102,241,0.18)", border: "1px solid rgba(129,140,248,0.3)" }}>
-                            <span className="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" />
-                            <span className="text-[11px] font-black text-indigo-200">{fmtVal(portEnd)}</span>
-                            <span className="text-[9px] text-indigo-400 font-semibold">Portfolio</span>
-                          </div>
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.2)" }}>
-                            <span className="w-2 h-2 rounded-full bg-slate-400" />
-                            <span className="text-[11px] font-black text-slate-300">{fmtVal(niftyEnd)}</span>
-                            <span className="text-[9px] text-slate-500 font-semibold">Nifty 500</span>
                           </div>
                           <div
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl ml-auto"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl self-start sm:self-center"
                             style={{
                               background: isBeating ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.12)",
                               border: `1px solid ${isBeating ? "rgba(52,211,153,0.3)" : "rgba(252,165,165,0.25)"}`,
                             }}
                           >
-                            <span className="text-[9px] font-bold" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>
-                              {isBeating ? "▲" : "▼"} Alpha
+                            <span className="text-lg font-black" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
+                              {isBeating ? "▲" : "▼"}
                             </span>
-                            <span className="text-[11px] font-black" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
-                              {isBeating ? "+" : ""}{alpha.toFixed(2)}%
-                            </span>
+                            <div>
+                              <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: isBeating ? "#6ee7b7" : "#fca5a5" }}>Alpha</div>
+                              <div className="text-base font-black leading-tight" style={{ color: isBeating ? "#34d399" : "#f87171" }}>
+                                {isBeating ? "+" : ""}{alpha.toFixed(2)}%
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Chart */}
-                        <ResponsiveContainer width="100%" height={220}>
-                          <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                        {/* Grouped Bar Chart */}
+                        <ResponsiveContainer width="100%" height={230}>
+                          <BarChart data={chartData} margin={{ top: 16, right: 16, left: 0, bottom: 0 }} barCategoryGap="28%" barGap={3}>
                             <defs>
-                              <linearGradient id="portfolioGradDark" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#818cf8" stopOpacity={0.35} />
-                                <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                              <linearGradient id="barPortGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#a5b4fc" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.9} />
                               </linearGradient>
-                              <linearGradient id="niftyGradDark" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.15} />
-                                <stop offset="100%" stopColor="#94a3b8" stopOpacity={0.01} />
+                              <linearGradient id="barNiftyGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.9} />
+                                <stop offset="100%" stopColor="#475569" stopOpacity={0.7} />
                               </linearGradient>
-                              <filter id="glow">
-                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                                <feMerge>
-                                  <feMergeNode in="coloredBlur" />
-                                  <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                              </filter>
                             </defs>
-                            <CartesianGrid strokeDasharray="1 4" stroke="rgba(148,163,184,0.12)" vertical={false} />
+                            <CartesianGrid strokeDasharray="1 5" stroke="rgba(148,163,184,0.1)" vertical={false} />
                             <XAxis
-                              dataKey="month"
-                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.7)", fontWeight: 700 }}
+                              dataKey="label"
+                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.75)", fontWeight: 700 }}
                               axisLine={false}
                               tickLine={false}
                             />
                             <YAxis
                               domain={[yMin, yMax]}
                               tickFormatter={fmtY}
-                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.6)", fontWeight: 600 }}
+                              tick={{ fontSize: 10, fill: "rgba(148,163,184,0.55)", fontWeight: 600 }}
                               axisLine={false}
                               tickLine={false}
-                              width={48}
+                              width={50}
                             />
                             <RechartsTooltip
                               contentStyle={{
                                 fontSize: 12,
                                 borderRadius: 12,
-                                border: "1px solid rgba(99,102,241,0.3)",
-                                background: "rgba(15,23,42,0.95)",
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                                backdropFilter: "blur(8px)",
+                                border: "1px solid rgba(99,102,241,0.35)",
+                                background: "rgba(15,23,42,0.97)",
+                                boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                               }}
                               formatter={(value: any, name: string) => [
                                 <span style={{ color: name === "portfolio" ? "#a5b4fc" : "#94a3b8", fontWeight: 700 }}>
@@ -2232,61 +2231,32 @@ export default function ConciseReport() {
                                 name === "portfolio" ? "Your Portfolio" : "Nifty 500 TRI",
                               ]}
                               labelStyle={{ fontWeight: 700, color: "#e2e8f0", marginBottom: 6, fontSize: 11 }}
-                              cursor={{ stroke: "rgba(148,163,184,0.2)", strokeWidth: 1, strokeDasharray: "4 2" }}
+                              cursor={{ fill: "rgba(255,255,255,0.04)" }}
                             />
-                            <Area
-                              type="monotone"
-                              dataKey="nifty"
-                              stroke="#64748b"
-                              strokeWidth={1.5}
-                              strokeDasharray="5 3"
-                              fill="url(#niftyGradDark)"
-                              dot={false}
-                              activeDot={{ r: 4, fill: "#94a3b8", stroke: "#1e293b", strokeWidth: 2 }}
+                            <Bar dataKey="nifty"     shape={<RoundedBar />} fill="url(#barNiftyGrad)"  radius={[5,5,0,0]} maxBarSize={32} />
+                            <Bar dataKey="portfolio" shape={<RoundedBar />} fill="url(#barPortGrad)"   radius={[5,5,0,0]} maxBarSize={32}
+                              label={{
+                                position: "top",
+                                formatter: (v: number) => fmtVal(v),
+                                fill: "#a5b4fc",
+                                fontSize: 9,
+                                fontWeight: 700,
+                              }}
                             />
-                            <Area
-                              type="monotone"
-                              dataKey="portfolio"
-                              stroke="#818cf8"
-                              strokeWidth={2.5}
-                              fill="url(#portfolioGradDark)"
-                              dot={false}
-                              filter="url(#glow)"
-                              activeDot={{ r: 5, fill: "#818cf8", stroke: "#1e293b", strokeWidth: 2 }}
-                            />
-                            <Customized component={(props: any) => {
-                              const items = props.formattedGraphicalItems;
-                              if (!items || items.length < 2) return null;
-                              const niftyPts: { x: number; y: number }[] = items[0]?.props?.points || [];
-                              const portPts: { x: number; y: number }[]  = items[1]?.props?.points || [];
-                              if (!niftyPts.length || !portPts.length) return null;
-                              const forward  = portPts.map(p => `${p.x},${p.y}`).join(" ");
-                              const backward = [...niftyPts].reverse().map(p => `${p.x},${p.y}`).join(" ");
-                              const alphaColor = isBeating ? "rgba(52,211,153,0.12)" : "rgba(239,68,68,0.1)";
-
-                              // End-point dot + label on the portfolio line
-                              const lastPort  = portPts[portPts.length - 1];
-                              const lastNifty = niftyPts[niftyPts.length - 1];
-
-                              return (
-                                <g>
-                                  <polygon points={`${forward} ${backward}`} fill={alphaColor} />
-                                  {/* Glowing end dot for portfolio */}
-                                  {lastPort && (
-                                    <>
-                                      <circle cx={lastPort.x} cy={lastPort.y} r={8} fill="rgba(129,140,248,0.15)" />
-                                      <circle cx={lastPort.x} cy={lastPort.y} r={4} fill="#818cf8" stroke="#1e293b" strokeWidth={2} />
-                                    </>
-                                  )}
-                                  {/* End dot for nifty */}
-                                  {lastNifty && (
-                                    <circle cx={lastNifty.x} cy={lastNifty.y} r={3.5} fill="#64748b" stroke="#1e293b" strokeWidth={1.5} />
-                                  )}
-                                </g>
-                              );
-                            }} />
-                          </AreaChart>
+                          </BarChart>
                         </ResponsiveContainer>
+
+                        {/* Legend */}
+                        <div className="px-4 pb-4 flex items-center justify-center gap-6">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "linear-gradient(135deg,#818cf8,#4f46e5)" }} />
+                            <span className="text-[10px] font-semibold text-slate-400">Your Portfolio</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-sm inline-block bg-slate-500 opacity-80" />
+                            <span className="text-[10px] font-semibold text-slate-500">Nifty 500</span>
+                          </div>
+                        </div>
                       </div>
                     );
                   })()}
