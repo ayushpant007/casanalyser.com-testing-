@@ -2151,10 +2151,7 @@ export default function ConciseReport() {
 
                     return (
                       <div className="rounded-2xl overflow-hidden bg-white space-y-4 px-5 py-5" style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 24px 0 rgba(99,102,241,0.07)" }}>
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                            If you had invested ₹1 Lakh · {is3Y ? "3 Years" : "1 Year"}
-                          </p>
+                        <div className="flex items-center justify-end gap-2 flex-wrap">
                           <div
                             className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
                             style={{ background: isBeating ? "#ecfdf5" : "#fef2f2", border: `1px solid ${isBeating ? "#a7f3d0" : "#fecaca"}` }}
