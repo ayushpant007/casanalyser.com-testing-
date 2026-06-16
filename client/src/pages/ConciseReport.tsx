@@ -2629,14 +2629,14 @@ export default function ConciseReport() {
                       <div
                         className="flex-1 flex flex-col items-center rounded-2xl py-5 px-2 min-w-0"
                         style={{
-                          background: "linear-gradient(180deg,#0d1117 0%,#0a0d14 100%)",
-                          border: "2px solid #1e293b",
-                          boxShadow: "0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+                          background: "#ffffff",
+                          border: "1.5px solid #e2e8f0",
+                          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
                         }}
                       >
                         {/* Title */}
                         <p style={{
-                          color: "#fff", fontWeight: 900, fontSize: 13,
+                          color: "#1e293b", fontWeight: 900, fontSize: 13,
                           letterSpacing: "0.22em", textTransform: "uppercase",
                           textAlign: "center", marginBottom: 4,
                         }}>{label}</p>
