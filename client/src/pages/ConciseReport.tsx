@@ -1938,19 +1938,9 @@ export default function ConciseReport() {
                             )}
                           </div>
 
-                          {/* ── ROW 4: Fund count + info note ── */}
-                          <div className="flex flex-wrap gap-3 items-stretch">
-                            <div className="flex-1 min-w-[140px] rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-purple-50 p-4 flex items-center gap-3" data-testid="stat-schemes">
-                              <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
-                                <Layers className="w-5 h-5 text-violet-600" />
-                              </div>
-                              <div>
-                                <p className="text-2xl font-bold text-slate-900"><AnimatedCounter value={totalSchemes} /></p>
-                                <p className="text-xs text-slate-500">Total funds · {accounts.length} account{accounts.length !== 1 ? 's' : ''}</p>
-                              </div>
-                            </div>
-
-                            {withoutData.length > 0 && (
+                          {/* ── ROW 4: Info note (only when needed) ── */}
+                          {withoutData.length > 0 && (
+                            <div className="flex flex-wrap gap-3 items-stretch">
                               <div className="flex-[2] min-w-[220px] flex gap-3 items-start p-4 rounded-2xl bg-amber-50 border border-amber-200">
                                 <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                                 <div>
@@ -1960,8 +1950,8 @@ export default function ConciseReport() {
                                   </p>
                                 </div>
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </>
                       );
                     })()}
