@@ -2552,38 +2552,35 @@ export default function ConciseReport() {
                     const unavailable = value === null || fundCount < 2;
                     const pct = unavailable ? 0 : Math.min(value as number, 100);
 
-                    const activeZone =
-                      unavailable ? null
-                      : pct < 25 ? { label: "LOW",    color: "#16a34a" }
-                      : pct < 50 ? { label: "MEDIUM", color: "#d97706" }
-                      :            { label: "HIGH",   color: "#dc2626" };
-                    const valueColor = unavailable ? "#94a3b8" : (activeZone?.color ?? "#94a3b8");
+                    const zone =
+                      unavailable      ? { label: "—",                color: "#94a3b8", textColor: "#94a3b8" }
+                      : pct < 25       ? { label: "LOW OVERLAP",      color: "#22c55e", textColor: "#16a34a" }
+                      : pct < 50       ? { label: "MODERATE OVERLAP", color: "#eab308", textColor: "#ca8a04" }
+                      : pct < 75       ? { label: "HIGH OVERLAP",     color: "#f97316", textColor: "#ea580c" }
+                      :                  { label: "MAXIMUM OVERLAP",  color: "#ef4444", textColor: "#dc2626" };
 
-                    const statusText = unavailable
-                      ? (label.includes("Debt") ? "No debt funds in holdings database" : "Insufficient data")
-                      : pct < 25 ? "Low Overlap ✓"
-                      : pct < 50 ? "Medium Overlap"
-                      : "High Overlap ⚠";
-
-                    // ── SVG constants ──────────────────────────────────────────
-                    const cx = 150, cy = 148;
-                    const Ro = 118, Ri = 82;   // ring thickness = 36px
-                    const GAP = 3.5;            // gap between segments in degrees
-                    const INNER_R = (Ro + Ri) / 2; // label placement radius
+                    // ── SVG geometry ─────────────────────────────────────────
+                    // Coordinate center and radii — made large/thick to match reference
+                    const W = 400, H = 240;
+                    const cx = W / 2, cy = H - 40;   // center near bottom
+                    const Ro = 160, Ri = 95;           // very thick ring (65px)
+                    const OUTER_R = Ro + 14;           // dark outer border
+                    const INNER_R = (Ro + Ri) / 2;    // label mid-radius
+                    const GAP = 3;
 
                     const toRad = (d: number) => (d * Math.PI) / 180;
-                    // 0% → 180° (left end), 100% → 0° (right end)
                     const pctToAngle = (p: number) => 180 - (p / 100) * 180;
                     const polar = (angleDeg: number, r: number) => ({
                       x: cx + r * Math.cos(toRad(angleDeg)),
                       y: cy - r * Math.sin(toRad(angleDeg)),
                     });
 
-                    // Three visually-equal 60° segments
+                    // 4 equal 45° segments (0-25, 25-50, 50-75, 75-100)
                     const segs = [
-                      { label: "LOW",    color: "#22c55e", dimColor: "#bbf7d0", aFrom: 180, aTo: 120 },
-                      { label: "MED",    color: "#f59e0b", dimColor: "#fef3c7", aFrom: 120, aTo: 60  },
-                      { label: "HIGH",   color: "#ef4444", dimColor: "#fee2e2", aFrom: 60,  aTo: 0   },
+                      { lines: ["LOW", "OVERLAP"],      color: "#22c55e", aFrom: 180, aTo: 135 },
+                      { lines: ["MODERATE", "OVERLAP"], color: "#eab308", aFrom: 135, aTo: 90  },
+                      { lines: ["HIGH", "OVERLAP"],     color: "#f97316", aFrom: 90,  aTo: 45  },
+                      { lines: ["MAXIMUM", "OVERLAP"],  color: "#ef4444", aFrom: 45,  aTo: 0   },
                     ];
 
                     const arcPath = (aFrom: number, aTo: number, first: boolean, last: boolean) => {
@@ -2600,158 +2597,116 @@ export default function ConciseReport() {
                       ].join(" ");
                     };
 
-                    // Needle: line + triangle tip
+                    // Long, thick needle pointing from center toward Ro
                     const needleAngle = pctToAngle(pct);
-                    const needleTip   = polar(needleAngle, Ro - 6);
-                    const nb1 = polar(needleAngle + 90, 5.5);
-                    const nb2 = polar(needleAngle - 90, 5.5);
-                    const nbTail = polar(needleAngle + 180, 14);
-                    const needlePts = [needleTip, nb1, nbTail, nb2].map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+                    const needleTip  = polar(needleAngle, Ro + 2);
+                    const nb1  = polar(needleAngle + 90, 9);
+                    const nb2  = polar(needleAngle - 90, 9);
+                    const tail = polar(needleAngle + 180, 22);
+                    const needlePts = [needleTip, nb1, tail, nb2].map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 
-                    // Tick lines at data thresholds (pct=25 → 135°, pct=50 → 90°)
-                    const mkTick = (angleDeg: number) => ({
-                      o: polar(angleDeg, Ro + 5),
-                      i: polar(angleDeg, Ri - 5),
-                    });
-                    const tick25 = mkTick(pctToAngle(25)); // 135°
-                    const tick50 = mkTick(pctToAngle(50)); // 90°
-
-                    // Outer boundary labels: 0%, 25%, 50%, 100%
-                    const MARKER_R = Ro + 16;
-                    const mkMarker = (angleDeg: number) => polar(angleDeg, MARKER_R);
+                    // Percentage labels just outside the arc
+                    const LABEL_R = OUTER_R + 18;
+                    const markers = [
+                      { val: "0%",   angle: 180, anchor: "end",    color: "#22c55e" },
+                      { val: "25%",  angle: 135, anchor: "end",    color: "#eab308" },
+                      { val: "50%",  angle: 90,  anchor: "middle", color: "#f97316" },
+                      { val: "75%",  angle: 45,  anchor: "start",  color: "#ef4444" },
+                      { val: "100%", angle: 0,   anchor: "start",  color: "#ef4444" },
+                    ];
 
                     return (
                       <div
-                        className="flex-1 flex flex-col items-center rounded-2xl bg-white py-5 px-3 min-w-0"
-                        style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 20px 0 rgba(0,0,0,0.06)" }}
+                        className="flex-1 flex flex-col items-center rounded-2xl py-6 px-3 min-w-0"
+                        style={{ background: "#0d1117", border: "2px solid #1f2937", boxShadow: "0 12px 40px 0 rgba(0,0,0,0.5)" }}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">{label}</p>
+                        <p className="text-[12px] font-black uppercase tracking-[0.25em] text-white mb-1">{label}</p>
 
-                        <svg viewBox="0 0 300 168" className="w-full max-w-[300px]" style={{ overflow: "visible" }}>
+                        <svg viewBox={`0 0 ${W} ${H}`} className="w-full max-w-[420px]" style={{ overflow: "visible" }}>
                           <defs>
-                            <filter id="needle-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                              <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.18" />
+                            <filter id="ndl-dropshadow" x="-40%" y="-40%" width="180%" height="180%">
+                              <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#000" floodOpacity="0.7" />
                             </filter>
                           </defs>
 
-                          {/* ── Background track ───────────────────────────────── */}
+                          {/* Outermost dark decorative ring */}
+                          {(() => {
+                            const o1 = polar(180, OUTER_R), o2 = polar(0, OUTER_R);
+                            const i1 = polar(180, Ro + 1), i2 = polar(0, Ro + 1);
+                            return <path d={[`M${o1.x.toFixed(2)},${o1.y.toFixed(2)}`,`A${OUTER_R},${OUTER_R} 0 0 0 ${o2.x.toFixed(2)},${o2.y.toFixed(2)}`,`L${i2.x.toFixed(2)},${i2.y.toFixed(2)}`,`A${Ro+1},${Ro+1} 0 0 1 ${i1.x.toFixed(2)},${i1.y.toFixed(2)}Z`].join(" ")} fill="#1c2333" />;
+                          })()}
+
+                          {/* Dark track background for segments */}
                           {(() => {
                             const po1 = polar(180, Ro), po2 = polar(0, Ro);
                             const pi1 = polar(180, Ri), pi2 = polar(0, Ri);
-                            return (
-                              <path
-                                d={[
-                                  `M ${po1.x.toFixed(2)} ${po1.y.toFixed(2)}`,
-                                  `A ${Ro} ${Ro} 0 0 0 ${po2.x.toFixed(2)} ${po2.y.toFixed(2)}`,
-                                  `L ${pi2.x.toFixed(2)} ${pi2.y.toFixed(2)}`,
-                                  `A ${Ri} ${Ri} 0 0 1 ${pi1.x.toFixed(2)} ${pi1.y.toFixed(2)}`,
-                                  "Z",
-                                ].join(" ")}
-                                fill="#f1f5f9"
-                              />
-                            );
+                            return <path d={[`M${po1.x.toFixed(2)},${po1.y.toFixed(2)}`,`A${Ro},${Ro} 0 0 0 ${po2.x.toFixed(2)},${po2.y.toFixed(2)}`,`L${pi2.x.toFixed(2)},${pi2.y.toFixed(2)}`,`A${Ri},${Ri} 0 0 1 ${pi1.x.toFixed(2)},${pi1.y.toFixed(2)}Z`].join(" ")} fill="#2d3748" />;
                           })()}
 
-                          {/* ── Colored segments ───────────────────────────────── */}
+                          {/* Inner dark track (hub area) */}
+                          {(() => {
+                            const po1 = polar(180, Ri - 2), po2 = polar(0, Ri - 2);
+                            const pi1 = polar(180, Ri - 16), pi2 = polar(0, Ri - 16);
+                            return <path d={[`M${po1.x.toFixed(2)},${po1.y.toFixed(2)}`,`A${Ri-2},${Ri-2} 0 0 0 ${po2.x.toFixed(2)},${po2.y.toFixed(2)}`,`L${pi2.x.toFixed(2)},${pi2.y.toFixed(2)}`,`A${Ri-16},${Ri-16} 0 0 1 ${pi1.x.toFixed(2)},${pi1.y.toFixed(2)}Z`].join(" ")} fill="#1c2333" />;
+                          })()}
+
+                          {/* Colored segments */}
                           {segs.map((s, i) => (
-                            <path
-                              key={s.label}
-                              d={arcPath(s.aFrom, s.aTo, i === 0, i === segs.length - 1)}
-                              fill={unavailable ? s.dimColor : s.color}
-                              opacity={unavailable ? 0.5 : 1}
-                            />
+                            <path key={s.lines[0]} d={arcPath(s.aFrom, s.aTo, i === 0, i === segs.length - 1)}
+                              fill={s.color} opacity={unavailable ? 0.2 : 1} />
                           ))}
 
-                          {/* ── Tick marks at 25% and 50% boundaries ──────────── */}
-                          {!unavailable && (
-                            <>
-                              <line x1={tick25.o.x.toFixed(2)} y1={tick25.o.y.toFixed(2)} x2={tick25.i.x.toFixed(2)} y2={tick25.i.y.toFixed(2)} stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                              <line x1={tick50.o.x.toFixed(2)} y1={tick50.o.y.toFixed(2)} x2={tick50.i.x.toFixed(2)} y2={tick50.i.y.toFixed(2)} stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-                            </>
-                          )}
-
-                          {/* ── Zone labels inside segments ────────────────────── */}
+                          {/* Zone labels — two bold lines per segment */}
                           {segs.map((s) => {
-                            const midAngle = (s.aFrom + s.aTo) / 2;
-                            const lp = polar(midAngle, INNER_R);
+                            const mid = (s.aFrom + s.aTo) / 2;
+                            const lp  = polar(mid, INNER_R);
                             return (
-                              <text
-                                key={s.label}
-                                x={lp.x.toFixed(2)}
-                                y={lp.y.toFixed(2)}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                fontSize="8.5"
-                                fontWeight="800"
-                                fill="white"
-                                fontFamily="system-ui, sans-serif"
-                                letterSpacing="0.8"
-                                opacity={unavailable ? 0.5 : 1}
-                              >
-                                {s.label}
+                              <g key={s.lines[0]}>
+                                <text x={lp.x.toFixed(2)} y={(lp.y - 7).toFixed(2)} textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="9.5" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif" letterSpacing="1"
+                                  opacity={unavailable ? 0.35 : 1}>{s.lines[0]}</text>
+                                <text x={lp.x.toFixed(2)} y={(lp.y + 7).toFixed(2)} textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="9.5" fontWeight="900" fill="white" fontFamily="system-ui,sans-serif" letterSpacing="1"
+                                  opacity={unavailable ? 0.35 : 1}>{s.lines[1]}</text>
+                              </g>
+                            );
+                          })}
+
+                          {/* Boundary percentage labels */}
+                          {markers.map(({ val, angle, anchor, color }) => {
+                            const mp = polar(angle, LABEL_R);
+                            return (
+                              <text key={val} x={mp.x.toFixed(2)} y={mp.y.toFixed(2)}
+                                textAnchor={anchor as any} dominantBaseline="middle"
+                                fontSize="11" fontWeight="800" fill={color} fontFamily="system-ui,sans-serif">
+                                {val}
                               </text>
                             );
                           })}
 
-                          {/* ── Outer boundary percentage markers ─────────────── */}
-                          {[
-                            { pctVal: 0,   angle: 180, anchor: "end"   },
-                            { pctVal: 25,  angle: pctToAngle(25), anchor: "middle" },
-                            { pctVal: 50,  angle: pctToAngle(50), anchor: "middle" },
-                            { pctVal: 100, angle: 0,   anchor: "start" },
-                          ].map(({ pctVal, angle, anchor }) => {
-                            const mp = mkMarker(angle);
-                            return (
-                              <text
-                                key={pctVal}
-                                x={mp.x.toFixed(2)}
-                                y={mp.y.toFixed(2)}
-                                textAnchor={anchor as any}
-                                dominantBaseline="middle"
-                                fontSize="7.5"
-                                fontWeight="600"
-                                fill="#94a3b8"
-                                fontFamily="system-ui, sans-serif"
-                              >
-                                {pctVal}%
-                              </text>
-                            );
-                          })}
-
-                          {/* ── Needle ─────────────────────────────────────────── */}
+                          {/* Needle */}
                           {!unavailable && (
-                            <polygon
-                              points={needlePts}
-                              fill="#1e293b"
-                              filter="url(#needle-shadow)"
-                            />
+                            <polygon points={needlePts} fill="#0d1117" filter="url(#ndl-dropshadow)" />
                           )}
 
-                          {/* ── Pivot hub ──────────────────────────────────────── */}
-                          <circle cx={cx} cy={cy} r="13" fill={unavailable ? "#cbd5e1" : "#1e293b"} />
-                          <circle cx={cx} cy={cy} r="7"  fill="white" />
-                          <circle cx={cx} cy={cy} r="2.5" fill={unavailable ? "#cbd5e1" : valueColor} />
+                          {/* Pivot hub — layered circles */}
+                          <circle cx={cx} cy={cy} r="22" fill="#1c2333" />
+                          <circle cx={cx} cy={cy} r="15" fill="#374151" />
+                          <circle cx={cx} cy={cy} r="7"  fill={unavailable ? "#4b5563" : zone.color} />
                         </svg>
 
-                        {/* ── Value & status below gauge ──────────────────────── */}
-                        <div className="text-center -mt-3">
-                          <div className="text-3xl font-black tabular-nums leading-tight" style={{ color: valueColor }}>
+                        {/* Value + zone label below the SVG */}
+                        <div className="text-center" style={{ marginTop: "-12px" }}>
+                          <div className="text-5xl font-black tabular-nums leading-none" style={{ color: unavailable ? "#6b7280" : zone.color }}>
                             {unavailable ? "—" : `${pct.toFixed(1)}%`}
                           </div>
-                          <div
-                            className="inline-flex items-center gap-1 mt-1 px-3 py-0.5 rounded-full text-[11px] font-bold"
-                            style={{
-                              backgroundColor: unavailable ? "#f1f5f9" : valueColor + "18",
-                              color: unavailable ? "#94a3b8" : valueColor,
-                              border: `1px solid ${unavailable ? "#e2e8f0" : valueColor + "40"}`,
-                            }}
-                          >
-                            {statusText}
-                          </div>
-                          <div className="text-[10px] text-slate-400 mt-1.5">
+                          <div className="text-[12px] font-black uppercase tracking-[0.18em] mt-2" style={{ color: unavailable ? "#6b7280" : zone.color }}>
                             {unavailable
-                              ? (label.includes("Debt") ? "No debt funds in holdings DB" : "Need ≥ 2 funds")
-                              : `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
+                              ? (label.includes("Debt") ? "No Debt Funds" : "Need ≥ 2 Funds")
+                              : zone.label}
+                          </div>
+                          <div className="text-[10px] text-slate-500 mt-1 tracking-wider">
+                            {!unavailable && `${fundCount} fund${fundCount !== 1 ? "s" : ""} analyzed`}
                           </div>
                         </div>
                       </div>
