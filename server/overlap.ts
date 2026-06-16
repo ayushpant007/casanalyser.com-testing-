@@ -313,7 +313,14 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     if (!uniqueMap.has(key)) uniqueMap.set(key, m);
   }
   const funds = Array.from(uniqueMap.values());
-  const analyzedFunds = funds.map(m => m.fund.fundName);
+
+  // Build a lookup: CSV fund name → user's actual CAS scheme name
+  const csvNameToScheme = new Map<string, string>();
+  for (const m of funds) {
+    csvNameToScheme.set(m.fund.fundName, m.schemeName);
+  }
+
+  const analyzedFunds = funds.map(m => m.schemeName);
 
   if (funds.length < 2) {
     return {
@@ -340,11 +347,16 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     };
   }
 
+  // Helper: replace CSV fund name with user's actual CAS scheme name
+  const toSchemeName = (csvName: string) => csvNameToScheme.get(csvName) ?? csvName;
+
   // ── Pair-wise overlap ────────────────────────────────────────────────────
   const pairs: FundPairOverlap[] = [];
   for (let i = 0; i < funds.length; i++) {
     for (let j = i + 1; j < funds.length; j++) {
-      pairs.push(computePairOverlap(funds[i].fund, funds[j].fund));
+      const p = computePairOverlap(funds[i].fund, funds[j].fund);
+      // Replace CSV names with user's actual scheme names
+      pairs.push({ ...p, fundA: toSchemeName(p.fundA), fundB: toSchemeName(p.fundB) });
     }
   }
   pairs.sort((a, b) => b.overlapScore - a.overlapScore);
@@ -400,7 +412,7 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
       }
       const entry = stockTotals.get(stock.company)!;
       entry.total += stock.weight;
-      entry.funds.push({ fund: m.fund.fundName, weight: stock.weight });
+      entry.funds.push({ fund: toSchemeName(m.fund.fundName), weight: stock.weight });
     }
   }
 
