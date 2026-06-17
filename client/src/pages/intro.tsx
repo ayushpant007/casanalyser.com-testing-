@@ -419,9 +419,10 @@ export default function Intro() {
             <ShinyButton
               onClick={handleStart}
               data-testid="button-get-started"
+              style={{ padding: "1.2rem 2.8rem", fontSize: "1.2rem" }}
             >
               Start Analysing Now
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-5 h-5" />
             </ShinyButton>
           </motion.div>
 
