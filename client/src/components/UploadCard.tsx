@@ -328,6 +328,10 @@ export function UploadCard({ onSuccess, externalFile }: UploadCardProps) {
                       <Lock className="w-4 h-4" style={{ color: "rgba(148,163,184,0.5)" }} />
                       PAN Number (In Capital)
                     </label>
+                    <p className="text-xs" style={{ color: "rgba(148,163,184,0.55)" }}>
+                      No password on your PDF? Enter a single{" "}
+                      <kbd className="px-1 py-0.5 rounded text-[10px] font-mono" style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)", color: "rgba(147,197,253,0.8)" }}>Space</kbd>
+                    </p>
                     <input
                       type="password"
                       value={password}
