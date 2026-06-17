@@ -125,6 +125,19 @@ function extractCoreFundName(name: string): string {
   return core;
 }
 
+export async function resolveIsinByName(schemeName: string): Promise<{ code: number; isin: string | null; name: string } | null> {
+  const match = await findSchemeCode(schemeName);
+  if (!match) return null;
+  const entries = await loadSchemeCodes();
+  const entry = entries.find(e => e.code === match.code);
+  if (!entry) return null;
+  return {
+    code: entry.code,
+    isin: entry.isinGrowth || entry.isinDivReinvestment || null,
+    name: entry.name,
+  };
+}
+
 export async function findSchemeCodeByISIN(isin: string): Promise<{ code: number; name: string } | null> {
   const isinMap = await getIsinMap();
   const code = isinMap.get(isin.trim());

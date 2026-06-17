@@ -413,10 +413,17 @@ export default function ConciseReport() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Stable lookup key — uses real/fuzzy ISIN when available, falls back to scheme name.
+  // Must be consistent with the key used by bulk-performance and scrape-performance endpoints.
+  const perfKey = (mf: any): string =>
+    ((mf.isin || "").trim() || (mf.scheme_name || "").trim());
+
   useEffect(() => {
     if (!report || hasAutoStarted.current) return;
     const analysisData = (report.analysis as any) || {};
-    const funds: any[] = (analysisData.mf_snapshot || []).filter((mf: any) => mf.isin);
+    const funds: any[] = (analysisData.mf_snapshot || []).filter(
+      (mf: any) => (mf.isin && mf.isin.trim()) || (mf.scheme_name && mf.scheme_name.trim())
+    );
     if (!funds.length) return;
     const alreadyDone = Object.keys(storedPerformances).length;
     if (alreadyDone >= funds.length) return;
@@ -426,24 +433,30 @@ export default function ConciseReport() {
     const newPerfs: Record<string, any> = { ...storedPerformances };
     const newScoring: Record<string, any> = { ...storedScoring };
     const analyzeOne = async (mf: any) => {
-      const isin = mf.isin;
-      if (newPerfs[isin] && newScoring[isin]) return;
+      const key = perfKey(mf);
+      if (newPerfs[key] && newScoring[key]) return;
+      const isin = (mf.isin || "").trim();
       const schemeName = mf.scheme_name || "";
+      // For funds resolved via fuzzy matching, isin is set. For old stored reports
+      // without an isin, we pass the scheme name to the endpoint which falls back
+      // to name-based NAV lookup internally.
+      const perfId = isin || encodeURIComponent(schemeName);
       const plan = schemeName.toLowerCase().includes("direct") ? "Direct" : "Regular";
+      const scoringId = isin || encodeURIComponent(schemeName);
       const scoringParams = new URLSearchParams({ schemeName, plan });
       const [perfRes, scoringRes] = await Promise.allSettled([
-        fetch(`/api/scrape-performance/${isin}?reportId=${reportId}`),
-        fetch(`/api/scoring/${encodeURIComponent(isin)}?${scoringParams}`)
+        fetch(`/api/scrape-performance/${perfId}?reportId=${reportId}`),
+        fetch(`/api/scoring/${scoringId}?${scoringParams}`)
       ]);
       if (perfRes.status === "fulfilled" && perfRes.value.ok) {
         const data = await perfRes.value.json();
-        newPerfs[isin] = data;
-        setStoredPerformances(prev => ({ ...prev, [isin]: data }));
+        newPerfs[key] = data;
+        setStoredPerformances(prev => ({ ...prev, [key]: data }));
       }
       if (scoringRes.status === "fulfilled" && scoringRes.value.ok) {
         const data = await scoringRes.value.json();
-        newScoring[isin] = data;
-        setStoredScoring(prev => ({ ...prev, [isin]: data }));
+        newScoring[key] = data;
+        setStoredScoring(prev => ({ ...prev, [key]: data }));
       }
     };
     const runAll = async () => {
@@ -469,7 +482,7 @@ export default function ConciseReport() {
       const units = mf.units || mf.closing_balance || 0;
 
       // Use latest NAV from Risk Metrics performance data if available
-      const perfNav = storedPerformances[mf.isin]?.nav?.value;
+      const perfNav = storedPerformances[perfKey(mf)]?.nav?.value;
       if (perfNav && units > 0) {
         const nav = perfNav;
         const valuation = units * nav;
@@ -515,13 +528,13 @@ export default function ConciseReport() {
     const nifty3y = niftyLive?.return_3y ?? NIFTY500_3Y_FALLBACK;
 
     const fundsWithPerf1Y = mfSnapshot.filter((mf: any) => {
-      const cagr = storedPerformances[mf.isin]?.cagr?.["1y"];
+      const cagr = storedPerformances[perfKey(mf)]?.cagr?.["1y"];
       return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
     });
     if (fundsWithPerf1Y.length === 0) return;
 
     const fundsWithPerf3Y = mfSnapshot.filter((mf: any) => {
-      const cagr = storedPerformances[mf.isin]?.cagr?.["3y"];
+      const cagr = storedPerformances[perfKey(mf)]?.cagr?.["3y"];
       return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
     });
 
@@ -529,7 +542,7 @@ export default function ConciseReport() {
       const totalInv = funds.reduce((s: number, mf: any) => s + (mf.invested_amount || 0), 0);
       if (totalInv <= 0) return null;
       const weighted = funds.reduce((sum: number, mf: any) => {
-        const cagr = parseFloat(String(storedPerformances[mf.isin]?.cagr?.[period]));
+        const cagr = parseFloat(String(storedPerformances[perfKey(mf)]?.cagr?.[period]));
         return sum + cagr * ((mf.invested_amount || 0) / totalInv);
       }, 0);
       return weighted - nifty;
@@ -1015,7 +1028,7 @@ export default function ConciseReport() {
 
       // ── Sheet 2: Performance Check + Portfolio Snapshot ────────────────
       const pv = (v: string) => parseFloat(v?.replace(/[^\d.-]/g, "") || "0");
-      const perfFunds = snap.filter((mf: any) => storedPerformances[mf.isin]);
+      const perfFunds = snap.filter((mf: any) => storedPerformances[perfKey(mf)]);
       const perfHdrs = ["#", "Fund Name", "ISIN", "Category", "Risk Type", "SIP Amt (₹)",
         "1Y CAGR%", "BM 1Y%", "3Y CAGR%", "BM 3Y%", "5Y CAGR%", "BM 5Y%",
         "Fin Score", "Perf Score", "Total /80", "Rating", "Action", "Target Category", "Target Fund", "Remarks"];
@@ -1026,8 +1039,8 @@ export default function ConciseReport() {
         [empty(), ...Array(perfHdrs.length - 1).fill(empty())],
         perfHdrs.map(h => hdr(h)),
         ...perfFunds.map((mf: any, i: number) => {
-          const p = storedPerformances[mf.isin];
-          const sc = storedScoring[mf.isin];
+          const p = storedPerformances[perfKey(mf)];
+          const sc = storedScoring[perfKey(mf)];
           const cagr = p?.cagr || {};
           const bm = p?.benchmark_returns || {};
           const diff1 = pv(cagr["1y"]) - pv(bm["1y"]);
@@ -1467,7 +1480,7 @@ export default function ConciseReport() {
   const sipHealthItems = useMemo(() => {
     return Object.entries(sipAmounts).map(([scheme, amount]) => {
       const mf = mfSnapshot.find((m: any) => m.scheme_name === scheme);
-      const perf = mf ? storedPerformances[(mf as any).isin] : null;
+      const perf = mf ? storedPerformances[perfKey(mf as any)] : null;
       const pv = (v: string | undefined) => parseFloat((v || "0").replace(/[^\d.-]/g, "") || "0");
       const cagr = perf ? (perf as any).cagr?.["1y"] : null;
       const bm1y = perf ? pv((perf as any).benchmark_returns?.["1y"]) : 0;
@@ -1974,12 +1987,12 @@ export default function ConciseReport() {
               : (niftyLive?.return_1y ?? NIFTY500_1Y_FALLBACK);
 
             const fundsWithPerf = mfSnapshot.filter((mf: any) => {
-              const cagr = storedPerformances[mf.isin]?.cagr?.[cagrKey];
+              const cagr = storedPerformances[perfKey(mf)]?.cagr?.[cagrKey];
               return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
             });
 
             const fundsWithPerf1Y = mfSnapshot.filter((mf: any) => {
-              const cagr = storedPerformances[mf.isin]?.cagr?.["1y"];
+              const cagr = storedPerformances[perfKey(mf)]?.cagr?.["1y"];
               return cagr !== undefined && cagr !== null && !isNaN(parseFloat(String(cagr)));
             });
 
@@ -1992,7 +2005,7 @@ export default function ConciseReport() {
             if (eligibleTotalInvested <= 0) return null;
 
             const weightedReturn = activeList.reduce((sum: number, mf: any) => {
-              const cagr = parseFloat(String(storedPerformances[mf.isin]?.cagr?.[cagrKey]));
+              const cagr = parseFloat(String(storedPerformances[perfKey(mf)]?.cagr?.[cagrKey]));
               const weight = (mf.invested_amount || 0) / eligibleTotalInvested;
               return sum + cagr * weight;
             }, 0);
@@ -2811,10 +2824,10 @@ export default function ConciseReport() {
               "Poor":      { pill: "bg-rose-100 text-rose-600 border-rose-200",          bar: "#ef4444" },
             };
             const rows = mfSnapshot
-              .filter((mf: any) => storedPerformances[mf.isin])
+              .filter((mf: any) => storedPerformances[perfKey(mf)])
               .map((mf: any) => {
-                const perf = storedPerformances[mf.isin];
-                const sc = storedScoring[mf.isin];
+                const perf = storedPerformances[perfKey(mf)];
+                const sc = storedScoring[perfKey(mf)];
                 const perfScore = calcPerfScore(perf?.cagr, perf?.benchmark_returns);
                 const scoringTotal = sc?.totalScore ?? 0;
                 const combined = scoringTotal + perfScore.total;
@@ -3078,7 +3091,7 @@ export default function ConciseReport() {
                         const pl = isDemat ? null : value - invested;
                         const plColor = pl == null ? "text-slate-400" : pl >= 0 ? "text-emerald-600" : "text-rose-600";
                         const portfolioPct = totalValueSnap > 0 ? ((value / totalValueSnap) * 100).toFixed(1) : "0.0";
-                        const hasPerf = !!storedPerformances[mf.isin];
+                        const hasPerf = !!storedPerformances[perfKey(mf)];
                         return (
                           <tr
                             key={idx}

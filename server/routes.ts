@@ -12,7 +12,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { insertUserSchema, insertContactMessageSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat/routes";
 import { registerImageRoutes } from "./replit_integrations/image/routes";
-import { fetchNavForScheme, fetchNavByISIN, findSchemeCode, findSchemeCodeByISIN, searchSchemeCodes } from "./mfapi";
+import { fetchNavForScheme, fetchNavByISIN, findSchemeCode, findSchemeCodeByISIN, searchSchemeCodes, resolveIsinByName } from "./mfapi";
 import { extractMetricsFromFactsheet } from "./factsheet";
 import { getMetricsFromJson } from "./json_factsheet";
 import { getBenchmarkReturns } from "./benchmarks";
@@ -427,6 +427,30 @@ ${text}`;
         }));
       }
 
+      // ── Fuzzy ISIN resolution for funds without ISINs ─────────────────────
+      // For statements that don't include ISINs, match fund names against the
+      // scheme_codes.csv using the existing fuzzy scorer.  High-confidence
+      // matches get the real ISIN written back so every downstream endpoint
+      // (NAV fetch, performance, scoring) works identically to CAS documents.
+      if (Array.isArray(analysis.mf_snapshot)) {
+        await Promise.all(analysis.mf_snapshot.map(async (entry: any) => {
+          const existingIsin = (entry.isin || "").trim();
+          if (existingIsin.length >= 10) return; // already has a real ISIN
+          const name = (entry.scheme_name || "").trim();
+          if (!name || name.length < 5) return;
+          try {
+            const resolved = await resolveIsinByName(name);
+            if (resolved?.isin) {
+              console.log(`[FuzzyISIN] "${name}" → ${resolved.isin} (code ${resolved.code}, matched "${resolved.name}")`);
+              entry.isin = resolved.isin;
+              entry.isin_source = "fuzzy";
+            }
+          } catch (_) {}
+        }));
+        const fuzzyCount = analysis.mf_snapshot.filter((e: any) => e.isin_source === "fuzzy").length;
+        if (fuzzyCount > 0) console.log(`[FuzzyISIN] Resolved ${fuzzyCount} fund(s) via name matching`);
+      }
+
       const report = await storage.createReport({ filename: originalName, investorType, ageGroup, analysis });
 
       uploadCasToDrive(fileBuffer, originalName, analysis.investor_name, password)
@@ -543,23 +567,29 @@ ${text}`;
       const report = await storage.getReport(Number(reportId));
       if (!report) return res.status(404).json({ message: "Report not found" });
 
-      const snapshot: any[] = ((report.analysis as any)?.mf_snapshot || []).filter((f: any) => f.isin);
+      // Include all funds that have an ISIN (real or fuzzy-resolved) or at least
+      // a scheme name we can look up by name-matching at query time.
+      const snapshot: any[] = ((report.analysis as any)?.mf_snapshot || []).filter(
+        (f: any) => (f.isin && f.isin.trim()) || (f.scheme_name && f.scheme_name.trim())
+      );
 
       const formatCagr = (val: number | null) => val !== null ? `${val.toFixed(2)}%` : "N/A";
 
       const buildPerf = async (mf: any) => {
-        const isin: string = mf.isin;
+        const isin: string = (mf.isin || "").trim();
         const fundName: string = mf.scheme_name || "";
+        // Stable key: real/fuzzy ISIN when available, scheme name as fallback
+        const perfKey: string = isin || fundName;
         try {
           const [navData, jsonMetrics] = await Promise.all([
-            fetchNavByISIN(isin, fundName),
+            isin ? fetchNavByISIN(isin, fundName) : fetchNavForScheme(fundName),
             getMetricsFromJson(fundName),
           ]);
           const reportedBenchmarkName = jsonMetrics?.benchmark_name || "Data unavailable";
           const benchmarkReturns = await getBenchmarkReturns(fundName, reportedBenchmarkName);
           const benchmarkName = benchmarkReturns?.resolvedName || reportedBenchmarkName;
           return {
-            isin,
+            key: perfKey,
             data: {
               nav: { value: navData?.current_nav ?? 0, date: navData?.nav_date || "Data unavailable" },
               cagr: {
@@ -592,19 +622,20 @@ ${text}`;
             },
           };
         } catch (_) {
-          return { isin, data: null };
+          return { key: perfKey, data: null };
         }
       };
 
       const buildScoring = (mf: any) => {
-        const isin: string = mf.isin;
+        const isin: string = (mf.isin || "").trim();
         const schemeName: string = mf.scheme_name || "";
+        const perfKey: string = isin || schemeName;
         const plan = schemeName.toLowerCase().includes("direct") ? "Direct" : "Regular";
         try {
           const record = lookupByIsinOrName(isin, schemeName, plan);
-          return { isin, data: record || null };
+          return { key: perfKey, data: record || null };
         } catch (_) {
-          return { isin, data: null };
+          return { key: perfKey, data: null };
         }
       };
 
@@ -616,11 +647,11 @@ ${text}`;
 
       const performances: Record<string, any> = {};
       for (const r of perfResults) {
-        if (r.data) performances[r.isin] = r.data;
+        if (r.data) performances[r.key] = r.data;
       }
       const scoringRecords: Record<string, any> = {};
       for (const r of scoringResults) {
-        if (r.data) scoringRecords[r.isin] = r.data;
+        if (r.data) scoringRecords[r.key] = r.data;
       }
 
       console.log(`[bulk-performance] report ${reportId}: ${snapshot.length} funds processed`);
@@ -641,8 +672,11 @@ ${text}`;
       if (reportId) {
         const report = await storage.getReport(Number(reportId));
         const snapshot = (report?.analysis as any)?.mf_snapshot || [];
-        const fund = snapshot.find((f: any) => f.isin === isin);
-        fundName = fund?.scheme_name || "";
+        const fund = snapshot.find((f: any) => f.isin === isin)
+          || snapshot.find((f: any) => f.scheme_name === isin);
+        fundName = fund?.scheme_name || isin;
+      } else {
+        fundName = isin;
       }
 
       console.log(`Fetching real data for: ${fundName} (${isin})`);
