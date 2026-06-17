@@ -420,7 +420,7 @@ export default function Intro() {
               onClick={handleStart}
               data-testid="button-get-started"
             >
-              Upload CAS &amp; See My Portfolio
+              Start Analysing Now
               <ArrowRight className="w-4 h-4" />
             </ShinyButton>
           </motion.div>
