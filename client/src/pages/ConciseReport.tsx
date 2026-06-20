@@ -2191,7 +2191,7 @@ export default function ConciseReport() {
                               ? `₹${(eligibleTotalInvested / 100000).toFixed(2)} L`
                               : `₹${(eligibleTotalInvested / 1000).toFixed(1)} K`}
                           </span>{" "}
-                          (Portfolio Value) in:
+                          (Funds with Complete CAGR data) in:
                         </p>
 
                         <Bar
