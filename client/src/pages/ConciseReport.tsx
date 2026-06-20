@@ -2134,34 +2134,49 @@ export default function ConciseReport() {
                     const Bar = ({ label, value, endVal, pct, color, trackColor, badge, investedAmt, currentAmt, textColor }: {
                       label: string; value: number; endVal: number; pct: number;
                       color: string; trackColor: string; badge?: React.ReactNode; investedAmt?: number; currentAmt?: number; textColor?: string;
-                    }) => (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
-                            <span className="text-xs font-bold text-slate-700">{label}</span>
-                            {badge}
+                    }) => {
+                      const isGain = value >= 0;
+                      const gainColor = isGain ? "#10b981" : "#ef4444";
+                      const gainLabel = isGain ? "You Have earned" : "You Have loss";
+                      const gainVal = currentAmt !== undefined
+                        ? (Math.abs(currentAmt) >= 100000
+                            ? `₹${(Math.abs(currentAmt) / 100000).toFixed(2)} L`
+                            : `₹${(Math.abs(currentAmt) / 1000).toFixed(1)} K`)
+                        : "";
+                      return (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+                              <span className="text-xs font-bold text-slate-700">{label}</span>
+                              {badge}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {investedAmt !== undefined && currentAmt !== undefined && (
+                                <span className="text-xs font-bold tabular-nums" style={{ color: textColor ?? gainColor }}>
+                                  {fmtRs(investedAmt)} → {fmtRs(currentAmt)}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {investedAmt !== undefined && currentAmt !== undefined && (
-                              <span className="text-xs font-bold tabular-nums" style={{ color: textColor ?? (pct >= 0 ? "#10b981" : "#ef4444") }}>
-                                {fmtRs(investedAmt)} → {fmtRs(currentAmt)}
-                              </span>
-                            )}
+                          <div className="relative h-10 rounded-xl overflow-hidden" style={{ background: trackColor }}>
+                            <div
+                              className="absolute inset-y-0 left-0 rounded-xl flex items-center px-3 transition-all duration-700"
+                              style={{
+                                width: `${Math.max(4, (Math.abs(pct) / maxPct) * 100)}%`,
+                                background: color,
+                              }}
+                            >
+                              {currentAmt !== undefined && (
+                                <span className="text-[11px] font-black text-white whitespace-nowrap overflow-hidden text-ellipsis">
+                                  {gainLabel} {gainVal}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <div className="relative h-9 rounded-xl overflow-hidden" style={{ background: trackColor }}>
-                          <div
-                            className="absolute inset-y-0 left-0 rounded-xl flex items-center justify-end pr-3 transition-all duration-700"
-                            style={{
-                              width: `${Math.max(4, (Math.abs(pct) / maxPct) * 100)}%`,
-                              background: color,
-                            }}
-                          >
-                          </div>
-                        </div>
-                      </div>
-                    );
+                      );
+                    };
 
                     return (
                       <div className="rounded-2xl overflow-hidden bg-white space-y-4 px-5 py-5" style={{ border: "1.5px solid #e2e8f0", boxShadow: "0 4px 24px 0 rgba(99,102,241,0.07)" }}>
@@ -2175,6 +2190,16 @@ export default function ConciseReport() {
                             </span>
                           </div>
                         </div>
+
+                        <p className="text-xs text-slate-500 font-medium -mb-1">
+                          If you would have invested{" "}
+                          <span className="font-bold text-slate-700">
+                            {Math.abs(eligibleTotalInvested) >= 100000
+                              ? `₹${(eligibleTotalInvested / 100000).toFixed(2)} L`
+                              : `₹${(eligibleTotalInvested / 1000).toFixed(1)} K`}
+                          </span>{" "}
+                          (Portfolio Value) in:
+                        </p>
 
                         <Bar
                           label="Your Portfolio"
