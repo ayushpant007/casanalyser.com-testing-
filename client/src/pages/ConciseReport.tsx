@@ -2137,7 +2137,7 @@ export default function ConciseReport() {
                     }) => {
                       const isGain = value >= 0;
                       const gainColor = isGain ? "#10b981" : "#ef4444";
-                      const gainLabel = isGain ? "You Have earned" : "You Have loss";
+                      const gainLabel = "Your Amount Become";
                       const gainVal = currentAmt !== undefined
                         ? (Math.abs(currentAmt) >= 100000
                             ? `₹${(Math.abs(currentAmt) / 100000).toFixed(2)} L`
