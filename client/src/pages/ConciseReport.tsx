@@ -2151,13 +2151,6 @@ export default function ConciseReport() {
                               <span className="text-xs font-bold text-slate-700">{label}</span>
                               {badge}
                             </div>
-                            <div className="flex items-center gap-2">
-                              {investedAmt !== undefined && currentAmt !== undefined && (
-                                <span className="text-xs font-bold tabular-nums" style={{ color: textColor ?? gainColor }}>
-                                  {fmtRs(investedAmt)} → {fmtRs(currentAmt)}
-                                </span>
-                              )}
-                            </div>
                           </div>
                           <div className="relative h-10 rounded-xl overflow-hidden" style={{ background: trackColor }}>
                             <div
