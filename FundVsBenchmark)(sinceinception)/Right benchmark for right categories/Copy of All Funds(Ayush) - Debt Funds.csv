@@ -1,26 +1,26 @@
 Fund Name,Plan,Category,VR ID,Benchmark Name,CSV Fetched,Status,Macaulay Duration (yrs),Average Maturity (yrs),Avg Credit Rating,ISIN,Scheme Code,YTM Score(10),Duration Score(10),Maturity Score(10),Credit Score(10),Total Score(40),Risk Category,Fund Rating
 ABSL Long Duration Dir,Direct,Long Duration,42338,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",9.37,22.59,AAA,INF209KB17J2,150484,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",9.37,22.59,AAA,INF209KB17J2,150484,7,2,1,9,INF740KA1QV9,149970,Average,
 Axis Long Duration Dir,Direct,Long Duration,42912,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.85,31.78,AAA,INF846K014L3,151179,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",11.85,31.78,AAA,INF846K014L3,151179,7,1,1,9,INF740KA1QV9,149970,Average,
 Bandhan Long Duration Dir,Direct,Long Duration,44184,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.47,17.8,GOI/Cash,INF194KB1HY2,152520,5,2,2,10,19,Moderately High Risk,Average
+"g-sec index""",8.47,17.8,GOI/Cash,INF194KB1HY2,152520,5,2,2,10,INF740KA1QV9,149970,Average,
 Franklin India Long Duration Fund Dir,Direct,Long Duration,44764,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.58,23.01,AAA,INF090I01XY7,153102,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",7.58,23.01,AAA,INF090I01XY7,153102,7,2,1,9,INF740KA1QV9,149970,Average,
 HDFC Long Duration Debt Dir,Direct,Long Duration,43050,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.76,29.07,AAA,INF179KC1ET7,151313,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",11.76,29.07,AAA,INF179KC1ET7,151313,7,1,1,9,INF740KA1QV9,149970,Average,
 ICICI Pru Long Term Bond Dir,Direct,Long Duration,15957,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.04,28.06,AAA,INF109K017L8,120743,8,1,1,9,19,Moderately High Risk,Average
+"g-sec index""",11.04,28.06,AAA,INF109K017L8,120743,8,1,1,9,INF740KA1QV9,149970,Average,
 Kotak Long Duration Dir,Direct,Long Duration,44192,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",12.13,20.38,AAA,INF174KA1RF5,152491,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",12.13,20.38,AAA,INF174KA1RF5,152491,7,1,1,9,INF740KA1QV9,149970,Average,
 Mirae Asset Long Duration Dir,Direct,Long Duration,44752,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.43,26.95,GOI/Cash,INF769K01NC9,153105,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",11.43,26.95,GOI/Cash,INF769K01NC9,153105,7,1,1,10,INF740KA1QV9,149970,Average,
 Nippon India Nivesh Lakshya Long Duration Dir,Direct,Long Duration,36522,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.98,21.95,AAA,INF204KB1YQ1,143704,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",10.98,21.95,AAA,INF204KB1YQ1,143704,7,1,1,9,INF740KA1QV9,149970,Average,
 SBI Long Duration Dir,Direct,Long Duration,42950,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.53,25.71,GOI/Cash,INF200KA16T4,151214,4,2,1,10,17,Moderately High Risk,Average
+"g-sec index""",8.53,25.71,GOI/Cash,INF200KA16T4,151214,4,2,1,10,INF740KA1QV9,149970,Average,
 UTI Long Duration Dir,Direct,Long Duration,43279,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.2,29.19,GOI/Cash,INF789F1AYB5,151523,6,1,1,10,18,Moderately High Risk,Average
+"g-sec index""",10.2,29.19,GOI/Cash,INF789F1AYB5,151523,6,1,1,10,INF740KA1QV9,149970,Average,
 ABSL Income Dir,Direct,Medium to Long Duration,15756,Not Available,Not Available,,6.78,14.35,AAA,INF209K01WY1,119657,7,3,3,9,22,Moderate Risk,Average
 Bandhan Medium to Long Duration Dir,Direct,Medium to Long Duration,16704,Not Available,Not Available,,2.21,2.59,AAA,INF194K01R51,118394,4,6,7,9,26,Moderate Risk,Average
 Canara Robeco Income Dir,Direct,Medium to Long Duration,15753,Not Available,Not Available,,4.19,8.69,GOI/Cash,INF760K01FI1,118282,4,4,4,10,22,Moderate Risk,Average
@@ -66,7 +66,7 @@ Baroda BNP Paribas Short Duration Dir,Direct,Short Duration,15785,Not Available,
 Canara Robeco Short Duration Dir,Direct,Short Duration,15780,Not Available,Not Available,,1.72,1.92,AAA,INF760K01DX5,118320,6,7,8,9,30,Low Risk,Good
 DSP Short Term Dir,Direct,Short Duration,16429,Not Available,Not Available,,2.76,3.35,AAA,INF740K01NJ5,119226,7,6,6,9,28,Low Risk,Good
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL SD Index Dir,Direct,Short Duration,43109,Not Available,Not Available,,2.68,2.95,GOI/Cash,INF754K01PV6,150807,3,6,7,10,26,Moderate Risk,Average
-Franklin Ind ST Incm Seg Port 3 Direct,Direct,Short Duration,40847,Not Available,Not Available,,,,,INF200K01V08,125503,1,1,1,1,4,High Risk,Poor
+Franklin Ind ST Incm Seg Port 3 Direct,Direct,Short Duration,40847,Not Available,Not Available,,,,,INF955L01971,119333,1,1,1,1,4,High Risk,Poor,
 Groww Short Duration Dir,Direct,Short Duration,20851,Not Available,Not Available,,1.42,1.53,AAA,INF955L01JF3,152898,5,8,8,9,30,Low Risk,Good
 HDFC Short Term Debt Dir,Direct,Short Duration,16151,Not Available,Not Available,,2.48,3.42,AAA,INF179K01YM7,119016,7,6,6,9,28,Low Risk,Good
 HSBC Short Duration Dir,Direct,Short Duration,16299,Not Available,Not Available,,2.29,2.66,AAA,INF917K01IQ4,151067,6,6,7,9,28,Low Risk,Good
@@ -138,7 +138,7 @@ ICICI Pru Ultra Short Term Dir,Direct,Ultra Short Duration,17404,Not Available,N
 Invesco India Ultra Short Duration Dir,Direct,Ultra Short Duration,16797,Not Available,Not Available,,0.37,0.38,AAA,INF205K01TH0,120541,6,10,10,9,35,Very Low Risk,Good
 ITI Ultra Short Duration Dir,Direct,Ultra Short Duration,41474,Not Available,Not Available,,0.25,0.27,AAA,INF00XX01AE2,148913,3,10,10,9,32,Low Risk,Good
 Kotak CRISIL-IBX Fin Srvices 3-6 Months Debt Index Dir,Direct,Ultra Short Duration,44996,Not Available,Not Available,,0.3,0.3,AAA,INF174KA1VK7,153372,7,10,10,9,36,Very Low Risk,Good
-Kotak Savings Dir,Direct,Ultra Short Duration,16346,Not Available,Not Available,,0.48,0.53,AAA,INF0QA701607,152162,6,10,9,9,34,Low Risk,Good
+Kotak Savings Dir,Direct,Ultra Short Duration,16346,Not Available,Not Available,,0.48,0.53,AAA,INF277K01QW4,119312,6,10,9,9,34,Low Risk,Good,
 LIC MF Ultra Short Duration Direct,Direct,Ultra Short Duration,40411,Not Available,Not Available,,0.35,0.35,AAA,INF00XX01AE2,148913,5,10,10,9,34,Low Risk,Good
 Mahindra Manulife Ultra Short Duration Dir,Direct,Ultra Short Duration,40343,Not Available,Not Available,,0.45,0.46,AAA,INF174V01887,147731,7,10,10,9,36,Very Low Risk,Good
 Mirae Asset Ultra Short Duration Dir,Direct,Ultra Short Duration,41139,Not Available,Not Available,,0.41,0.43,AAA,INF769K01GK6,148529,6,10,10,9,35,Very Low Risk,Good
@@ -170,7 +170,7 @@ DSP NIFTY 1D Rate Liquid ETF,Direct,Liquid,35400,Not Available,Not Available,,,,
 Edelweiss Liquid Dir,Direct,Liquid,16576,Not Available,Not Available,,0.09,0.09,AAA,INF754K01GM4,140196,3,10,10,9,32,Low Risk,Good
 Edelweiss Nifty 1D Rate Liquid ETF-Growth,Direct,Liquid,45545,Not Available,Not Available,,0.01,0.01,Cash,INF955L01JF3,152898,1,10,10,10,31,Low Risk,Good
 Franklin India Liquid Super Inst Plan Dir,Direct,Liquid,16848,Not Available,Not Available,,0.09,0.09,AAA,INF090I01JV2,118577,4,10,10,9,33,Low Risk,Good
-Groww Liquid Dir,Direct,Liquid,15583,Not Available,Not Available,,0.08,0.08,AAA,INF0QA701607,152162,4,10,10,9,33,Low Risk,Good
+Groww Liquid Dir,Direct,Liquid,15583,Not Available,Not Available,,0.08,0.08,AAA,INF277K01QW4,119312,4,10,10,9,33,Low Risk,Good,
 Groww Nifty 1D Rate Liquid ETF,Direct,Liquid,44564,Not Available,Not Available,,0.01,0.01,Cash,INF666M01EK5,145589,1,10,10,10,31,Low Risk,Good
 HDFC Liquid Dir,Direct,Liquid,16167,Not Available,Not Available,,0.1,0.1,AAA,INF179KB1HP9,119091,4,10,10,9,33,Low Risk,Good
 HDFC NIFTY 1D RATE LIQUID ETF-Growth,Direct,Liquid,43738,Not Available,Not Available,,0.01,0.01,Cash,INF209K01YN0,119550,1,10,10,10,31,Low Risk,Good
@@ -185,13 +185,13 @@ JM Liquid Dir,Direct,Liquid,16741,Not Available,Not Available,,0.1,0.1,AAA,INF19
 Kotak Liquid Dir,Direct,Liquid,16365,Not Available,Not Available,,0.09,0.09,AAA,INF174K01NE8,119766,4,10,10,9,33,Low Risk,Good
 Kotak Nifty 1D Rate Liquid ETF,Direct,Liquid,43078,Not Available,Not Available,,0.01,0.01,Cash,INF209K01UX7,122646,1,10,10,10,31,Low Risk,Good
 LIC MF Liquid Dir,Direct,Liquid,16822,Not Available,Not Available,,0.09,0.09,AAA,INF767K01DN1,120249,4,10,10,9,33,Low Risk,Good
-Mahindra Manulife Liquid Dir,Direct,Liquid,32624,Not Available,Not Available,,0.12,0.12,AAA,INF0QA701607,152162,4,10,10,9,33,Low Risk,Good
+Mahindra Manulife Liquid Dir,Direct,Liquid,32624,Not Available,Not Available,,0.12,0.12,AAA,INF277K01QW4,119312,4,10,10,9,33,Low Risk,Good,
 Mirae Asset Liquid Dir,Direct,Liquid,16554,Not Available,Not Available,,0.1,0.1,AAA,INF769K01CM1,118859,3,10,10,9,32,Low Risk,Good
 Mirae Asset Nifty 1D Rate Liquid ETF-Growth,Direct,Liquid,44705,Not Available,Not Available,,,,Cash,INF955L01JF3,152898,1,1,1,10,13,High Risk,Poor
 Mirae Asset Nifty 1D Rate Liquid ETF-IDCW,Direct,Liquid,43679,Not Available,Not Available,,,,Cash,INF579M01621,125345,1,1,1,10,13,High Risk,Poor
 Motilal Oswal Liquid Dir,Direct,Liquid,38515,Not Available,Not Available,,0.11,0.11,AAA,INF247L01734,145834,3,10,10,9,32,Low Risk,Good
 Navi Liquid Dir,Direct,Liquid,16473,Not Available,Not Available,,0.05,0.06,AAA,INF959L01GF1,119164,2,10,10,9,31,Low Risk,Good
-Nippon India ETF Nifty 1D Rate Liquid BeES,Direct,Liquid,1787,Not Available,Not Available,,0.01,0.01,CASH,INF090I01VZ8,148304,1,10,10,10,31,Low Risk,Good
+Nippon India ETF Nifty 1D Rate Liquid BeES,Direct,Liquid,1787,Not Available,Not Available,,0.01,0.01,CASH,INF204KB1X25,146513,1,10,10,10,31,Low Risk,Good,
 Nippon India Liquid Dir,Direct,Liquid,16100,Not Available,Not Available,,0.09,0.09,AAA,INF204K01ZH0,118701,4,10,10,9,33,Low Risk,Good
 Nippon India Nifty 1D Rate Liquid ETF-Growth,Direct,Liquid,45364,Not Available,Not Available,,0.01,0.01,CASH,INF955L01JF3,152898,1,10,10,10,31,Low Risk,Good
 Parag Parikh Liquid Dir,Direct,Liquid,36013,Not Available,Not Available,,0.11,0.12,AAA,INF879O01068,143269,4,10,10,9,33,Low Risk,Good
@@ -203,7 +203,7 @@ SBI NIFTY 1D Rate Liquid ETF-Growth,Direct,Liquid,45433,Not Available,Not Availa
 SBI Nifty 1D Rate Liquid ETF - IDCW,Direct,Liquid,43870,Not Available,Not Available,,,,Cash,INF200K01SH3,119707,1,1,1,10,13,High Risk,Poor
 Shriram Liquid Dir,Direct,Liquid,44700,Not Available,Not Available,,0.07,0.07,AAA,INF680P01430,153035,2,10,10,9,31,Low Risk,Good
 Shriram Nifty 1D Rate Liquid ETF,Direct,Liquid,44414,Not Available,Not Available,,0.01,0.01,Cash,INF209K01UX7,122646,1,10,10,10,31,Low Risk,Good
-Sundaram Liquid Dir,Direct,Liquid,16532,Not Available,Not Available,,0.08,0.08,AAA,INF0QA701607,152162,4,10,10,9,33,Low Risk,Good
+Sundaram Liquid Dir,Direct,Liquid,16532,Not Available,Not Available,,0.08,0.08,AAA,INF277K01QW4,119312,4,10,10,9,33,Low Risk,Good,
 Tata Liquid Dir,Direct,Liquid,16723,Not Available,Not Available,,0.1,0.1,AAA,INF277K01YE6,119861,3,10,10,9,32,Low Risk,Good
 The Wealth Company Liquid Dir,Direct,Liquid,45509,Not Available,Not Available,,0.1,0.1,AAA,INF2F0001081,153883,4,10,10,9,33,Low Risk,Good
 TRUSTMF Liquid Dir,Direct,Liquid,41413,Not Available,Not Available,,0.1,0.1,AAA,INF0GCD01255,148841,4,10,10,9,33,Low Risk,Good
@@ -251,7 +251,7 @@ Canara Robeco Overnight Dir,Direct,Overnight,40153,Not Available,Not Available,,
 DSP Overnight Dir,Direct,Overnight,38748,Not Available,Not Available,,,0.01,GOI/Cash,INF740KA1MC8,146062,1,1,10,10,22,Moderate Risk,Average
 Edelweiss Overnight Dir,Direct,Overnight,40175,Not Available,Not Available,,0.01,0.01,Cash,INF754K01JV9,147570,1,10,10,10,31,Low Risk,Good
 Franklin India Overnight Dir,Direct,Overnight,39884,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF090I01SS9,147214,1,10,10,10,31,Low Risk,Good
-Groww Overnight Dir,Direct,Overnight,40037,Not Available,Not Available,,0.01,0.01,Cash,INF0QA701607,152162,1,10,10,10,31,Low Risk,Good
+Groww Overnight Dir,Direct,Overnight,40037,Not Available,Not Available,,0.01,0.01,Cash,INF277K01QW4,119312,1,10,10,10,31,Low Risk,Good,
 HDFC Overnight Dir,Direct,Overnight,16000,Not Available,Not Available,,0.02,0.02,GOI/Cash,INF179KB1HT1,119110,1,10,10,10,31,Low Risk,Good
 Helios Overnight Dir,Direct,Overnight,43835,Not Available,Not Available,,0,0,Cash,INF0R8701079,152152,1,10,10,10,31,Low Risk,Good
 HSBC Overnight Dir,Direct,Overnight,39921,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF336L01OF6,147287,1,10,10,10,31,Low Risk,Good
@@ -270,7 +270,7 @@ PGIM India Overnight Dir,Direct,Overnight,40236,Not Available,Not Available,,0,0
 Quant Overnight Dir,Direct,Overnight,42932,Not Available,Not Available,,0.01,0.01,Cash,INF966L01AZ7,151190,1,10,10,10,31,Low Risk,Good
 Samco Overnight Dir,Direct,Overnight,42551,Not Available,Not Available,,0,0,Cash,INF0K1H01040,150631,1,10,10,10,31,Low Risk,Good
 SBI Overnight Dir,Direct,Overnight,17189,Not Available,Not Available,,0,0,GOI/Cash,INF200K01TK5,119833,1,10,10,10,31,Low Risk,Good
-Shriram Overnight Dir,Direct,Overnight,42470,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF680P01323,150562,1,10,10,10,31,Low Risk,Good
+Shriram Overnight Dir,Direct,Overnight,42470,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF680P01497,154394,1,10,10,10,31,Low Risk,Good,
 Sundaram Overnight Dir,Direct,Overnight,39565,Not Available,Not Available,,0.01,0.01,Cash,INF903JA1HG5,146963,1,10,10,10,31,Low Risk,Good
 Tata Overnight Dir,Direct,Overnight,39638,Not Available,Not Available,,0.01,0.01,Cash,INF277K018T5,146980,1,10,10,10,31,Low Risk,Good
 TRUSTMF Overnight Dir,Direct,Overnight,42046,Not Available,Not Available,,0.01,0.01,Cash,INF0GCD01453,149797,1,10,10,10,31,Low Risk,Good
@@ -278,59 +278,59 @@ Union Overnight Dir,Direct,Overnight,39665,Not Available,Not Available,,0.01,0.0
 UTI Overnight Dir,Direct,Overnight,17630,Not Available,Not Available,,0,0,GOI/Cash,INF789FB1S71,120785,1,10,10,10,31,Low Risk,Good
 Zerodha Overnight Dir,Direct,Overnight,45081,Not Available,Not Available,,0.01,0.01,Cash,INF0R8F01075,153436,1,10,10,10,31,Low Risk,Good
 360 ONE Dynamic Bond Dir,Direct,Dynamic Bond,19784,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.72,6.39,AAA,INF579M01266,122715,7,4,5,9,25,Moderate Risk,Average
+"g-sec index""",4.72,6.39,AAA,INF579M01266,122715,7,4,5,9,INF740KA1QV9,149970,Average,
 ABSL Dynamic Bond Dir,Direct,Dynamic Bond,15734,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.54,7.69,AAA,INF209K01N82,119505,8,4,4,9,25,Moderate Risk,Average
+"g-sec index""",4.54,7.69,AAA,INF209K01N82,119505,8,4,4,9,INF740KA1QV9,149970,Average,
 ABSL Dyn Bond Seg Port1 Dir,Direct,Dynamic Bond,40459,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,Cash,INF767K01GI4,120338,1,1,1,10,13,High Risk,Poor
+"g-sec index""",,,Cash,INF767K01GI4,120338,1,1,1,10,INF740KA1QV9,149970,Poor,
 Axis Dynamic Bond Dir,Direct,Dynamic Bond,15740,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.23,6.55,AAA,INF846K01DI3,120451,4,4,5,9,22,Moderate Risk,Average
+"g-sec index""",4.23,6.55,AAA,INF846K01DI3,120451,4,4,5,9,INF740KA1QV9,149970,Average,
 Bandhan Dynamic Bond Dir,Direct,Dynamic Bond,16479,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.35,2.06,AAA,INF194K01N63,118416,5,8,7,9,29,Low Risk,Good
+"g-sec index""",1.35,2.06,AAA,INF194K01N63,118416,5,8,7,9,INF740KA1QV9,149970,Good,
 Baroda BNP Paribas Dynamic Bond Dir,Direct,Dynamic Bond,16213,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.01,14.38,AAA,INF251K01GW0,150180,6,2,3,9,20,Moderately High Risk,Average
+"g-sec index""",7.01,14.38,AAA,INF251K01GW0,150180,6,2,3,9,INF740KA1QV9,149970,Average,
 Canara Robeco Dynamic Bond Dir,Direct,Dynamic Bond,16577,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.54,10,GOI/Cash,INF760K01EC7,118284,5,3,4,10,22,Moderate Risk,Average
+"g-sec index""",5.54,10,GOI/Cash,INF760K01EC7,118284,5,3,4,10,INF740KA1QV9,149970,Average,
 DSP Strategic Bond Dir,Direct,Dynamic Bond,16443,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.15,18.96,AAA,INF740K01QG4,119239,6,2,2,9,19,Moderately High Risk,Average
+"g-sec index""",8.15,18.96,AAA,INF740K01QG4,119239,6,2,2,9,INF740KA1QV9,149970,Average,
 Franklin Ind Dyn Accrual Seg Port 2 Dir,Direct,Dynamic Bond,40600,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.01,0.01,B,INF955L01JF3,152898,1,10,10,1,22,Moderate Risk,Average
+"g-sec index""",0.01,0.01,B,INF955L01JF3,152898,1,10,10,1,INF740KA1QV9,149970,Average,
 Franklin Ind Dyn Accrual Seg Port 3 Dir,Direct,Dynamic Bond,40828,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,,INF955L01JF3,152898,1,1,1,1,4,High Risk,Poor
+"g-sec index""",,,,INF955L01JF3,152898,1,1,1,1,INF740KA1QV9,149970,Poor,
 Groww Dynamic Bond Dir,Direct,Dynamic Bond,38300,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.93,10.61,GOI/Cash,INF209K01S38,119533,2,5,3,10,20,Moderately High Risk,Average
+"g-sec index""",3.93,10.61,GOI/Cash,INF209K01S38,119533,2,5,3,10,INF740KA1QV9,149970,Average,
 HDFC Dynamic Debt Dir,Direct,Dynamic Bond,16061,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.21,17.89,AAA,INF179K01WB4,119075,6,2,2,9,19,Moderately High Risk,Average
+"g-sec index""",7.21,17.89,AAA,INF179K01WB4,119075,6,2,2,9,INF740KA1QV9,149970,Average,
 HSBC Dynamic Bond Dir,Direct,Dynamic Bond,16218,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.46,10.23,AAA,INF917K01HA0,151087,5,3,3,9,20,Moderately High Risk,Average
+"g-sec index""",5.46,10.23,AAA,INF917K01HA0,151087,5,3,3,9,INF740KA1QV9,149970,Average,
 ICICI Pru All Seasons Bond Dir,Direct,Dynamic Bond,17120,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.98,13.54,AAA,INF109K016E5,120603,8,3,3,9,23,Moderate Risk,Average
+"g-sec index""",5.98,13.54,AAA,INF109K016E5,120603,8,3,3,9,INF740KA1QV9,149970,Average,
 ICICI Pru Retirement Pure Debt Dir,Direct,Dynamic Bond,39073,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.61,10.18,AAA,INF109KC1UE0,146727,7,4,3,9,23,Moderate Risk,Average
+"g-sec index""",4.61,10.18,AAA,INF109KC1UE0,146727,7,4,3,9,INF740KA1QV9,149970,Average,
 ITI Dynamic Bond Dir,Direct,Dynamic Bond,41563,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.4,1.9,GOI/Cash,INF00XX01BC4,149029,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.4,1.9,GOI/Cash,INF00XX01BC4,149029,1,8,8,10,INF740KA1QV9,149970,Average,
 JM Dynamic Bond Dir,Direct,Dynamic Bond,17148,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.89,5.37,AAA,INF192K01DD3,120435,5,5,5,9,24,Moderate Risk,Average
+"g-sec index""",3.89,5.37,AAA,INF192K01DD3,120435,5,5,5,9,INF740KA1QV9,149970,Average,
 Kotak Dynamic Bond Dir,Direct,Dynamic Bond,16342,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.59,12.74,AAA,INF174K01JU2,119755,7,3,3,9,22,Moderate Risk,Average
+"g-sec index""",6.59,12.74,AAA,INF174K01JU2,119755,7,3,3,9,INF740KA1QV9,149970,Average,
 Mahindra Manulife Dynamic Bond Dir,Direct,Dynamic Bond,37127,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.66,6.68,AAA,INF174V01580,144403,7,5,5,9,26,Moderate Risk,Average
+"g-sec index""",3.66,6.68,AAA,INF174V01580,144403,7,5,5,9,INF740KA1QV9,149970,Average,
 Mirae Asset Dynamic Bond Dir,Direct,Dynamic Bond,33706,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.05,1.08,AAA,INF769K01DR8,140769,4,8,8,9,29,Low Risk,Good
+"g-sec index""",1.05,1.08,AAA,INF769K01DR8,140769,4,8,8,9,INF740KA1QV9,149970,Good,
 Nippon India Dynamic Bond Dir,Direct,Dynamic Bond,16060,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.81,4.44,AAA,INF204K01A25,118747,6,5,6,9,26,Moderate Risk,Average
+"g-sec index""",3.81,4.44,AAA,INF204K01A25,118747,6,5,6,9,INF740KA1QV9,149970,Average,
 PGIM India Dynamic Bond Dir,Direct,Dynamic Bond,16632,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.89,10.79,AAA,INF192K01DD3,120435,6,3,3,9,21,Moderate Risk,Average
+"g-sec index""",5.89,10.79,AAA,INF192K01DD3,120435,6,3,3,9,INF740KA1QV9,149970,Average,
 Quantum Dynamic Bond Dir,Direct,Dynamic Bond,30145,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.89,4.86,AAA,INF082J01176,134494,4,5,6,9,24,Moderate Risk,Average
+"g-sec index""",3.89,4.86,AAA,INF082J01176,134494,4,5,6,9,INF740KA1QV9,149970,Average,
 SBI Dynamic Bond Dir,Direct,Dynamic Bond,16199,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3,5.71,AAA,INF200K01RD4,119671,5,6,5,9,25,Moderate Risk,Average
+"g-sec index""",3,5.71,AAA,INF200K01RD4,119671,5,6,5,9,INF740KA1QV9,149970,Average,
 Union Dynamic Bond Dir,Direct,Dynamic Bond,16408,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",9.85,25.84,AAA,INF582M01799,119311,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",9.85,25.84,AAA,INF582M01799,119311,7,2,1,9,INF740KA1QV9,149970,Average,
 UTI Dynamic Bond Dir,Direct,Dynamic Bond,15885,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.51,4.27,AAA,INF789F01XD4,120762,5,5,6,9,25,Moderate Risk,Average
+"g-sec index""",3.51,4.27,AAA,INF789F01XD4,120762,5,5,6,9,INF740KA1QV9,149970,Average,
 UTI Dyn Bond Seg Port Dir,Direct,Dynamic Bond,40750,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,0.07,B,INF209K01S38,119533,1,1,10,1,13,High Risk,Poor
+"g-sec index""",,0.07,B,INF209K01S38,119533,1,1,10,1,INF740KA1QV9,149970,Poor,
 ABSL Corporate Bond Dir,Direct,Corporate Bond,15926,Not Available,Not Available,,4.82,7.01,AAA,INF209K01S38,119533,7,4,4,9,24,Moderate Risk,Average
 Axis Corporate Bond Dir,Direct,Corporate Bond,34381,Not Available,Not Available,,2.78,3.33,AAA,INF846K01ZM8,141588,7,6,6,9,28,Low Risk,Good
 Bandhan Corporate Bond Dir,Direct,Corporate Bond,31521,Not Available,Not Available,,1.66,2.22,AAA,INF194KA1M23,135916,5,7,7,9,28,Low Risk,Good
@@ -378,12 +378,12 @@ UTI Credit Risk Seg Port 3 Dir,Direct,Credit Risk,40906,Not Available,Not Availa
 UTI Credit Risk Seg Port Dir,Direct,Credit Risk,40290,Not Available,Not Available,,,0,Cash,INF955L01JF3,152898,1,1,10,10,22,Moderate Risk,Average
 ABSL Banking & PSU Debt Dir,Direct,Banking and PSU,15941,Not Available,Not Available,,3.44,4.52,AAA,INF209K01YN0,119550,6,5,6,9,26,Moderate Risk,Average
 Axis Banking & PSU Debt Dir,Direct,Banking and PSU,15680,Not Available,Not Available,,2.3,2.75,AAA,INF846K01CR6,120438,6,6,7,9,28,Low Risk,Good
-Bajaj Finserv Banking and PSU Dir,Direct,Banking and PSU,43851,Not Available,Not Available,,2.13,2.43,AAA,INF0QA701607,152162,5,6,7,9,27,Moderate Risk,Average
+Bajaj Finserv Banking and PSU Dir,Direct,Banking and PSU,43851,Not Available,Not Available,,2.13,2.43,AAA,INF277K01QW4,119312,5,6,7,9,27,Moderate Risk,Average,
 Bandhan Banking and PSU Dir,Direct,Banking and PSU,18448,Not Available,Not Available,,1.75,2.06,AAA,INF194K015G8,121279,5,7,7,9,28,Low Risk,Good
 Canara Robeco Banking and PSU Debt Dir,Direct,Banking and PSU,42432,Not Available,Not Available,,2.91,3.45,AAA,INF760K01KC4,150505,6,6,6,9,27,Moderate Risk,Average
 DSP Banking & PSU Debt Dir,Direct,Banking and PSU,21204,Not Available,Not Available,,4.15,6.75,AAA,INF740K01ZW2,124175,7,4,5,9,25,Moderate Risk,Average
 Edelweiss Banking and PSU Debt Dir,Direct,Banking and PSU,21020,Not Available,Not Available,,2.36,2.65,AAA,INF843K01FC8,140286,6,6,7,9,28,Low Risk,Good
-Franklin India Banking & PSU Debt Dir,Direct,Banking and PSU,26029,Not Available,Not Available,,2.39,5.2,AAA,INF090I01KR8,129008,7,6,5,9,27,Moderate Risk,Average
+Franklin India Banking & PSU Debt Dir,Direct,Banking and PSU,26029,Not Available,Not Available,,2.39,5.2,AAA,INF204KB1X25,146513,7,6,5,9,27,Moderate Risk,Average,
 HDFC Banking and PSU Debt Dir,Direct,Banking and PSU,25440,Not Available,Not Available,,3.32,4.42,AAA,INF179KA1IZ7,128629,7,5,6,9,27,Moderate Risk,Average
 HSBC Banking & PSU Debt Dir,Direct,Banking and PSU,16783,Not Available,Not Available,,2.65,3.09,AAA,INF917K01HH5,151107,6,6,6,9,27,Moderate Risk,Average
 ICICI Pru Banking & PSU Debt Dir,Direct,Banking and PSU,17786,Not Available,Not Available,,3.35,5.83,AAA,INF109K010A6,120256,7,5,5,9,26,Moderate Risk,Average
@@ -393,7 +393,7 @@ Kotak Banking & PSU Debt Dir,Direct,Banking and PSU,16356,Not Available,Not Avai
 LIC MF Banking & PSU Dir,Direct,Banking and PSU,16974,Not Available,Not Available,,2.75,3.55,AAA,INF767K01GI4,120338,6,6,6,9,27,Moderate Risk,Average
 Mirae Asset Banking and PSU Dir,Direct,Banking and PSU,41030,Not Available,Not Available,,2.34,2.79,AAA,INF769K01FY9,148419,4,6,7,9,26,Moderate Risk,Average
 Nippon India Banking and PSU Dir,Direct,Banking and PSU,30193,Not Available,Not Available,,3.49,4.33,AAA,INF204KA1U53,134547,6,5,6,9,26,Moderate Risk,Average
-SBI Banking and PSU Dir,Direct,Banking and PSU,17346,Not Available,Not Available,,1.79,2.16,AAA,INF0QA701607,152162,6,7,7,9,29,Low Risk,Good
+SBI Banking and PSU Dir,Direct,Banking and PSU,17346,Not Available,Not Available,,1.79,2.16,AAA,INF277K01QW4,119312,6,7,7,9,29,Low Risk,Good,
 Sundaram Banking & PSU Dir,Direct,Banking and PSU,17237,Not Available,Not Available,,2.87,3.42,AAA,INF209K01YN0,119550,6,6,6,9,27,Moderate Risk,Average
 UTI Banking & PSU Dir,Direct,Banking and PSU,23934,Not Available,Not Available,,1.35,1.44,AAA,INF789F015Z6,126940,4,8,8,9,29,Low Risk,Good
 ABSL Floating Rate Dir,Direct,Floater,15819,Not Available,Not Available,,1.07,1.72,AAA,INF209K01UX7,122646,6,8,8,9,31,Low Risk,Good
@@ -409,75 +409,75 @@ SBI Floating Rate Debt Dir,Direct,Floater,41154,Not Available,Not Available,,1.0
 Tata Floating Rate Dir,Direct,Floater,41544,Not Available,Not Available,,1.18,1.96,AAA,INF277KA1026,149007,5,8,8,9,30,Low Risk,Good
 UTI Floater Dir,Direct,Floater,38032,Not Available,Not Available,,0.81,1.78,AAA,INF789F1ACX5,145295,5,9,8,9,31,Low Risk,Good
 ABSL CRISIL Broad Based Gilt ETF,Direct,Gilt,44415,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.93,12,GOI/Cash,INF846K01DD4,120447,4,3,3,10,20,Moderately High Risk,Average
+"g-sec index""",6.93,12,GOI/Cash,INF846K01DD4,120447,4,3,3,10,INF740KA1QV9,149970,Average,
 ABSL Government Securities Dir,Direct,Gilt,15896,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.43,,GOI/Cash,INF209K01XP7,119605,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",11.43,,GOI/Cash,INF209K01XP7,119605,7,1,1,10,INF740KA1QV9,149970,Average,
 Axis Gilt Dir,Direct,Gilt,15681,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.21,15.13,GOI/Cash,INF846K01DD4,120447,5,2,2,10,19,Moderately High Risk,Average
+"g-sec index""",7.21,15.13,GOI/Cash,INF846K01DD4,120447,5,2,2,10,INF740KA1QV9,149970,Average,
 Bajaj Finserv Gilt Dir,Direct,Gilt,44862,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.73,5.23,GOI/Cash,INF0QA701AP9,153206,1,5,5,10,21,Moderate Risk,Average
+"g-sec index""",3.73,5.23,GOI/Cash,INF0QA701AP9,153206,1,5,5,10,INF740KA1QV9,149970,Average,
 Bandhan Gilt Dir,Direct,Gilt,16715,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.55,1.82,GOI/Cash,INF194K01Q29,118464,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.55,1.82,GOI/Cash,INF194K01Q29,118464,1,7,8,10,INF740KA1QV9,149970,Average,
 Baroda BNP Paribas Gilt Dir,Direct,Gilt,15706,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.27,16.81,GOI/Cash,INF955L01AD7,119341,5,2,2,10,19,Moderately High Risk,Average
+"g-sec index""",8.27,16.81,GOI/Cash,INF955L01AD7,119341,5,2,2,10,INF740KA1QV9,149970,Average,
 Canara Robeco Gilt Dir,Direct,Gilt,15745,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.61,15.09,GOI/Cash,INF760K01FC4,118299,5,2,2,10,19,Moderately High Risk,Average
+"g-sec index""",7.61,15.09,GOI/Cash,INF760K01FC4,118299,5,2,2,10,INF740KA1QV9,149970,Average,
 DSP Gilt Dir,Direct,Gilt,16391,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.93,27.14,GOI/Cash,INF740K01NF3,119099,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",10.93,27.14,GOI/Cash,INF740K01NF3,119099,7,1,1,10,INF740KA1QV9,149970,Average,
 Edelweiss Government Securities Dir,Direct,Gilt,24229,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.39,16.97,GOI/Cash,INF843K01GS2,140298,4,2,2,10,18,Moderately High Risk,Average
+"g-sec index""",7.39,16.97,GOI/Cash,INF843K01GS2,140298,4,2,2,10,INF740KA1QV9,149970,Average,
 Franklin India Government Securities Dir,Direct,Gilt,16888,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.28,23.19,GOI/Cash,INF090I01HS2,118498,7,2,1,10,20,Moderately High Risk,Average
+"g-sec index""",7.28,23.19,GOI/Cash,INF090I01HS2,118498,7,2,1,10,INF740KA1QV9,149970,Average,
 Groww Gilt Dir,Direct,Gilt,45121,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.32,19.02,GOI/Cash,INF666M01KK2,153477,3,3,2,10,18,Moderately High Risk,Average
+"g-sec index""",6.32,19.02,GOI/Cash,INF666M01KK2,153477,3,3,2,10,INF740KA1QV9,149970,Average,
 HDFC Gilt Dir,Direct,Gilt,16046,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.66,17.08,GOI/Cash,INF179K01VS0,119116,6,2,2,10,20,Moderately High Risk,Average
+"g-sec index""",7.66,17.08,GOI/Cash,INF179K01VS0,119116,6,2,2,10,INF740KA1QV9,149970,Average,
 HSBC Gilt Dir,Direct,Gilt,16236,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.22,,GOI/Cash,INF917K01FI7,151014,5,2,1,10,18,Moderately High Risk,Average
+"g-sec index""",8.22,,GOI/Cash,INF917K01FI7,151014,5,2,1,10,INF740KA1QV9,149970,Average,
 ICICI Pru Gilt Dir,Direct,Gilt,15953,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.58,20.28,GOI/Cash,INF109K018C5,120590,7,2,1,10,20,Moderately High Risk,Average
+"g-sec index""",8.58,20.28,GOI/Cash,INF109K018C5,120590,7,2,1,10,INF740KA1QV9,149970,Average,
 ICICI Pru Nifty 5 yr Benchmark G-SEC ETF,Direct,Gilt,42160,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.84,4.32,GOI/Cash,INF109K018C5,120590,3,5,6,10,24,Moderate Risk,Average
+"g-sec index""",3.84,4.32,GOI/Cash,INF109K018C5,120590,3,5,6,10,INF740KA1QV9,149970,Average,
 Invesco India Gilt Dir,Direct,Gilt,16750,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.05,25.21,GOI/Cash,INF205K01SN0,120520,6,1,1,10,18,Moderately High Risk,Average
+"g-sec index""",10.05,25.21,GOI/Cash,INF205K01SN0,120520,6,1,1,10,INF740KA1QV9,149970,Average,
 JioBlackRock Nifty 8-13 yr G-Sec Index Dir,Direct,Gilt,45426,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",7,9.3,GOI/Cash,INF22M001069,153791,4,3,4,10,21,Moderate Risk,Average
+"g-sec index""",7,9.3,GOI/Cash,INF22M001069,153791,4,3,4,10,INF740KA1QV9,149970,Average,
 Kotak Gilt Investment Dir,Direct,Gilt,16354,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.2,23.54,GOI/Cash,INF955L01JF3,152898,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",10.2,23.54,GOI/Cash,INF955L01JF3,152898,7,1,1,10,INF740KA1QV9,149970,Average,
 Kotak Gilt Investment PF & Trust Dir,Direct,Gilt,17766,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.2,23.54,GOI/Cash,INF903J017I5,134363,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",10.2,23.54,GOI/Cash,INF903J017I5,134363,7,1,1,10,INF740KA1QV9,149970,Average,
 LIC MF Gilt Dir,Direct,Gilt,16777,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",9.91,23.29,GOI/Cash,INF767K01EZ3,120282,6,2,1,10,19,Moderately High Risk,Average
+"g-sec index""",9.91,23.29,GOI/Cash,INF767K01EZ3,120282,6,2,1,10,INF740KA1QV9,149970,Average,
 LIC MF Nifty 8-13 yr G-Sec ETF,Direct,Gilt,29111,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.95,8.99,GOI/Cash,INF767K01EW0,120279,5,3,4,10,22,Moderate Risk,Average
+"g-sec index""",6.95,8.99,GOI/Cash,INF767K01EW0,120279,5,3,4,10,INF740KA1QV9,149970,Average,
 Mirae Asset Nifty 8-13 yr G-Sec ETF,Direct,Gilt,43473,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.76,8.67,GOI/Cash,INF740K019I5,131301,4,3,4,10,21,Moderate Risk,Average
+"g-sec index""",6.76,8.67,GOI/Cash,INF740K019I5,131301,4,3,4,10,INF740KA1QV9,149970,Average,
 Motilal Oswal 5 Year G-Sec FoF Dir,Direct,Gilt,41759,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,GOI/Cash,INF247L01AQ1,149240,1,1,1,10,13,High Risk,Poor
+"g-sec index""",,,GOI/Cash,INF247L01AQ1,149240,1,1,1,10,INF740KA1QV9,149970,Poor,
 Motilal Oswal Nifty 5Y Benchmark G-Sec ETF,Direct,Gilt,41212,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.95,4.49,GOI/Cash,INF740K019I5,131301,3,5,6,10,24,Moderate Risk,Average
+"g-sec index""",3.95,4.49,GOI/Cash,INF740K019I5,131301,3,5,6,10,INF740KA1QV9,149970,Average,
 Nippon India ETF Nifty 5Y Benchmark G-Sec,Direct,Gilt,41391,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.93,4.42,GOI/Cash,INF090I01VZ8,148304,3,5,6,10,24,Moderate Risk,Average
+"g-sec index""",3.93,4.42,GOI/Cash,INF090I01VZ8,148304,3,5,6,10,INF740KA1QV9,149970,Average,
 Nippon India ETF Nifty 8-13 yr G-Sec LT Gilt,Direct,Gilt,32557,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.94,9.27,GOI/Cash,INF090I01VZ8,148304,5,3,4,10,22,Moderate Risk,Average
+"g-sec index""",6.94,9.27,GOI/Cash,INF090I01VZ8,148304,5,3,4,10,INF740KA1QV9,149970,Average,
 Nippon India Gilt Dir,Direct,Gilt,16078,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.81,17.89,GOI/Cash,INF204K01XP8,118672,7,2,2,10,21,Moderate Risk,Average
+"g-sec index""",8.81,17.89,GOI/Cash,INF204K01XP8,118672,7,2,2,10,INF740KA1QV9,149970,Average,
 PGIM India Gilt Dir,Direct,Gilt,15595,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.82,18.79,GOI/Cash,INF223J01ND7,138472,6,2,2,10,20,Moderately High Risk,Average
+"g-sec index""",8.82,18.79,GOI/Cash,INF223J01ND7,138472,6,2,2,10,INF740KA1QV9,149970,Average,
 Quant Gilt Dir,Direct,Gilt,42968,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.97,11.45,GOI/Cash,INF966L01BF7,151228,4,3,3,10,20,Moderately High Risk,Average
+"g-sec index""",5.97,11.45,GOI/Cash,INF966L01BF7,151228,4,3,3,10,INF740KA1QV9,149970,Average,
 SBI Gilt Dir,Direct,Gilt,17166,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.66,10.93,GOI/Cash,INF200K01SH3,119707,3,3,3,10,19,Moderately High Risk,Average
+"g-sec index""",5.66,10.93,GOI/Cash,INF200K01SH3,119707,3,3,3,10,INF740KA1QV9,149970,Average,
 Tata GSF Dir,Direct,Gilt,17531,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.6,25.2,GOI/Cash,INF0QA701607,152162,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",10.6,25.2,GOI/Cash,INF0QA701607,152162,7,1,1,10,INF740KA1QV9,149970,Average,
 Union Gilt Dir,Direct,Gilt,42326,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.99,34.35,GOI/Cash,INF582M01HW2,150407,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",11.99,34.35,GOI/Cash,INF582M01HW2,150407,7,1,1,10,INF740KA1QV9,149970,Average,
 UTI Gilt Dir,Direct,Gilt,17050,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.34,7.09,GOI/Cash,INF789F01TL5,120792,4,3,4,10,21,Moderate Risk,Average
+"g-sec index""",5.34,7.09,GOI/Cash,INF789F01TL5,120792,4,3,4,10,INF740KA1QV9,149970,Average,
 UTI Nifty 5 yr Benchmark G-Sec ETF,Direct,Gilt,44081,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,GOI/Cash,INF789F1ACX5,145295,1,1,1,10,13,High Risk,Poor
+"g-sec index""",,,GOI/Cash,INF789F1ACX5,145295,1,1,1,10,INF740KA1QV9,149970,Poor,
 Zerodha Nifty 8-13 Yr G-Sec ETF,Direct,Gilt,45448,Nifty Composite Debt TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.96,9.26,GOI/Cash,INF579M01AN2,151165,5,3,4,10,22,Moderate Risk,Average
+"g-sec index""",6.96,9.26,GOI/Cash,INF579M01AN2,151165,5,3,4,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL 10 Year Gilt ETF,Direct,Gilt with 10 year,44486,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.09,9.61,GOI/Cash,INF846K01DD4,120447,5,2,4,10,21,Moderate Risk,Average
 Bandhan Gilt Fund with 10 year Constant Duration Dir,Direct,Gilt with 10 year,16728,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,6.8,9.37,GOI/Cash,INF194K01P38,118387,5,3,4,10,22,Moderate Risk,Average
 DSP 10Y G-Sec Dir,Direct,Gilt with 10 year,28175,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.08,9.57,GOI/Cash,INF740K019I5,131301,5,2,4,10,21,Moderate Risk,Average
@@ -488,58 +488,58 @@ SBI Nifty 10Y Benchmark G-Sec ETF,Direct,Gilt with 10 year,32486,NIFTY Composite
 UTI Gilt Fund with 10 year Constant Duration Dir,Direct,Gilt with 10 year,42374,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,6.96,9.47,GOI/Cash,INF789F1AVR7,150410,5,3,4,10,22,Moderate Risk,Average
 UTI Nifty 10 yr Benchmark G-Sec ETF,Direct,Gilt with 10 year,44082,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,,,GOI/Cash,INF789F1ACX5,145295,1,1,1,10,13,High Risk,Poor
 ABSL CRISIL IBX 50:50 Gilt+SDL Apr 2028 Index Dir,Direct,Target Maturity,42601,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.91,2.08,GOI/Cash,INF209KB14N1,150702,2,7,7,10,26,Moderate Risk,Average
+"g-sec index""",1.91,2.08,GOI/Cash,INF209KB14N1,150702,2,7,7,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX 60:40 SDL+ AAA PSU Apr 2026 Index Dir,Direct,Target Maturity,42832,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.07,0.07,GOI/Cash,INF209KB10P4,150938,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.07,0.07,GOI/Cash,INF209KB10P4,150938,1,10,10,10,INF740KA1QV9,149970,Good,
 ABSL CRISIL IBX 60:40 SDL+AAA PSU-Apr 2027 Dir,Direct,Target Maturity,42264,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.81,0.85,AAA,INF209KB19H2,150353,3,9,9,9,30,Low Risk,Good
+"g-sec index""",0.81,0.85,AAA,INF209KB19H2,150353,3,9,9,9,INF740KA1QV9,149970,Good,
 ABSL CRISIL-IBX AAA Fin Srvices Index-Sep 2027 Dir,Direct,Target Maturity,44685,NIFTY Corporate Bond A-II TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.26,1.33,AAA,INF209KC1290,153030,6,8,8,9,31,Low Risk,Good
+"g-sec index""",1.26,1.33,AAA,INF209KC1290,153030,6,8,8,9,INF740KA1QV9,149970,Good,
 ABSL CRISIL-IBX AAA NBFC-HFC Index-Sep 2026 Dir,Direct,Target Maturity,44616,NIFTY Corporate Bond A-II TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.37,0.38,AAA,INF209KC1217,152947,7,10,10,9,36,Very Low Risk,Good
+"g-sec index""",0.37,0.38,AAA,INF209KC1217,152947,7,10,10,9,INF740KA1QV9,149970,Good,
 ABSL CRISIL IBX Gilt Apr 2028 Index Dir,Direct,Target Maturity,43266,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.66,1.77,GOI/Cash,INF209KB11U2,151577,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.66,1.77,GOI/Cash,INF209KB11U2,151577,1,7,8,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt -Apr 2029 Index Dir,Direct,Target Maturity,42685,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.8,3.11,GOI/Cash,INF209KB12O3,150778,2,6,6,10,24,Moderate Risk,Average
+"g-sec index""",2.8,3.11,GOI/Cash,INF209KB12O3,150778,2,6,6,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt-April 2026 Index Dir,Direct,Target Maturity,42597,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.11,0.12,GOI/Cash,INF209KB10N9,150698,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.11,0.12,GOI/Cash,INF209KB10N9,150698,1,10,10,10,INF740KA1QV9,149970,Good,
 ABSL CRISIL IBX Gilt April 2033 Index Dir,Direct,Target Maturity,43983,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.2,6.49,GOI/Cash,INF209KB19Y7,152267,4,3,5,10,22,Moderate Risk,Average
+"g-sec index""",5.2,6.49,GOI/Cash,INF209KB19Y7,152267,4,3,5,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt June 2027 Index Dir,Direct,Target Maturity,44343,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.2,1.25,GOI/Cash,INF209KC1076,152659,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.2,1.25,GOI/Cash,INF209KC1076,152659,1,8,8,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX SDL Jun 2032 Index Dir,Direct,Target Maturity,43138,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.84,5.99,GOI/Cash,INF209KB14S0,151427,6,4,5,10,25,Moderate Risk,Average
+"g-sec index""",4.84,5.99,GOI/Cash,INF209KB14S0,151427,6,4,5,10,INF740KA1QV9,149970,Average,
 ABSL Nifty SDL Apr 2027 Dir,Direct,Target Maturity,42027,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),0.77,0.79,GOI/Cash,INF209KB11F3,149794,1,9,9,10,29,Low Risk,Good
 ABSL SDL + PSU Bond Sep 2026 60:40 Dir,Direct,Target Maturity,41726,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),0.4,0.41,AAA,INF209KB18B7,149199,3,10,10,9,32,Low Risk,Good
 ABSL Nifty SDL Sep 2027 Index Dir,Direct,Target Maturity,43270,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),1.36,1.42,GOI/Cash,INF209KB16T3,151562,2,8,8,10,28,Low Risk,Good
 Axis CRISIL IBX 50:50 Gilt Plus SDL Jun 2028 Index Dir,Direct,Target Maturity,43027,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.97,2.13,GOI/Cash,INF846K010N7,151300,3,7,7,10,27,Moderate Risk,Average
+"g-sec index""",1.97,2.13,GOI/Cash,INF846K010N7,151300,3,7,7,10,INF740KA1QV9,149970,Average,
 Axis CRISIL IBX 50:50 Gilt Plus SDL September 2027 Index Dir,Direct,Target Maturity,43146,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.34,1.4,GOI/Cash,INF846K012O1,151435,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.34,1.4,GOI/Cash,INF846K012O1,151435,1,8,8,10,INF740KA1QV9,149970,Average,
 Axis CRISIL-IBX AAA Bond Fin Srvices - Sep 2027 Index Dir,Direct,Target Maturity,44720,Not Available,Not Available,,1.37,1.45,AAA,INF846K015Y3,153051,7,8,8,9,32,Low Risk,Good
 Axis CRISIL-IBX AAA Bond NBFC-HFC-Jun 2027 Index Dir,Direct,Target Maturity,44816,Not Available,Not Available,,1.11,1.18,AAA,INF846KA1028,153172,6,8,8,9,31,Low Risk,Good
 Axis CRISIL-IBX AAA Bond NBFC - Jun 2027 Index Dir,Direct,Target Maturity,44562,Not Available,Not Available,,1.17,1.24,AAA,INF846K017X1,152887,7,8,8,9,32,Low Risk,Good
 Axis CRISIL IBX SDL May 2027 Dir,Direct,Target Maturity,42096,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.17,1.21,GOI/Cash,INF846K017G6,149873,2,8,8,10,28,Low Risk,Good
-Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF,Direct,Target Maturity,41480,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),0.15,0.15,AAA,INF846K017C5,149243,3,10,10,9,32,Low Risk,Good
-Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF FoF Dir,Direct,Target Maturity,41766,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),,,AAA,INF846K017C5,149243,1,1,1,9,12,High Risk,Poor
+"g-sec index""",1.17,1.21,GOI/Cash,INF846K017G6,149873,2,8,8,10,INF740KA1QV9,149970,Good,
+Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF,Direct,Target Maturity,41480,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),0.15,0.15,AAA,INF754K01WR0,154310,3,10,10,9,32,Low Risk,Good,
+Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF FoF Dir,Direct,Target Maturity,41766,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),,,AAA,INF754K01WR0,154310,1,1,1,9,12,High Risk,Poor,
 Axis Nifty SDL September 2026 Debt Index Dir,Direct,Target Maturity,42739,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),0.54,0.56,GOI/Cash,INF846K018K6,150854,1,9,9,10,29,Low Risk,Good
 Bandhan CRISIL-IBX 10:90 Gilt + SDL Index-Dec 2029 Dir,Direct,Target Maturity,45034,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.41,3.83,GOI/Cash,INF194KB1JL5,153389,3,5,6,10,24,Moderate Risk,Average
+"g-sec index""",3.41,3.83,GOI/Cash,INF194KB1JL5,153389,3,5,6,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX 90:10 SDL+Gilt- April 2032 Index Dir,Direct,Target Maturity,42791,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.8,5.9,GOI/Cash,INF194KB1EN2,150871,7,4,5,10,26,Moderate Risk,Average
+"g-sec index""",4.8,5.9,GOI/Cash,INF194KB1EN2,150871,7,4,5,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX 90:10 SDL+Gilt- November 2026 Index Dir,Direct,Target Maturity,42787,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.66,0.67,GOI/Cash,INF194KB1ET9,150868,1,9,9,10,29,Low Risk,Good
+"g-sec index""",0.66,0.67,GOI/Cash,INF194KB1ET9,150868,1,9,9,10,INF740KA1QV9,149970,Good,
 Bandhan CRISIL IBX 90:10 SDL+Gilt-September 2027 Index Dir,Direct,Target Maturity,42820,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.41,1.49,GOI/Cash,INF0QA701607,152162,3,8,8,10,29,Low Risk,Good
+"g-sec index""",1.41,1.49,GOI/Cash,INF0QA701607,152162,3,8,8,10,INF740KA1QV9,149970,Good,
 Bandhan Crisil IBX Gilt April 2026 Index Dir,Direct,Target Maturity,42669,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.18,0.19,GOI/Cash,INF194KB1EH4,150746,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.18,0.19,GOI/Cash,INF194KB1EH4,150746,1,10,10,10,INF740KA1QV9,149970,Good,
 Bandhan CRISIL IBX Gilt April 2028 Index Dir,Direct,Target Maturity,41372,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.69,1.8,GOI/Cash,INF194KB1EH4,150746,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.69,1.8,GOI/Cash,INF194KB1EH4,150746,1,7,8,10,INF740KA1QV9,149970,Average,
 Bandhan Crisil IBX Gilt April 2032 Index Dir,Direct,Target Maturity,43150,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.79,5.66,GOI/Cash,INF194KB1FF5,151408,4,4,5,10,23,Moderate Risk,Average
+"g-sec index""",4.79,5.66,GOI/Cash,INF194KB1FF5,151408,4,4,5,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX Gilt June 2027 Index Dir,Direct,Target Maturity,41376,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.24,1.29,GOI/Cash,INF194KB1BP3,148789,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.24,1.29,GOI/Cash,INF194KB1BP3,148789,1,8,8,10,INF740KA1QV9,149970,Average,
 Baroda BNP Paribas Nifty SDL December 2026 Index Dir,Direct,Target Maturity,43046,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),0.85,0.87,GOI/Cash,INF251K01RL0,151283,1,9,9,10,29,Low Risk,Good
 Baroda BNP Paribas NIFTY SDL December 2028 Index Dir,Direct,Target Maturity,43305,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),2.55,2.81,GOI/Cash,INF251K01RR7,151574,3,6,7,10,26,Moderate Risk,Average
 BHARAT Bond ETF-April 2030,Direct,Target Maturity,40483,NIFTY Corporate Bond A-II TR INR,Done,Avail of till 2019 (NSE),3.37,3.85,AAA,INF754K01KY1,147857,6,5,6,9,26,Moderate Risk,Average
@@ -551,19 +551,19 @@ BHARAT Bond ETF FOF-April 2033 Dir,Direct,Target Maturity,42896,NIFTY Corporate 
 BHARAT Bond FOF-April 2030 Dir,Direct,Target Maturity,40490,NIFTY Corporate Bond A-II TR INR,Done,Avail of till 2019 (NSE),3.39,3.86,AAA,INF754K01KY1,147857,6,5,6,9,26,Moderate Risk,Average
 BHARAT Bond FOF-April 2031 Dir,Direct,Target Maturity,41067,NIFTY Corporate Bond A-II TR INR,Done,Avail till 2020 (NSE),4.25,5.02,AAA,INF754K01LO0,148450,7,4,5,9,25,Moderate Risk,Average
 DSP CRISIL-IBX 50:50 Gilt Plus SDL - April 2033 Index Dir,Direct,Target Maturity,43070,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.26,6.74,GOI/Cash,INF740KA1SB7,151329,6,3,5,10,24,Moderate Risk,Average
+"g-sec index""",5.26,6.74,GOI/Cash,INF740KA1SB7,151329,6,3,5,10,INF740KA1QV9,149970,Average,
 DSP Nifty SDL + G-Sec Jun 2028 30:70 Dir,Direct,Target Maturity,42187,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),1.83,1.98,GOI/Cash,INF740KA1QV9,149970,2,7,8,10,27,Moderate Risk,Average
 DSP Nifty SDL Plus G-Sec Sep 2027 50:50 Index Dir,Direct,Target Maturity,43113,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.36,1.45,GOI/Cash,INF740KA1SH4,151373,2,8,8,10,28,Low Risk,Good
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL April 2037 Dir,Direct,Target Maturity,42589,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.71,10.74,GOI/Cash,INF754K01PF9,150671,7,2,3,10,22,Moderate Risk,Average
+"g-sec index""",7.71,10.74,GOI/Cash,INF754K01PF9,150671,7,2,3,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL June 2027 Dir,Direct,Target Maturity,42637,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.24,1.24,GOI/Cash,INF754K01PN3,150727,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.24,1.24,GOI/Cash,INF754K01PN3,150727,1,8,8,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL Sep 2028 Index Dir,Direct,Target Maturity,42709,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.2,2.35,GOI/Cash,INF754K01PV6,150807,3,6,7,10,26,Moderate Risk,Average
+"g-sec index""",2.2,2.35,GOI/Cash,INF754K01PV6,150807,3,6,7,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL-IBX AAA Bond NBFC-HFC-Jun 2027 Index Dir,Direct,Target Maturity,44976,NIFTY Corporate Bond A-II TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.21,1.29,AAA,INF754K01UG7,153335,7,8,8,9,32,Low Risk,Good
+"g-sec index""",1.21,1.29,AAA,INF754K01UG7,153335,7,8,8,9,INF740KA1QV9,149970,Good,
 Edelweiss CRISIL IBX AAA Fin Srvices Bond - Jan 2028 Index Dir,Direct,Target Maturity,44748,NIFTY Corporate Bond A-II TR INR,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.69,1.76,AAA,INF754K01TP0,153115,7,7,8,9,31,Low Risk,Good
+"g-sec index""",1.69,1.76,AAA,INF754K01TP0,153115,7,7,8,9,INF740KA1QV9,149970,Good,
 Edelweiss NIFTY PSU Bond Plus SDL Apr 2026 50:50 Index Dir,Direct,Target Maturity,41380,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),0.13,0.12,AAA,INF754K01MD1,148795,3,10,10,9,32,Low Risk,Good
 Edelweiss NIFTY PSU Bond Plus SDL Apr 2027 50:50 Index Dir,Direct,Target Maturity,41770,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),1.07,1.1,AAA,INF754K01MT7,149247,4,8,8,9,29,Low Risk,Good
 HDFC Nifty G-Sec Apr 2029 Index Dir,Direct,Target Maturity,43249,Nifty Composite Debt TR INR,Done,Avail till 2021 (NSE),2.8,3.13,GOI/Cash,INF179KC1FQ0,151495,2,6,6,10,24,Moderate Risk,Average
@@ -575,9 +575,9 @@ HDFC Nifty G-Sec Sep 2032 Index Dir,Direct,Target Maturity,42929,Nifty Composite
 HDFC Nifty SDL Oct 2026 Index Dir,Direct,Target Maturity,43194,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.53,0.54,GOI/Cash,INF179KC1FI7,151456,1,9,9,10,29,Low Risk,Good
 HDFC NIFTY SDL Plus G-Sec Jun 2027 40:60 Index Dir,Direct,Target Maturity,43338,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.19,1.23,GOI/Cash,INF179KC1GA2,151570,1,8,8,10,27,Moderate Risk,Average
 HSBC CRISIL IBX 50:50 Gilt+SDL Apr 2028 Dir,Direct,Target Maturity,42191,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.88,2.01,GOI/Cash,INF917K01HN3,150996,3,7,7,10,27,Moderate Risk,Average
+"g-sec index""",1.88,2.01,GOI/Cash,INF917K01HN3,150996,3,7,7,10,INF740KA1QV9,149970,Average,
 HSBC CRISIL IBX Gilt June 2027 Index Dir,Direct,Target Maturity,43207,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.28,1.33,GOI/Cash,INF336L01QT2,151479,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.28,1.33,GOI/Cash,INF336L01QT2,151479,1,8,8,10,INF740KA1QV9,149970,Average,
 ICICI Pru Nifty G-Sec Dec 2030 Index Dir,Direct,Target Maturity,42651,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),3.93,4.73,GOI/Cash,INF109KC18K8,150733,4,5,6,10,25,Moderate Risk,Average
 ICICI Pru Nifty PSU Bond + SDL Sep 2027 40:60 Index Dir,Direct,Target Maturity,41730,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),1.42,1.5,AAA,INF109KC1S88,149210,4,8,8,9,29,Low Risk,Good
 ICICI Pru Nifty SDL Dec 2028 Index Dir,Direct,Target Maturity,42647,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),2.48,2.76,GOI/Cash,INF109KC14L5,150729,4,6,7,10,27,Moderate Risk,Average
@@ -593,16 +593,16 @@ Kotak Nifty SDL Apr 2027 Top 12 Equal Weight Dir,Direct,Target Maturity,42084,NI
 Kotak Nifty SDL Apr 2032 Top 12 Equal Weight Dir,Direct,Target Maturity,42088,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),4.8,5.96,GOI/Cash,INF174KA1IR9,149865,7,4,5,10,26,Moderate Risk,Average
 Kotak Nifty SDL Jul 2026 Index Dir,Direct,Target Maturity,42958,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),0.41,0.41,GOI/Cash,INF174KA1LC5,151218,1,10,10,10,31,Low Risk,Good
 Kotak Nifty SDL Jul 2033 Index Dir,Direct,Target Maturity,43166,NIFTY Composite G-Sec Index,Done,"primary bm data not avail. Can use nifty composite
-g-sec index",5.3,6.84,GOI/Cash,INF174KA1MJ8,151420,7,3,5,10,25,Moderate Risk,Average
+"g-sec index""",5.3,6.84,GOI/Cash,INF174KA1MJ8,151420,7,3,5,10,INF740KA1QV9,149970,Average,
 Kotak Nifty SDL Plus AAA PSU Bond Jul 2028 60:40 Index Dir,Direct,Target Maturity,42643,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),1.99,2.16,AAA,INF174KA1JT3,150725,5,7,7,9,28,Low Risk,Good
 Mirae Asset CRISIL IBX Gilt Index-April 2033 Index Dir,Direct,Target Maturity,42697,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.45,6.75,GOI/Cash,INF769K01IX5,150792,5,3,5,10,23,Moderate Risk,Average
+"g-sec index""",5.45,6.75,GOI/Cash,INF769K01IX5,150792,5,3,5,10,INF740KA1QV9,149970,Average,
 Mirae Asset Nifty AAA PSU Bond Plus SDL Apr 2026 50:50 Index Dir,Direct,Target Maturity,42701,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),0.14,0.14,AAA,INF769K01JD5,150788,2,10,10,9,31,Low Risk,Good
 Mirae Asset Nifty SDL Jun 2027 Index Dir,Direct,Target Maturity,42238,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),1.25,1.26,GOI/Cash,INF769K01IH8,150358,3,8,8,10,29,Low Risk,Good
 Mirae Asset Nifty SDL June 2028 Index Dir,Direct,Target Maturity,43395,NIFTY Composite G-Sec Index,Done,Avail till 2023 (NSE),2.13,2.24,GOI/Cash,INF769K01JZ8,151691,4,6,7,10,27,Moderate Risk,Average
 Nippon India CRISIL IBX AAA Fin Srvices-Dec 2026 Index Dir,Direct,Target Maturity,44654,Not Available,Not Available,,0.69,0.7,AAA,INF204KC1DM3,152992,8,9,9,9,35,Very Low Risk,Good
 Nippon India CRISIL IBX AAA Fin Srvices-Jan 2028 Index Dir,Direct,Target Maturity,44658,Not Available,Not Available,,1.71,1.78,AAA,INF204KC1DS0,152996,7,7,8,9,31,Low Risk,Good
-Nippon India ETF Nifty SDL Apr 2026 Top 20 Equal Wght,Direct,Target Maturity,41392,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),0.12,0.12,GOI/Cash,INF090I01VZ8,148304,1,10,10,10,31,Low Risk,Good
+Nippon India ETF Nifty SDL Apr 2026 Top 20 Equal Wght,Direct,Target Maturity,41392,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),0.12,0.12,GOI/Cash,INF204KB1X25,146513,1,10,10,10,31,Low Risk,Good,
 Nippon India Nifty AAA CPSE Bond + SDL-Apr 2027 Mtrty 60:40 Dir,Direct,Target Maturity,42221,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.88,0.91,AAA,INF204KC1527,150012,5,9,9,9,32,Low Risk,Good
 Nippon India Nifty AAA PSU Bond+SDL-Sep 2026 Mtrty 50:50 Index Dir,Direct,Target Maturity,42663,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.39,0.4,AAA,INF204KC1683,150754,4,10,10,9,33,Low Risk,Good
 Nippon India Nifty G-Sec Jun 2036 Mtrty Index Dir,Direct,Target Maturity,42828,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),7.3,10.2,GOI/Cash,INF204KC1AC0,150920,5,2,3,10,20,Moderately High Risk,Average
@@ -611,22 +611,22 @@ Nippon India Nifty G-Sec Sep 2027 Mtrty Index Dir,Direct,Target Maturity,42816,N
 Nippon India Nifty SDL Plus G-Sec-Jun 2028 Mtrty 70:30 Index Dir,Direct,Target Maturity,42735,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.92,2.07,GOI/Cash,INF204KC1741,150824,3,7,7,10,27,Moderate Risk,Average
 Nippon India Nifty SDL Plus G-Sec-Jun 2029 Mtrty 70:30 Index Dir,Direct,Target Maturity,43171,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),2.73,3.09,GOI/Cash,INF204KC1AI7,151390,4,6,6,10,26,Moderate Risk,Average
 PGIM India CRISIL IBX Gilt Index-Apr 2028 Dir,Direct,Target Maturity,43158,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.72,1.84,GOI/Cash,INF663L01X21,151407,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.72,1.84,GOI/Cash,INF663L01X21,151407,1,7,8,10,INF740KA1QV9,149970,Average,
 SBI CPSE Bond + SDL Sep 2026 50:50 Dir,Direct,Target Maturity,41950,NIFTY Composite G-Sec Index,Done,"primary bm data not avail. Can use nifty composite
-g-sec index",0.4,0.41,AAA,INF200K01V08,125503,4,10,10,9,33,Low Risk,Good
+"g-sec index""",0.4,0.41,AAA,INF200K01V08,125503,4,10,10,9,INF740KA1QV9,149970,Good,
 SBI CRISIL IBX Gilt Index-April 2029 Dir,Direct,Target Maturity,42613,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.85,3.18,GOI/Cash,INF200KA18Q6,150706,2,6,6,10,24,Moderate Risk,Average
+"g-sec index""",2.85,3.18,GOI/Cash,INF200KA18Q6,150706,2,6,6,10,INF740KA1QV9,149970,Average,
 SBI CRISIL IBX Gilt Index-June 2036 Dir,Direct,Target Maturity,42593,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.29,10.26,GOI/Cash,INF200KA12Q9,150681,5,2,3,10,20,Moderately High Risk,Average
+"g-sec index""",7.29,10.26,GOI/Cash,INF200KA12Q9,150681,5,2,3,10,INF740KA1QV9,149970,Average,
 SBI CRISIL IBX SDL Index-September 2027 Dir,Direct,Target Maturity,42617,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.44,1.52,GOI/Cash,INF200KA14R3,150711,3,8,8,10,29,Low Risk,Good
+"g-sec index""",1.44,1.52,GOI/Cash,INF200KA14R3,150711,3,8,8,10,INF740KA1QV9,149970,Good,
 Tata Nifty G-Sec Dec 2026 Index Dir,Direct,Target Maturity,43058,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),0.69,0.71,GOI/Cash,INF277KA1794,151301,1,9,9,10,29,Low Risk,Good
 Tata Nifty G-Sec Dec 2029 Index Dir,Direct,Target Maturity,43011,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),3.05,3.42,GOI/Cash,INF277KA1737,151273,2,5,6,10,23,Moderate Risk,Average
 Tata Nifty SDL+AAA PSU Bond Dec 27 60:40 Dir,Direct,Target Maturity,42260,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.58,1.67,AAA,INF767K01GI4,120338,3,7,8,9,27,Moderate Risk,Average
 UTI CRISIL SDL Maturity April 2033 Index Dir,Direct,Target Maturity,42945,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.5,7.11,GOI/Cash,INF789F1AWX3,151185,7,3,4,10,24,Moderate Risk,Average
+"g-sec index""",5.5,7.11,GOI/Cash,INF789F1AWX3,151185,7,3,4,10,INF740KA1QV9,149970,Average,
 UTI CRISIL SDL Maturity June 2027 Index Dir,Direct,Target Maturity,42991,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.21,1.26,GOI/Cash,INF789F1AWZ8,151239,2,8,8,10,28,Low Risk,Good
+"g-sec index""",1.21,1.26,GOI/Cash,INF789F1AWZ8,151239,2,8,8,10,INF740KA1QV9,149970,Good,
 UTI Nifty SDL Plus AAA PSU Bond Apr 2026 75:25 Index Dir,Direct,Target Maturity,43131,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.18,0.18,AAA,INF789F1AXL6,151364,1,10,10,9,30,Low Risk,Good
 UTI Nifty SDL Plus AAA PSU Bond Apr 2028 75:25 Index Dir,Direct,Target Maturity,43246,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.97,2.15,AAA,INF789F1AXR3,151487,3,7,7,9,26,Moderate Risk,Average
 ABSL US Treasury 1-3 Year Bonds ETFs Passive FoF Dir,Direct,Others,43824,Not Available,Not Available,,,1.89,D,INF209KB16W7,152140,1,1,8,1,11,High Risk,Poor
@@ -635,31 +635,31 @@ Axis US Specific Treasury Dynamic Debt Passive FoF Dir,Direct,Others,43978,Not A
 Bandhan US Treasury Bond 0-1 year Specific Debt Passive FoF Dir,Direct,Others,43353,Not Available,Not Available,,,,D,INF194KB1FV2,151548,1,1,1,1,4,High Risk,Poor
 DSP US Specific Debt Passive FoF Dir,Direct,Others,44196,Not Available,Not Available,,,,D,INF740KA1UJ6,152528,1,1,1,1,4,High Risk,Poor
 ABSL Long Duration Reg,Regular,Long Duration,42338,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",9.37,22.59,AAA,INF209KB14J9,150482,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",9.37,22.59,AAA,INF209KB14J9,150482,7,2,1,9,INF740KA1QV9,149970,Average,
 Axis Long Duration Reg,Regular,Long Duration,42912,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.85,31.78,AAA,INF846K015L0,151178,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",11.85,31.78,AAA,INF846K015L0,151178,7,1,1,9,INF740KA1QV9,149970,Average,
 Bandhan Long Duration Reg,Regular,Long Duration,44184,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.47,17.8,GOI/Cash,INF194KB1HV8,152518,5,2,2,10,19,Moderately High Risk,Average
+"g-sec index""",8.47,17.8,GOI/Cash,INF194KB1HV8,152518,5,2,2,10,INF740KA1QV9,149970,Average,
 Franklin India Long Duration Fund Reg,Regular,Long Duration,44764,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.58,23.01,AAA,INF955L01IY6,152904,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",7.58,23.01,AAA,INF955L01IY6,152904,7,2,1,9,INF740KA1QV9,149970,Average,
 HDFC Long Duration Debt Reg,Regular,Long Duration,43050,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.76,29.07,AAA,INF209K01LV0,108273,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",11.76,29.07,AAA,INF209K01LV0,108273,7,1,1,9,INF740KA1QV9,149970,Average,
 ICICI Pru Long Term Bond Reg,Regular,Long Duration,15957,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.04,28.06,AAA,INF955L01IY6,152904,8,1,1,9,19,Moderately High Risk,Average
+"g-sec index""",11.04,28.06,AAA,INF955L01IY6,152904,8,1,1,9,INF740KA1QV9,149970,Average,
 Kotak Long Duration Reg,Regular,Long Duration,44192,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",12.13,20.38,AAA,INF174KA1RC2,152489,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",12.13,20.38,AAA,INF174KA1RC2,152489,7,1,1,9,INF740KA1QV9,149970,Average,
 Mirae Asset Long Duration Reg,Regular,Long Duration,44752,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",11.43,26.95,GOI/Cash,INF769K01MZ2,153107,7,1,1,10,19,Moderately High Risk,Average
+"g-sec index""",11.43,26.95,GOI/Cash,INF769K01MZ2,153107,7,1,1,10,INF740KA1QV9,149970,Average,
 Nippon India Nivesh Lakshya Long Duration Reg,Regular,Long Duration,36522,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.98,21.95,AAA,INF767K01535,105823,7,1,1,9,18,Moderately High Risk,Average
+"g-sec index""",10.98,21.95,AAA,INF767K01535,105823,7,1,1,9,INF740KA1QV9,149970,Average,
 SBI Long Duration Reg,Regular,Long Duration,42950,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.53,25.71,GOI/Cash,INF200KA13T1,151212,4,2,1,10,17,Moderately High Risk,Average
+"g-sec index""",8.53,25.71,GOI/Cash,INF200KA13T1,151212,4,2,1,10,INF740KA1QV9,149970,Average,
 UTI Long Duration Reg,Regular,Long Duration,43279,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",10.2,29.19,GOI/Cash,INF789F1AXS1,151527,6,1,1,10,18,Moderately High Risk,Average
+"g-sec index""",10.2,29.19,GOI/Cash,INF789F1AXS1,151527,6,1,1,10,INF740KA1QV9,149970,Average,
 ABSL Income Reg,Regular,Medium to Long Duration,15756,Not Available,Not Available,,6.78,14.35,AAA,INF209K01579,100038,7,3,3,9,22,Moderate Risk,Average
 Bandhan Medium to Long Duration Reg,Regular,Medium to Long Duration,16704,Not Available,Not Available,,2.21,2.59,AAA,INF194K01IL1,108765,4,6,7,9,26,Moderate Risk,Average
 Canara Robeco Income Reg,Regular,Medium to Long Duration,15753,Not Available,Not Available,,4.19,8.69,GOI/Cash,INF760K01324,101588,4,4,4,10,22,Moderate Risk,Average
-Franklin India Medium to Long Duration Reg,Regular,Medium to Long Duration,44534,Not Available,Not Available,,5.67,11.03,AAA,INF955L01IY6,152904,8,3,3,9,23,Moderate Risk,Average
+Franklin India Medium to Long Duration Reg,Regular,Medium to Long Duration,44534,Not Available,Not Available,,5.67,11.03,AAA,INF223J01AY0,138453,8,3,3,9,23,Moderate Risk,Average,
 HDFC Income Reg,Regular,Medium to Long Duration,16066,Not Available,Not Available,,6.56,12.29,AAA,INF767K01535,105823,5,3,3,9,20,Moderately High Risk,Average
 HSBC Medium to Long Duration Reg,Regular,Medium to Long Duration,17390,Not Available,Not Available,,5.35,10.24,AAA,INF336L01776,101685,5,3,3,9,20,Moderately High Risk,Average
 ICICI Pru Bond Reg,Regular,Medium to Long Duration,17100,Not Available,Not Available,,6.76,16.88,AAA,INF209K01785,103178,7,3,2,9,21,Moderate Risk,Average
@@ -667,31 +667,31 @@ ICICI Pru Diversified Debt Strategy Active FoF Reg,Regular,Medium to Long Durati
 JM Medium to Long Duration Reg,Regular,Medium to Long Duration,17172,Not Available,Not Available,,4.4,5.81,AAA,INF192K01AB3,100223,4,4,5,9,22,Moderate Risk,Average
 Kotak Bond Reg,Regular,Medium to Long Duration,16749,Not Available,Not Available,,6.43,10.97,AAA,INF174K01EM0,100299,7,3,3,9,22,Moderate Risk,Average
 LIC MF Medium to Long Duration Reg,Regular,Medium to Long Duration,16768,Not Available,Not Available,,6.11,10.13,AAA,INF767K01923,100315,5,3,3,9,20,Moderately High Risk,Average
-Nippon India Medium to Long Duration Reg,Regular,Medium to Long Duration,16835,Not Available,Not Available,,6.82,14.1,AAA,INF955L01IY6,152904,6,3,3,9,21,Moderate Risk,Average
+Nippon India Medium to Long Duration Reg,Regular,Medium to Long Duration,16835,Not Available,Not Available,,6.82,14.1,AAA,INF223J01AY0,138453,6,3,3,9,21,Moderate Risk,Average,
 SBI Medium to Long Duration Reg,Regular,Medium to Long Duration,16230,Not Available,Not Available,,5.45,9.24,AAA,INF200K01594,100639,8,3,4,9,24,Moderate Risk,Average
 UTI Medium to Long Duration Reg,Regular,Medium to Long Duration,15861,Not Available,Not Available,,6.44,10.4,AAA,INF789F01406,100741,7,3,3,9,22,Moderate Risk,Average
 UTI Medium to Long Duration Seg Port Reg,Regular,Medium to Long Duration,40720,Not Available,Not Available,,,0.07,B,INF789F014Z9,126939,1,1,10,1,13,High Risk,Poor
 ABSL Medium Term Reg,Regular,Medium Duration,15910,Not Available,Not Available,,3.12,3.9,AAA,INF209K01603,111803,8,5,6,9,28,Low Risk,Good
-ABSL Medium Term Seg Port1 Regect,Regular,Medium Duration,40449,Not Available,Not Available,,,,Cash,INF955L01IY6,152904,1,1,1,10,13,High Risk,Poor
+ABSL Medium Term Seg Port1 Regect,Regular,Medium Duration,40449,Not Available,Not Available,,,,Cash,INF223J01AY0,138453,1,1,1,10,13,High Risk,Poor,
 Axis Strategic Bond Reg,Regular,Medium Duration,17333,Not Available,Not Available,,3.36,4.35,AAA,INF846K01BP2,116894,9,5,6,9,29,Low Risk,Good
 Bandhan Medium Duration Reg,Regular,Medium Duration,16708,Not Available,Not Available,,1.73,2.06,AAA,INF194K01JU0,108728,5,7,7,9,28,Low Risk,Good
 DSP Bond Reg,Regular,Medium Duration,15795,Not Available,Not Available,,3.38,3.94,AAA,INF740K01ZP6,124172,7,5,6,9,27,Moderate Risk,Average
-Franklin Ind Incm Opp Seg Port 2 Reg,Regular,Medium Duration,40592,Not Available,Not Available,,0.01,0.01,B,INF955L01IY6,152904,1,10,10,1,22,Moderate Risk,Average
+Franklin Ind Incm Opp Seg Port 2 Reg,Regular,Medium Duration,40592,Not Available,Not Available,,0.01,0.01,B,INF223J01AY0,138453,1,10,10,1,22,Moderate Risk,Average,
 HDFC Medium Term Debt Reg,Regular,Medium Duration,16058,Not Available,Not Available,,3.4,5.02,AAA,INF209K01LV0,108273,9,5,5,9,28,Low Risk,Good
 HSBC Medium Duration Reg,Regular,Medium Duration,29311,Not Available,Not Available,,3.1,4.54,AAA,INF917K01TH0,151149,8,5,6,9,28,Low Risk,Good
-ICICI Pru Medium Term Bond Reg,Regular,Medium Duration,17063,Not Available,Not Available,,3.69,6.48,AAA,INF955L01IY6,152904,9,5,5,9,28,Low Risk,Good
+ICICI Pru Medium Term Bond Reg,Regular,Medium Duration,17063,Not Available,Not Available,,3.69,6.48,AAA,INF223J01AY0,138453,9,5,5,9,28,Low Risk,Good,
 Invesco India Medium Duration Reg,Regular,Medium Duration,41551,Not Available,Not Available,,3.66,4.97,AAA,INF205KA1379,149012,5,5,6,9,25,Moderate Risk,Average
 Kotak Medium Term Reg,Regular,Medium Duration,25271,Not Available,Not Available,,3.24,4.36,AA,INF277K01717,101703,9,5,6,7,27,Moderate Risk,Average
-Nippon India Medium Duration Reg,Regular,Medium Duration,26994,Not Available,Not Available,,4.03,4.99,AAA,INF955L01IY6,152904,8,4,6,9,27,Moderate Risk,Average
-Nippon India Medium Duration Seg Port1 Reg,Regular,Medium Duration,40711,Not Available,Not Available,,,0.07,B,INF955L01IY6,152904,1,1,10,1,13,High Risk,Poor
-Nippon India Medium Duration Seg Port 2 Regect,Regular,Medium Duration,40880,Not Available,Not Available,,,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
+Nippon India Medium Duration Reg,Regular,Medium Duration,26994,Not Available,Not Available,,4.03,4.99,AAA,INF223J01AY0,138453,8,4,6,9,27,Moderate Risk,Average,
+Nippon India Medium Duration Seg Port1 Reg,Regular,Medium Duration,40711,Not Available,Not Available,,,0.07,B,INF223J01AY0,138453,1,1,10,1,13,High Risk,Poor,
+Nippon India Medium Duration Seg Port 2 Regect,Regular,Medium Duration,40880,Not Available,Not Available,,,,,INF223J01AY0,138453,1,1,1,1,4,High Risk,Poor,
 SBI Medium Duration Reg,Regular,Medium Duration,17808,Not Available,Not Available,,3.21,4.37,AA,INF200K01719,102053,9,5,6,7,27,Moderate Risk,Average
 Sundaram Medium Duration Reg,Regular,Medium Duration,16084,Not Available,Not Available,,3.81,4.81,AAA,INF903J016H9,134356,6,5,6,9,26,Moderate Risk,Average
-Tata Medium Term Seg Port1 Regect,Regular,Medium Duration,40074,Not Available,Not Available,,,,AA,INF955L01IY6,152904,1,1,1,7,10,High Risk,Poor
+Tata Medium Term Seg Port1 Regect,Regular,Medium Duration,40074,Not Available,Not Available,,,,AA,INF223J01AY0,138453,1,1,1,7,10,High Risk,Poor,
 UTI Medium Duration Reg,Regular,Medium Duration,29994,Not Available,Not Available,,3.63,4.61,AAA,INF789FB1JU4,134499,6,5,6,9,26,Moderate Risk,Average
-UTI Medium Duration Seg Port 2 Reg,Regular,Medium Duration,40918,Not Available,Not Available,,,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
-UTI Medium Duration Seg Port 3 Reg,Regular,Medium Duration,41050,Not Available,Not Available,,,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
-UTI Medium Duration Seg Port Reg,Regular,Medium Duration,40739,Not Available,Not Available,,,0.07,B,INF955L01IY6,152904,1,1,10,1,13,High Risk,Poor
+UTI Medium Duration Seg Port 2 Reg,Regular,Medium Duration,40918,Not Available,Not Available,,,,,INF223J01AY0,138453,1,1,1,1,4,High Risk,Poor,
+UTI Medium Duration Seg Port 3 Reg,Regular,Medium Duration,41050,Not Available,Not Available,,,,,INF223J01AY0,138453,1,1,1,1,4,High Risk,Poor,
+UTI Medium Duration Seg Port Reg,Regular,Medium Duration,40739,Not Available,Not Available,,,0.07,B,INF223J01AY0,138453,1,1,10,1,13,High Risk,Poor,
 ABSL Retirement 50s + Debt Reg,Regular,Short Duration,39193,Not Available,Not Available,,3.21,6.07,AAA,INF209KB1J71,146941,2,5,5,9,21,Moderate Risk,Average
 ABSL Short Term Reg,Regular,Short Duration,15930,Not Available,Not Available,,2.5,2.99,AAA,INF209K01942,101844,7,6,7,9,29,Low Risk,Good
 Axis Short Duration Reg,Regular,Short Duration,15752,Not Available,Not Available,,2.39,2.78,AAA,INF846K01644,112354,7,6,7,9,29,Low Risk,Good
@@ -702,18 +702,18 @@ Canara Robeco Short Duration Reg,Regular,Short Duration,15780,Not Available,Not 
 DSP Short Term Reg,Regular,Short Duration,16429,Not Available,Not Available,,2.76,3.35,AAA,INF740K01656,101304,7,6,6,9,28,Low Risk,Good
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL SD Index Reg,Regular,Short Duration,43109,Not Available,Not Available,,2.68,2.95,GOI/Cash,INF754K01PR4,150848,3,6,7,10,26,Moderate Risk,Average
 Franklin Ind ST Incm Seg Port 3 Regect,Regular,Short Duration,40847,Not Available,Not Available,,,,,INF209KB13W4,152142,1,1,1,1,4,High Risk,Poor
-Groww Short Duration Reg,Regular,Short Duration,20851,Not Available,Not Available,,1.42,1.53,AAA,INF955L01IY6,152904,5,8,8,9,30,Low Risk,Good
+Groww Short Duration Reg,Regular,Short Duration,20851,Not Available,Not Available,,1.42,1.53,AAA,INF223J01AY0,138453,5,8,8,9,30,Low Risk,Good,
 HDFC Short Term Debt Reg,Regular,Short Duration,16151,Not Available,Not Available,,2.48,3.42,AAA,INF209K01LV0,108273,7,6,6,9,28,Low Risk,Good
 HSBC Short Duration Reg,Regular,Short Duration,16299,Not Available,Not Available,,2.29,2.66,AAA,INF917K01CL8,151065,6,6,7,9,28,Low Risk,Good
-ICICI Pru Short Term Reg,Regular,Short Duration,15866,Not Available,Not Available,,2.89,4.64,AAA,INF955L01IY6,152904,8,6,6,9,29,Low Risk,Good
+ICICI Pru Short Term Reg,Regular,Short Duration,15866,Not Available,Not Available,,2.89,4.64,AAA,INF223J01AY0,138453,8,6,6,9,29,Low Risk,Good,
 Invesco India Short Duration Reg,Regular,Short Duration,16839,Not Available,Not Available,,2.22,2.61,AAA,INF205K01UN6,105185,6,6,7,9,28,Low Risk,Good
-JioBlackRock Short Duration Reg,Regular,Short Duration,45726,Not Available,Not Available,,0.35,0.36,AAA,INF955L01IY6,152904,3,10,10,9,32,Low Risk,Good
+JioBlackRock Short Duration Reg,Regular,Short Duration,45726,Not Available,Not Available,,0.35,0.36,AAA,INF223J01AY0,138453,3,10,10,9,32,Low Risk,Good,
 JM Short Duration Reg,Regular,Short Duration,42463,Not Available,Not Available,,2.1,2.34,AAA,INF192K01MM5,150542,5,6,7,9,27,Moderate Risk,Average
 Kotak Bond Short Term Reg,Regular,Short Duration,16339,Not Available,Not Available,,2.62,3.49,AAA,INF277K01972,101548,7,6,6,9,28,Low Risk,Good
 LIC MF Short Duration Reg,Regular,Short Duration,38779,Not Available,Not Available,,2.63,2.9,AAA,INF767K01PT2,145952,6,6,7,9,28,Low Risk,Good
 Mahindra Manulife Short Duration Reg,Regular,Short Duration,41315,Not Available,Not Available,,2.3,2.88,AAA,INF174V01AJ1,148727,7,6,7,9,29,Low Risk,Good
 Mirae Asset Short Duration Reg,Regular,Short Duration,35431,Not Available,Not Available,,2.01,2.26,AAA,INF769K01DU2,142642,5,6,7,9,27,Moderate Risk,Average
-Nippon India Short Duration Reg,Regular,Short Duration,16180,Not Available,Not Available,,2.58,2.96,AAA,INF955L01IY6,152904,7,6,7,9,29,Low Risk,Good
+Nippon India Short Duration Reg,Regular,Short Duration,16180,Not Available,Not Available,,2.58,2.96,AAA,INF223J01AY0,138453,7,6,7,9,29,Low Risk,Good,
 SBI Short Term Debt Reg,Regular,Short Duration,16906,Not Available,Not Available,,2.59,3.5,AAA,INF209K01LV0,108273,7,6,6,9,28,Low Risk,Good
 Sundaram Short Duration Reg,Regular,Short Duration,16590,Not Available,Not Available,,2.39,2.88,AAA,INF903J016H9,134356,6,6,7,9,28,Low Risk,Good
 Tata Short Term Bond Reg,Regular,Short Duration,16736,Not Available,Not Available,,2.1,2.41,AAA,INF277K01972,101548,6,6,7,9,28,Low Risk,Good
@@ -725,19 +725,19 @@ ABSL CRISIL-IBX Fin Srvices 9-12 Months Debt Index Reg,Regular,Low Duration,4507
 ABSL Low Duration Reg,Regular,Low Duration,15725,Not Available,Not Available,,0.98,1.05,AAA,INF209KB14J9,150482,6,9,8,9,32,Low Risk,Good
 Axis Treasury Advantage Reg,Regular,Low Duration,15760,Not Available,Not Available,,0.93,1.04,AAA,INF846K01537,112214,6,9,8,9,32,Low Risk,Good
 Bajaj Finserv Low Duration Reg,Regular,Low Duration,45824,Not Available,Not Available,,,,AAA,INF0QA701CC3,154203,1,1,1,9,12,High Risk,Poor
-Bandhan Low Duration Reg,Regular,Low Duration,16735,Not Available,Not Available,,0.87,1,AAA,INF194K01FU8,108632,6,9,9,9,33,Low Risk,Good
+Bandhan Low Duration Reg,Regular,Low Duration,16735,Not Available,Not Available,,0.87,1,AAA,INF109KC1R55,149157,6,9,9,9,33,Low Risk,Good,
 Baroda BNP Paribas Low Duration Reg,Regular,Low Duration,16234,Not Available,Not Available,,0.99,1.07,AAA,INF251K01DQ9,150165,7,9,8,9,33,Low Risk,Good
 Baroda BNP Paribas Medium Duration-Seg Port 1 Reg,Regular,Low Duration,40947,Not Available,Not Available,,,,,INF767K01535,105823,1,1,1,1,4,High Risk,Poor
 Canara Robeco Savings Reg,Regular,Low Duration,16604,Not Available,Not Available,,0.98,1.42,AAA,INF760K01795,102913,6,9,8,9,32,Low Risk,Good
 DSP Low Duration Reg,Regular,Low Duration,29616,Not Available,Not Available,,0.97,1.22,AAA,INF740K018P2,133926,6,9,8,9,32,Low Risk,Good
 Edelweiss Low Duration Reg,Regular,Low Duration,45057,Not Available,Not Available,,0.79,0.8,AAA,INF754K01UT0,153419,6,9,9,9,33,Low Risk,Good
-Franklin India Low Duration Reg,Regular,Low Duration,45010,Not Available,Not Available,,0.68,1.88,AAA,INF955L01IY6,152904,7,9,8,9,33,Low Risk,Good
-Franklin Ind Low Duration Seg Port 2 Reg,Regular,Low Duration,40611,Not Available,Not Available,,0.01,0.01,B,INF955L01IY6,152904,1,10,10,1,22,Moderate Risk,Average
-HDFC Low Duration Reg,Regular,Low Duration,16011,Not Available,Not Available,,0.98,1.87,AAA,INF955L01IY6,152904,7,9,8,9,33,Low Risk,Good
+Franklin India Low Duration Reg,Regular,Low Duration,45010,Not Available,Not Available,,0.68,1.88,AAA,INF223J01AY0,138453,7,9,8,9,33,Low Risk,Good,
+Franklin Ind Low Duration Seg Port 2 Reg,Regular,Low Duration,40611,Not Available,Not Available,,0.01,0.01,B,INF223J01AY0,138453,1,10,10,1,22,Moderate Risk,Average,
+HDFC Low Duration Reg,Regular,Low Duration,16011,Not Available,Not Available,,0.98,1.87,AAA,INF223J01AY0,138453,7,9,8,9,33,Low Risk,Good,
 HSBC Low Duration Reg,Regular,Low Duration,16296,Not Available,Not Available,,0.93,0.98,AAA,INF677K01452,151114,7,9,9,9,34,Low Risk,Good
 ICICI Pru Savings Reg,Regular,Low Duration,15565,Not Available,Not Available,,0.94,1.39,AAA,INF109K01902,102330,7,9,8,9,33,Low Risk,Good
 Invesco India Low Duration Reg,Regular,Low Duration,16853,Not Available,Not Available,,0.74,0.77,AAA,INF205K01HT0,104728,5,9,9,9,32,Low Risk,Good
-JioBlackRock Low Duration Reg,Regular,Low Duration,45727,Not Available,Not Available,,0.59,0.6,AAA,INF955L01IY6,152904,4,9,9,9,31,Low Risk,Good
+JioBlackRock Low Duration Reg,Regular,Low Duration,45727,Not Available,Not Available,,0.59,0.6,AAA,INF223J01AY0,138453,4,9,9,9,31,Low Risk,Good,
 JM Low Duration Reg,Regular,Low Duration,16564,Not Available,Not Available,,0.89,0.91,AAA,INF192K01AY5,143607,6,9,9,9,33,Low Risk,Good
 Kotak CRISIL-IBX Fin Srvices 9 To 12 Months Debt Index Reg,Regular,Low Duration,45503,Not Available,Not Available,,0.55,0.55,AAA,INF174KA1XP2,153877,7,9,9,9,34,Low Risk,Good
 Kotak Low Duration Reg,Regular,Low Duration,16503,Not Available,Not Available,,0.93,1.35,AAA,INF174KA1RC2,152489,7,9,8,9,33,Low Risk,Good
@@ -746,8 +746,8 @@ Mahindra Manulife Low Duration Reg,Regular,Low Duration,33500,Not Available,Not 
 Mirae Asset CRISIL-IBX Financial Services 9-12 Months Debt Index Fund Reg,Regular,Low Duration,45253,Not Available,Not Available,,0.52,0.52,AAA,INF769K01OP9,153636,7,9,9,9,34,Low Risk,Good
 Mirae Asset Low Duration Reg,Regular,Low Duration,16599,Not Available,Not Available,,0.69,0.73,AAA,INF769K01937,107705,5,9,9,9,32,Low Risk,Good
 Nippon India CRISIL-IBX Fin Srvices 9-12 Months Debt Index Reg,Regular,Low Duration,45881,Not Available,Not Available,,,,,INF204KC1GO2,154255,1,1,1,1,4,High Risk,Poor
-Nippon India Low Duration Reg,Regular,Low Duration,16863,Not Available,Not Available,,0.98,1.21,AAA,INF955L01IY6,152904,7,9,8,9,33,Low Risk,Good
-PGIM India Money Market -Seg Port 1 Reg,Regular,Low Duration,43750,Not Available,Not Available,,,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
+Nippon India Low Duration Reg,Regular,Low Duration,16863,Not Available,Not Available,,0.98,1.21,AAA,INF223J01AY0,138453,7,9,8,9,33,Low Risk,Good,
+PGIM India Money Market -Seg Port 1 Reg,Regular,Low Duration,43750,Not Available,Not Available,,,,,INF223J01AY0,138453,1,1,1,1,4,High Risk,Poor,
 SBI Low Duration Reg,Regular,Low Duration,16316,Not Available,Not Available,,0.62,0.73,AAA,INF200K01MO2,106212,5,9,9,9,32,Low Risk,Good
 Sundaram Low Duration Reg,Regular,Low Duration,16542,Not Available,Not Available,,0.82,0.86,AAA,INF903J016H9,134356,6,9,9,9,33,Low Risk,Good
 Tata Treasury Advantage Reg,Regular,Low Duration,16689,Not Available,Not Available,,0.93,1.1,AAA,INF277K01MA9,103159,5,9,8,9,31,Low Risk,Good
@@ -764,12 +764,12 @@ Bank of India Ultra Short Duration Reg,Regular,Ultra Short Duration,16978,Not Av
 Baroda BNP Paribas Ultra Short Duration Reg,Regular,Ultra Short Duration,36295,Not Available,Not Available,,0.44,0.49,AAA,INF955L01GX2,143464,6,10,10,9,35,Very Low Risk,Good
 Canara Robeco Ultra Short Term Reg,Regular,Ultra Short Duration,16684,Not Available,Not Available,,0.43,1.25,AAA,INF760K01DC9,109371,6,10,8,9,33,Low Risk,Good
 DSP Ultra Short Reg,Regular,Ultra Short Duration,16415,Not Available,Not Available,,0.48,0.62,AAA,INF740K01QQ3,104138,7,10,9,9,35,Very Low Risk,Good
-Franklin India Ultra Short Duration Reg,Regular,Ultra Short Duration,44497,Not Available,Not Available,,0.31,0.57,AAA,INF955L01IY6,152904,5,10,9,9,33,Low Risk,Good
+Franklin India Ultra Short Duration Reg,Regular,Ultra Short Duration,44497,Not Available,Not Available,,0.31,0.57,AAA,INF223J01AY0,138453,5,10,9,9,33,Low Risk,Good,
 HDFC CRISIL-IBX Fin Srvices 3-6 Months Debt Index Reg,Regular,Ultra Short Duration,45140,Not Available,Not Available,,0.31,0.32,AAA,INF179KC1JJ7,153518,7,10,10,9,36,Very Low Risk,Good
 HDFC Ultra Short Term Reg,Regular,Ultra Short Duration,37806,Not Available,Not Available,,0.46,0.67,AAA,INF277K016S1,146070,7,10,9,9,35,Very Low Risk,Good
 HSBC Ultra Short Duration Reg,Regular,Ultra Short Duration,40543,Not Available,Not Available,,0.44,0.46,AAA,INF336L01OW1,147907,5,10,10,9,34,Low Risk,Good
 ICICI Pru CRISIL-IBX Financial Services 3-6 Months Debt Index Reg,Regular,Ultra Short Duration,45048,Not Available,Not Available,,0.31,0.31,AAA,INF174KA1VN1,153375,7,10,10,9,36,Very Low Risk,Good
-ICICI Pru Ultra Short Term Reg,Regular,Ultra Short Duration,17404,Not Available,Not Available,,0.47,0.53,AAA,INF955L01IY6,152904,7,10,9,9,35,Very Low Risk,Good
+ICICI Pru Ultra Short Term Reg,Regular,Ultra Short Duration,17404,Not Available,Not Available,,0.47,0.53,AAA,INF223J01AY0,138453,7,10,9,9,35,Very Low Risk,Good,
 Invesco India Ultra Short Duration Reg,Regular,Ultra Short Duration,16797,Not Available,Not Available,,0.37,0.38,AAA,INF205K01TM0,114359,6,10,10,9,35,Very Low Risk,Good
 ITI Ultra Short Duration Reg,Regular,Ultra Short Duration,41474,Not Available,Not Available,,0.25,0.27,AAA,INF00XX01952,148906,3,10,10,9,32,Low Risk,Good
 Kotak CRISIL-IBX Fin Srvices 3-6 Months Debt Index Reg,Regular,Ultra Short Duration,44996,Not Available,Not Available,,0.3,0.3,AAA,INF174KA1VN1,153375,7,10,10,9,36,Very Low Risk,Good
@@ -779,8 +779,8 @@ Mahindra Manulife Ultra Short Duration Reg,Regular,Ultra Short Duration,40343,No
 Mirae Asset Ultra Short Duration Reg,Regular,Ultra Short Duration,41139,Not Available,Not Available,,0.41,0.43,AAA,INF769K01GH2,148530,6,10,10,9,35,Very Low Risk,Good
 Motilal Oswal Ultra Short Term Reg,Regular,Ultra Short Duration,21385,Not Available,Not Available,,0.38,0.38,AAA,INF247L01213,124233,4,10,10,9,33,Low Risk,Good
 Nippon India CRISIL-IBX Financial Services 3-6 Months Debt Index Reg,Regular,Ultra Short Duration,45885,Not Available,Not Available,,,,,INF204KC1GO2,154255,1,1,1,1,4,High Risk,Poor
-Nippon India Ultra Short Duration Reg,Regular,Ultra Short Duration,16091,Not Available,Not Available,,0.48,0.67,AAA,INF955L01IY6,152904,8,10,9,9,36,Very Low Risk,Good
-Nippon India Ultra Short Duration Seg Port 1 Regect,Regular,Ultra Short Duration,40332,Not Available,Not Available,,,0.07,BBB,INF955L01IY6,152904,10,1,10,2,23,Moderate Risk,Average
+Nippon India Ultra Short Duration Reg,Regular,Ultra Short Duration,16091,Not Available,Not Available,,0.48,0.67,AAA,INF223J01AY0,138453,8,10,9,9,36,Very Low Risk,Good,
+Nippon India Ultra Short Duration Seg Port 1 Regect,Regular,Ultra Short Duration,40332,Not Available,Not Available,,,0.07,BBB,INF223J01AY0,138453,10,1,10,2,23,Moderate Risk,Average,
 PGIM India Ultra Short Duration Reg,Regular,Ultra Short Duration,16397,Not Available,Not Available,,0.35,0.35,AAA,INF223J01FX1,138337,6,10,10,9,35,Very Low Risk,Good
 SBI Ultra Short Duration Reg,Regular,Ultra Short Duration,16890,Not Available,Not Available,,0.42,0.52,AAA,INF200K01LJ4,100641,5,10,9,9,33,Low Risk,Good
 Sundaram Ultra Short Duration Reg,Regular,Ultra Short Duration,16635,Not Available,Not Available,,0.48,0.5,AAA,INF903J016H9,134356,6,10,10,9,35,Very Low Risk,Good
@@ -790,7 +790,7 @@ WhiteOak Capital Ultra Short Duration Reg,Regular,Ultra Short Duration,39938,Not
 360 ONE Liquid Reg,Regular,Liquid,22358,Not Available,Not Available,,0.12,0.12,AAA,INF579M01506,125259,3,10,10,9,32,Low Risk,Good
 Abakkus Liquid Reg,Regular,Liquid,45690,Not Available,Not Available,,,,GOI/Cash,INF2JJD01078,154047,1,1,1,10,13,High Risk,Poor
 ABSL Liquid Reg,Regular,Liquid,15800,Not Available,Not Available,,0.14,0.14,AAA,INF209K01LV0,108273,4,10,10,9,33,Low Risk,Good
-Angel One Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45082,Not Available,Not Available,,0,0,Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+Angel One Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45082,Not Available,Not Available,,0,0,Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 Axis Liquid Reg,Regular,Liquid,15748,Not Available,Not Available,,0.08,0.08,AAA,INF846K01412,112210,4,10,10,9,33,Low Risk,Good
 Bajaj Finserv Liquid Reg,Regular,Liquid,43593,Not Available,Not Available,,0.1,0.1,AAA,INF0QA701094,151837,3,10,10,9,32,Low Risk,Good
 Bajaj Finserv Nifty 1D Rate Liquid ETF - Growth,Regular,Liquid,44331,Not Available,Not Available,,,,Cash,INF846K01412,112210,1,1,1,10,13,High Risk,Poor
@@ -798,37 +798,37 @@ Bandhan Liquid Reg,Regular,Liquid,16472,Not Available,Not Available,,0.09,0.09,A
 Bank of India Liquid Reg,Regular,Liquid,16274,Not Available,Not Available,,0.19,0.19,AAA,INF761K01306,109254,1,10,10,9,30,Low Risk,Good
 Baroda BNP Paribas Liquid Reg,Regular,Liquid,15774,Not Available,Not Available,,0.09,0.09,AAA,INF955L01484,111704,3,10,10,9,32,Low Risk,Good
 Canara Robeco Liquid Reg,Regular,Liquid,16615,Not Available,Not Available,,0.09,0.09,AAA,INF760K01CW9,109353,4,10,10,9,33,Low Risk,Good
-Capitalmind Liquid Reg,Regular,Liquid,45638,Not Available,Not Available,,0.08,0.08,AAA,INF955L01IY6,152904,3,10,10,9,32,Low Risk,Good
+Capitalmind Liquid Reg,Regular,Liquid,45638,Not Available,Not Available,,0.08,0.08,AAA,INF223J01AY0,138453,3,10,10,9,32,Low Risk,Good,
 DSP BSE Liquid Rate ETF,Regular,Liquid,44244,Not Available,Not Available,,,,Cash,INF209K01MG9,122644,1,1,1,10,13,High Risk,Poor
 DSP Liquidity Reg,Regular,Liquid,16111,Not Available,Not Available,,0.11,0.11,AAA,INF740K01FK9,103347,5,10,10,9,34,Low Risk,Good
 DSP NIFTY 1D Rate Liquid ETF,Regular,Liquid,35400,Not Available,Not Available,,,,Cash,INF209K01MG9,122644,1,1,1,10,13,High Risk,Poor
 Edelweiss Liquid Reg,Regular,Liquid,16576,Not Available,Not Available,,0.09,0.09,AAA,INF754K01GZ6,140182,3,10,10,9,32,Low Risk,Good
-Edelweiss Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45545,Not Available,Not Available,,0.01,0.01,Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
-Franklin India Liquid Super Inst Plan Reg,Regular,Liquid,16848,Not Available,Not Available,,0.09,0.09,AAA,INF955L01IY6,152904,4,10,10,9,33,Low Risk,Good
+Edelweiss Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45545,Not Available,Not Available,,0.01,0.01,Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
+Franklin India Liquid Super Inst Plan Reg,Regular,Liquid,16848,Not Available,Not Available,,0.09,0.09,AAA,INF223J01AY0,138453,4,10,10,9,33,Low Risk,Good,
 Groww Liquid Reg,Regular,Liquid,15583,Not Available,Not Available,,0.08,0.08,AAA,INF767K01535,105823,4,10,10,9,33,Low Risk,Good
 Groww Nifty 1D Rate Liquid ETF,Regular,Liquid,44564,Not Available,Not Available,,0.01,0.01,Cash,INF666M01ES8,145590,1,10,10,10,31,Low Risk,Good
 HDFC Liquid Reg,Regular,Liquid,16167,Not Available,Not Available,,0.1,0.1,AAA,INF767K01535,105823,4,10,10,9,33,Low Risk,Good
 HDFC NIFTY 1D RATE LIQUID ETF-Growth,Regular,Liquid,43738,Not Available,Not Available,,0.01,0.01,Cash,INF209K01LV0,108273,1,10,10,10,31,Low Risk,Good
 HSBC Liquid Reg,Regular,Liquid,16285,Not Available,Not Available,,0.1,0.09,AAA,INF336L01BN7,118902,4,10,10,9,33,Low Risk,Good
-ICICI Pru BSE Liquid Rate ETF-Growth,Regular,Liquid,45036,Not Available,Not Available,,0,0.01,Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+ICICI Pru BSE Liquid Rate ETF-Growth,Regular,Liquid,45036,Not Available,Not Available,,0,0.01,Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 ICICI Pru BSE Liquid Rate ETF - IDCW,Regular,Liquid,37659,Not Available,Not Available,,0,0.01,Cash,INF579M01506,125259,1,10,10,10,31,Low Risk,Good
-ICICI Pru Liquid Reg,Regular,Liquid,15961,Not Available,Not Available,,0.07,0.08,AAA,INF955L01IY6,152904,4,10,10,9,33,Low Risk,Good
+ICICI Pru Liquid Reg,Regular,Liquid,15961,Not Available,Not Available,,0.07,0.08,AAA,INF223J01AY0,138453,4,10,10,9,33,Low Risk,Good,
 Invesco India Liquid Reg,Regular,Liquid,16780,Not Available,Not Available,,0.08,0.08,AAA,INF205K01HG7,104488,3,10,10,9,32,Low Risk,Good
 ITI Liquid Reg,Regular,Liquid,39839,Not Available,Not Available,,0.08,0.08,AAA,INF00XX01192,147153,3,10,10,9,32,Low Risk,Good
-JioBlackRock Liquid Reg,Regular,Liquid,45288,Not Available,Not Available,,0.11,0.11,AAA,INF955L01IY6,152904,3,10,10,9,32,Low Risk,Good
+JioBlackRock Liquid Reg,Regular,Liquid,45288,Not Available,Not Available,,0.11,0.11,AAA,INF223J01AY0,138453,3,10,10,9,32,Low Risk,Good,
 JM Liquid Reg,Regular,Liquid,16741,Not Available,Not Available,,0.1,0.1,AAA,INF767K01IS9,101185,3,10,10,9,32,Low Risk,Good
 Kotak Liquid Reg,Regular,Liquid,16365,Not Available,Not Available,,0.09,0.09,AAA,INF174K01NI9,100835,4,10,10,9,33,Low Risk,Good
 Kotak Nifty 1D Rate Liquid ETF,Regular,Liquid,43078,Not Available,Not Available,,0.01,0.01,Cash,INF209K01MG9,122644,1,10,10,10,31,Low Risk,Good
 LIC MF Liquid Reg,Regular,Liquid,16822,Not Available,Not Available,,0.09,0.09,AAA,INF767K01IS9,101185,4,10,10,9,33,Low Risk,Good
 Mahindra Manulife Liquid Reg,Regular,Liquid,32624,Not Available,Not Available,,0.12,0.12,AAA,INF174V01010,139537,4,10,10,9,33,Low Risk,Good
 Mirae Asset Liquid Reg,Regular,Liquid,16554,Not Available,Not Available,,0.1,0.1,AAA,INF769K01788,111646,3,10,10,9,32,Low Risk,Good
-Mirae Asset Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,44705,Not Available,Not Available,,,,Cash,INF955L01IY6,152904,1,1,1,10,13,High Risk,Poor
+Mirae Asset Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,44705,Not Available,Not Available,,,,Cash,INF223J01AY0,138453,1,1,1,10,13,High Risk,Poor,
 Mirae Asset Nifty 1D Rate Liquid ETF-IDCW,Regular,Liquid,43679,Not Available,Not Available,,,,Cash,INF579M01506,125259,1,1,1,10,13,High Risk,Poor
 Motilal Oswal Liquid Reg,Regular,Liquid,38515,Not Available,Not Available,,0.11,0.11,AAA,INF247L01726,145946,3,10,10,9,32,Low Risk,Good
 Navi Liquid Reg,Regular,Liquid,16473,Not Available,Not Available,,0.05,0.06,AAA,INF959L01GL9,112636,2,10,10,9,31,Low Risk,Good
 Nippon India ETF Nifty 1D Rate Liquid BeES,Regular,Liquid,1787,Not Available,Not Available,,0.01,0.01,CASH,INF579M01506,125259,1,10,10,10,31,Low Risk,Good
-Nippon India Liquid Reg,Regular,Liquid,16100,Not Available,Not Available,,0.09,0.09,AAA,INF955L01IY6,152904,4,10,10,9,33,Low Risk,Good
-Nippon India Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45364,Not Available,Not Available,,0.01,0.01,CASH,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+Nippon India Liquid Reg,Regular,Liquid,16100,Not Available,Not Available,,0.09,0.09,AAA,INF223J01AY0,138453,4,10,10,9,33,Low Risk,Good,
+Nippon India Nifty 1D Rate Liquid ETF-Growth,Regular,Liquid,45364,Not Available,Not Available,,0.01,0.01,CASH,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 Parag Parikh Liquid Reg,Regular,Liquid,36013,Not Available,Not Available,,0.11,0.12,AAA,INF879O01035,143260,4,10,10,9,33,Low Risk,Good
 PGIM India Liquid Reg,Regular,Liquid,15605,Not Available,Not Available,,0.08,0.08,AAA,INF767K01535,105823,3,10,10,9,32,Low Risk,Good
 Quant Liquid Reg,Regular,Liquid,17028,Not Available,Not Available,,0.14,0.14,AAA,INF966L01317,103225,4,10,10,9,33,Low Risk,Good
@@ -845,9 +845,9 @@ TRUSTMF Liquid Reg,Regular,Liquid,41413,Not Available,Not Available,,0.1,0.1,AAA
 Unifi Liquid Reg,Regular,Liquid,45229,Not Available,Not Available,,0.05,0.05,AAA,INF1MIY01064,153571,3,10,10,9,32,Low Risk,Good
 Union Liquid Reg,Regular,Liquid,16419,Not Available,Not Available,,0.09,0.09,AAA,INF767K01535,105823,3,10,10,9,32,Low Risk,Good
 UTI Liquid Reg,Regular,Liquid,15758,Not Available,Not Available,,0.16,0.16,AAA,INF277K01YD8,102672,2,10,10,9,31,Low Risk,Good
-WhiteOak Capital Liquid Reg,Regular,Liquid,38646,Not Available,Not Available,,0.09,0.09,AAA,INF955L01IY6,152904,3,10,10,9,32,Low Risk,Good
+WhiteOak Capital Liquid Reg,Regular,Liquid,38646,Not Available,Not Available,,0.09,0.09,AAA,INF223J01AY0,138453,3,10,10,9,32,Low Risk,Good,
 Zerodha Nifty 1D Rate Liquid ETF,Regular,Liquid,44050,Not Available,Not Available,,0.01,0.01,Cash,INF209K01MG9,122644,1,10,10,10,31,Low Risk,Good
-ABSL Money Manager Reg,Regular,Money Market,15826,Not Available,Not Available,,0.64,0.64,AAA,INF955L01IY6,152904,6,9,9,9,33,Low Risk,Good
+ABSL Money Manager Reg,Regular,Money Market,15826,Not Available,Not Available,,0.64,0.64,AAA,INF223J01AY0,138453,6,9,9,9,33,Low Risk,Good,
 Axis Money Market Reg,Regular,Money Market,40197,Not Available,Not Available,,0.41,0.41,AAA,INF846K01R46,147568,5,10,10,9,34,Low Risk,Good
 Bajaj Finserv Money Market Reg,Regular,Money Market,43661,Not Available,Not Available,,0.36,0.36,AAA,INF0QA701441,151893,4,10,10,9,33,Low Risk,Good
 Bandhan Money Market Reg,Regular,Money Market,16515,Not Available,Not Available,,0.33,0.33,AAA,INF194K01LJ9,108756,4,10,10,9,33,Low Risk,Good
@@ -855,17 +855,17 @@ Bank of India Money Market Reg,Regular,Money Market,44948,Not Available,Not Avai
 Baroda BNP Paribas Money Market Reg,Regular,Money Market,40016,Not Available,Not Available,,0.41,0.41,AAA,INF955L01HY8,147382,6,10,10,9,35,Very Low Risk,Good
 DSP Savings Reg,Regular,Money Market,16459,Not Available,Not Available,,0.53,0.53,AAA,INF740K01714,100087,6,9,9,9,33,Low Risk,Good
 Edelweiss Money Market Reg,Regular,Money Market,17429,Not Available,Not Available,,0.36,0.34,AAA,INF843K01344,140229,5,10,10,9,34,Low Risk,Good
-Franklin India Money Market Reg,Regular,Money Market,16748,Not Available,Not Available,,0.48,0.47,AAA,INF955L01IY6,152904,5,10,10,9,34,Low Risk,Good
+Franklin India Money Market Reg,Regular,Money Market,16748,Not Available,Not Available,,0.48,0.47,AAA,INF223J01AY0,138453,5,10,10,9,34,Low Risk,Good,
 Groww Money Market Reg,Regular,Money Market,45614,Not Available,Not Available,,0.08,0.08,AAA,INF666M01MZ6,153992,4,10,10,9,33,Low Risk,Good
-HDFC Money Market Reg,Regular,Money Market,16004,Not Available,Not Available,,0.4,0.4,AAA,INF955L01IY6,152904,5,10,10,9,34,Low Risk,Good
+HDFC Money Market Reg,Regular,Money Market,16004,Not Available,Not Available,,0.4,0.4,AAA,INF223J01AY0,138453,5,10,10,9,34,Low Risk,Good,
 HSBC Money Market Reg,Regular,Money Market,16223,Not Available,Not Available,,0.38,0.38,AAA,INF917K01BC9,151048,5,10,10,9,34,Low Risk,Good
-ICICI Pru Money Market Reg,Regular,Money Market,15854,Not Available,Not Available,,0.48,0.48,AAA,INF955L01IY6,152904,5,10,10,9,34,Low Risk,Good
+ICICI Pru Money Market Reg,Regular,Money Market,15854,Not Available,Not Available,,0.48,0.48,AAA,INF223J01AY0,138453,5,10,10,9,34,Low Risk,Good,
 Invesco India Money Market Reg,Regular,Money Market,16726,Not Available,Not Available,,0.36,0.36,AAA,INF205K01SG4,112120,5,10,10,9,34,Low Risk,Good
-JioBlackRock Money Market Reg,Regular,Money Market,45287,Not Available,Not Available,,0.23,0.23,AAA,INF955L01IY6,152904,4,10,10,9,33,Low Risk,Good
+JioBlackRock Money Market Reg,Regular,Money Market,45287,Not Available,Not Available,,0.23,0.23,AAA,INF223J01AY0,138453,4,10,10,9,33,Low Risk,Good,
 Kotak Money Market Reg,Regular,Money Market,16350,Not Available,Not Available,,0.44,0.44,AAA,INF277K01LQ7,101847,5,10,10,9,34,Low Risk,Good
 LIC MF Money Market Reg,Regular,Money Market,42409,Not Available,Not Available,,0.46,0.46,AAA,INF767K01RB6,150393,6,10,10,9,35,Very Low Risk,Good
 Mirae Asset Money Market Reg,Regular,Money Market,41643,Not Available,Not Available,,0.3,0.3,AAA,INF769K01HK4,149115,5,10,10,9,34,Low Risk,Good
-Nippon India Money Market Reg,Regular,Money Market,16121,Not Available,Not Available,,0.48,0.48,AAA,INF955L01IY6,152904,6,10,10,9,35,Very Low Risk,Good
+Nippon India Money Market Reg,Regular,Money Market,16121,Not Available,Not Available,,0.48,0.48,AAA,INF223J01AY0,138453,6,10,10,9,35,Very Low Risk,Good,
 PGIM India Money Market Reg,Regular,Money Market,40775,Not Available,Not Available,,0.26,0.26,AAA,INF663L01U24,148159,5,10,10,9,34,Low Risk,Good
 SBI Savings Reg,Regular,Money Market,17152,Not Available,Not Available,,0.29,0.28,AAA,INF200K01636,102503,5,10,10,9,34,Low Risk,Good
 Shriram Money Market Reg,Regular,Money Market,45778,Not Available,Not Available,,0.21,0.21,AAA,INF680P01489,154143,3,10,10,9,32,Low Risk,Good
@@ -885,15 +885,15 @@ Baroda BNP Paribas Overnight Reg,Regular,Overnight,39818,Not Available,Not Avail
 Canara Robeco Overnight Reg,Regular,Overnight,40153,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF760K01JO1,147534,1,10,10,10,31,Low Risk,Good
 DSP Overnight Reg,Regular,Overnight,38748,Not Available,Not Available,,,0.01,GOI/Cash,INF740KA1MB0,146061,1,1,10,10,22,Moderate Risk,Average
 Edelweiss Overnight Reg,Regular,Overnight,40175,Not Available,Not Available,,0.01,0.01,Cash,INF754K01KE3,147569,1,10,10,10,31,Low Risk,Good
-Franklin India Overnight Reg,Regular,Overnight,39884,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
-Groww Overnight Reg,Regular,Overnight,40037,Not Available,Not Available,,0.01,0.01,Cash,INF0GCD01537,151322,1,10,10,10,31,Low Risk,Good
-HDFC Overnight Reg,Regular,Overnight,16000,Not Available,Not Available,,0.02,0.02,GOI/Cash,INF277KA1299,149351,1,10,10,10,31,Low Risk,Good
+Franklin India Overnight Reg,Regular,Overnight,39884,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
+Groww Overnight Reg,Regular,Overnight,40037,Not Available,Not Available,,0.01,0.01,Cash,INF966L01234,100631,1,10,10,10,31,Low Risk,Good,
+HDFC Overnight Reg,Regular,Overnight,16000,Not Available,Not Available,,0.02,0.02,GOI/Cash,INF179KC1BV9,149366,1,10,10,10,31,Low Risk,Good,
 Helios Overnight Reg,Regular,Overnight,43835,Not Available,Not Available,,0,0,Cash,INF0R8701095,152153,1,10,10,10,31,Low Risk,Good
 HSBC Overnight Reg,Regular,Overnight,39921,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF336L01OL4,147290,1,10,10,10,31,Low Risk,Good
-ICICI Pru Overnight Reg,Regular,Overnight,38261,Not Available,Not Available,,0,0.01,GOI/Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+ICICI Pru Overnight Reg,Regular,Overnight,38261,Not Available,Not Available,,0,0.01,GOI/Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 Invesco India Overnight Reg,Regular,Overnight,40514,Not Available,Not Available,,0,0.01,GOI/Cash,INF205KA1114,147878,1,10,10,10,31,Low Risk,Good
 ITI Overnight Reg,Regular,Overnight,40356,Not Available,Not Available,,0.01,0.01,Cash,INF00XX01473,147714,1,10,10,10,31,Low Risk,Good
-JioBlackRock Overnight Reg,Regular,Overnight,45293,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+JioBlackRock Overnight Reg,Regular,Overnight,45293,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 JM Overnight Reg,Regular,Overnight,40475,Not Available,Not Available,,0.01,0.01,Cash,INF192K01LX4,147836,1,10,10,10,31,Low Risk,Good
 Kotak Overnight Reg,Regular,Overnight,38846,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF174KA1BC6,146142,1,10,10,10,31,Low Risk,Good
 LIC MF Overnight Reg,Regular,Overnight,40147,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF767K01QD4,147519,1,10,10,10,31,Low Risk,Good
@@ -905,67 +905,67 @@ PGIM India Overnight Reg,Regular,Overnight,40236,Not Available,Not Available,,0,
 Quant Overnight Reg,Regular,Overnight,42932,Not Available,Not Available,,0.01,0.01,Cash,INF966L01BC4,151195,1,10,10,10,31,Low Risk,Good
 Samco Overnight Reg,Regular,Overnight,42551,Not Available,Not Available,,0,0,Cash,INF0K1H01032,150632,1,10,10,10,31,Low Risk,Good
 SBI Overnight Reg,Regular,Overnight,17189,Not Available,Not Available,,0,0,GOI/Cash,INF200K01LQ9,101206,1,10,10,10,31,Low Risk,Good
-Shriram Overnight Reg,Regular,Overnight,42470,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF680P01232,150565,1,10,10,10,31,Low Risk,Good
+Shriram Overnight Reg,Regular,Overnight,42470,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF680P01505,154399,1,10,10,10,31,Low Risk,Good,
 Sundaram Overnight Reg,Regular,Overnight,39565,Not Available,Not Available,,0.01,0.01,Cash,INF903JA1GZ7,146959,1,10,10,10,31,Low Risk,Good
 Tata Overnight Reg,Regular,Overnight,39638,Not Available,Not Available,,0.01,0.01,Cash,INF277K016T9,146977,1,10,10,10,31,Low Risk,Good
 TRUSTMF Overnight Reg,Regular,Overnight,42046,Not Available,Not Available,,0.01,0.01,Cash,INF0GCD01438,149795,1,10,10,10,31,Low Risk,Good
 Union Overnight Reg,Regular,Overnight,39665,Not Available,Not Available,,0.01,0.01,GOI/Cash,INF582M01FJ3,146997,1,10,10,10,31,Low Risk,Good
 UTI Overnight Reg,Regular,Overnight,17630,Not Available,Not Available,,0,0,GOI/Cash,INF789F01604,100814,1,10,10,10,31,Low Risk,Good
-Zerodha Overnight Reg,Regular,Overnight,45081,Not Available,Not Available,,0.01,0.01,Cash,INF955L01IY6,152904,1,10,10,10,31,Low Risk,Good
+Zerodha Overnight Reg,Regular,Overnight,45081,Not Available,Not Available,,0.01,0.01,Cash,INF223J01AY0,138453,1,10,10,10,31,Low Risk,Good,
 360 ONE Dynamic Bond Reg,Regular,Dynamic Bond,19784,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.72,6.39,AAA,INF579M01183,122612,7,4,5,9,25,Moderate Risk,Average
+"g-sec index""",4.72,6.39,AAA,INF579M01183,122612,7,4,5,9,INF740KA1QV9,149970,Average,
 ABSL Dynamic Bond Reg,Regular,Dynamic Bond,15734,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.54,7.69,AAA,INF209K01793,102767,8,4,4,9,25,Moderate Risk,Average
+"g-sec index""",4.54,7.69,AAA,INF209K01793,102767,8,4,4,9,INF740KA1QV9,149970,Average,
 ABSL Dyn Bond Seg Port1 Reg,Regular,Dynamic Bond,40459,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,Cash,INF767K01535,105823,1,1,1,10,13,High Risk,Poor
+"g-sec index""",,,Cash,INF767K01535,105823,1,1,1,10,INF740KA1QV9,149970,Poor,
 Axis Dynamic Bond Reg,Regular,Dynamic Bond,15740,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.23,6.55,AAA,INF846K01917,115068,4,4,5,9,22,Moderate Risk,Average
+"g-sec index""",4.23,6.55,AAA,INF846K01917,115068,4,4,5,9,INF740KA1QV9,149970,Average,
 Bandhan Dynamic Bond Reg,Regular,Dynamic Bond,16479,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.35,2.06,AAA,INF194K01QG4,111524,5,8,7,9,29,Low Risk,Good
+"g-sec index""",1.35,2.06,AAA,INF194K01QG4,111524,5,8,7,9,INF740KA1QV9,149970,Good,
 Baroda BNP Paribas Dynamic Bond Reg,Regular,Dynamic Bond,16213,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.01,14.38,AAA,INF251K01DW7,150173,6,2,3,9,20,Moderately High Risk,Average
+"g-sec index""",7.01,14.38,AAA,INF251K01DW7,150173,6,2,3,9,INF740KA1QV9,149970,Average,
 Canara Robeco Dynamic Bond Reg,Regular,Dynamic Bond,16577,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.54,10,GOI/Cash,INF760K01449,111962,5,3,4,10,22,Moderate Risk,Average
+"g-sec index""",5.54,10,GOI/Cash,INF760K01449,111962,5,3,4,10,INF740KA1QV9,149970,Average,
 DSP Strategic Bond Reg,Regular,Dynamic Bond,16443,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",8.15,18.96,AAA,INF740K01GK7,105669,6,2,2,9,19,Moderately High Risk,Average
+"g-sec index""",8.15,18.96,AAA,INF740K01GK7,105669,6,2,2,9,INF740KA1QV9,149970,Average,
 Franklin Ind Dyn Accrual Seg Port 2 Reg,Regular,Dynamic Bond,40600,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.01,0.01,B,INF955L01IY6,152904,1,10,10,1,22,Moderate Risk,Average
+"g-sec index""",0.01,0.01,B,INF955L01IY6,152904,1,10,10,1,INF740KA1QV9,149970,Average,
 Franklin Ind Dyn Accrual Seg Port 3 Reg,Regular,Dynamic Bond,40828,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
+"g-sec index""",,,,INF955L01IY6,152904,1,1,1,1,INF740KA1QV9,149970,Poor,
 Groww Dynamic Bond Reg,Regular,Dynamic Bond,38300,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.93,10.61,GOI/Cash,INF209K01785,103178,2,5,3,10,20,Moderately High Risk,Average
+"g-sec index""",3.93,10.61,GOI/Cash,INF209K01785,103178,2,5,3,10,INF740KA1QV9,149970,Average,
 HDFC Dynamic Debt Reg,Regular,Dynamic Bond,16061,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.21,17.89,AAA,INF209K01LV0,108273,6,2,2,9,19,Moderately High Risk,Average
+"g-sec index""",7.21,17.89,AAA,INF209K01LV0,108273,6,2,2,9,INF740KA1QV9,149970,Average,
 HSBC Dynamic Bond Reg,Regular,Dynamic Bond,16218,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.46,10.23,AAA,INF677K01916,151084,5,3,3,9,20,Moderately High Risk,Average
+"g-sec index""",5.46,10.23,AAA,INF677K01916,151084,5,3,3,9,INF740KA1QV9,149970,Average,
 ICICI Pru All Seasons Bond Reg,Regular,Dynamic Bond,17120,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.98,13.54,AAA,INF955L01IY6,152904,8,3,3,9,23,Moderate Risk,Average
+"g-sec index""",5.98,13.54,AAA,INF955L01IY6,152904,8,3,3,9,INF740KA1QV9,149970,Average,
 ICICI Pru Retirement Pure Debt Reg,Regular,Dynamic Bond,39073,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.61,10.18,AAA,INF903J016H9,134356,7,4,3,9,23,Moderate Risk,Average
+"g-sec index""",4.61,10.18,AAA,INF903J016H9,134356,7,4,3,9,INF740KA1QV9,149970,Average,
 ITI Dynamic Bond Reg,Regular,Dynamic Bond,41563,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.4,1.9,GOI/Cash,INF00XX01AT0,149021,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.4,1.9,GOI/Cash,INF00XX01AT0,149021,1,8,8,10,INF740KA1QV9,149970,Average,
 JM Dynamic Bond Reg,Regular,Dynamic Bond,17148,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.89,5.37,AAA,INF192K01700,101806,5,5,5,9,24,Moderate Risk,Average
+"g-sec index""",3.89,5.37,AAA,INF192K01700,101806,5,5,5,9,INF740KA1QV9,149970,Average,
 Kotak Dynamic Bond Reg,Regular,Dynamic Bond,16342,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",6.59,12.74,AAA,INF174K01FA2,108511,7,3,3,9,22,Moderate Risk,Average
+"g-sec index""",6.59,12.74,AAA,INF174K01FA2,108511,7,3,3,9,INF740KA1QV9,149970,Average,
 Mahindra Manulife Dynamic Bond Reg,Regular,Dynamic Bond,37127,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.66,6.68,AAA,INF174V01531,144401,7,5,5,9,26,Moderate Risk,Average
+"g-sec index""",3.66,6.68,AAA,INF174V01531,144401,7,5,5,9,INF740KA1QV9,149970,Average,
 Mirae Asset Dynamic Bond Reg,Regular,Dynamic Bond,33706,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.05,1.08,AAA,INF769K01DO5,140771,4,8,8,9,29,Low Risk,Good
+"g-sec index""",1.05,1.08,AAA,INF769K01DO5,140771,4,8,8,9,INF740KA1QV9,149970,Good,
 Nippon India Dynamic Bond Reg,Regular,Dynamic Bond,16060,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.81,4.44,AAA,INF955L01IY6,152904,6,5,6,9,26,Moderate Risk,Average
+"g-sec index""",3.81,4.44,AAA,INF955L01IY6,152904,6,5,6,9,INF740KA1QV9,149970,Average,
 PGIM India Dynamic Bond Reg,Regular,Dynamic Bond,16632,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.89,10.79,AAA,INF192K01700,101806,6,3,3,9,21,Moderate Risk,Average
+"g-sec index""",5.89,10.79,AAA,INF192K01700,101806,6,3,3,9,INF740KA1QV9,149970,Average,
 Quantum Dynamic Bond Reg,Regular,Dynamic Bond,30145,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.89,4.86,AAA,INF082J01218,141061,4,5,6,9,24,Moderate Risk,Average
+"g-sec index""",3.89,4.86,AAA,INF082J01218,141061,4,5,6,9,INF740KA1QV9,149970,Average,
 SBI Dynamic Bond Reg,Regular,Dynamic Bond,16199,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3,5.71,AAA,INF200K01958,102205,5,6,5,9,25,Moderate Risk,Average
+"g-sec index""",3,5.71,AAA,INF200K01958,102205,5,6,5,9,INF740KA1QV9,149970,Average,
 Union Dynamic Bond Reg,Regular,Dynamic Bond,16408,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",9.85,25.84,AAA,INF209K01785,103178,7,2,1,9,19,Moderately High Risk,Average
+"g-sec index""",9.85,25.84,AAA,INF209K01785,103178,7,2,1,9,INF740KA1QV9,149970,Average,
 UTI Dynamic Bond Reg,Regular,Dynamic Bond,15885,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.51,4.27,AAA,INF789F01JQ5,113077,5,5,6,9,25,Moderate Risk,Average
+"g-sec index""",3.51,4.27,AAA,INF789F01JQ5,113077,5,5,6,9,INF740KA1QV9,149970,Average,
 UTI Dyn Bond Seg Port Reg,Regular,Dynamic Bond,40750,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,0.07,B,INF209K01785,103178,1,1,10,1,13,High Risk,Poor
+"g-sec index""",,0.07,B,INF209K01785,103178,1,1,10,1,INF740KA1QV9,149970,Poor,
 ABSL Corporate Bond Reg,Regular,Corporate Bond,15926,Not Available,Not Available,,4.82,7.01,AAA,INF209K01785,103178,7,4,4,9,24,Moderate Risk,Average
 Axis Corporate Bond Reg,Regular,Corporate Bond,34381,Not Available,Not Available,,2.78,3.33,AAA,INF846K01ZU1,141593,7,6,6,9,28,Low Risk,Good
 Bandhan Corporate Bond Reg,Regular,Corporate Bond,31521,Not Available,Not Available,,1.66,2.22,AAA,INF194KA1L81,135914,5,7,7,9,28,Low Risk,Good
@@ -975,47 +975,47 @@ DSP Corporate Bond Reg,Regular,Corporate Bond,37505,Not Available,Not Available,
 Franklin India Corporate Debt Reg,Regular,Corporate Bond,16911,Not Available,Not Available,,2.64,5.78,AAA,INF209K01LV0,108273,7,6,5,9,27,Moderate Risk,Average
 HDFC Corporate Bond Reg,Regular,Corporate Bond,16109,Not Available,Not Available,,4.72,7.71,AAA,INF917K01AH0,150992,7,4,4,9,24,Moderate Risk,Average
 HSBC Corporate Bond Reg,Regular,Corporate Bond,16305,Not Available,Not Available,,2.42,2.69,AAA,INF917K01AH0,150992,6,6,7,9,28,Low Risk,Good
-ICICI Pru Corporate Bond Reg,Regular,Corporate Bond,15568,Not Available,Not Available,,3.56,6.01,AAA,INF955L01IY6,152904,7,5,5,9,26,Moderate Risk,Average
+ICICI Pru Corporate Bond Reg,Regular,Corporate Bond,15568,Not Available,Not Available,,3.56,6.01,AAA,INF223J01AY0,138453,7,5,5,9,26,Moderate Risk,Average,
 Invesco India Corporate Bond Reg,Regular,Corporate Bond,16675,Not Available,Not Available,,3.54,4.4,AAA,INF205K01RM4,106177,6,5,6,9,26,Moderate Risk,Average
 Kotak Corporate Bond Reg,Regular,Corporate Bond,17470,Not Available,Not Available,,3.35,4.28,AAA,INF209K01785,103178,7,5,6,9,27,Moderate Risk,Average
 Mirae Asset Corporate Bond Reg,Regular,Corporate Bond,41343,Not Available,Not Available,,2.8,3.32,AAA,INF769K01HA5,148757,5,6,6,9,26,Moderate Risk,Average
-Nippon India Corporate Bond Reg,Regular,Corporate Bond,16135,Not Available,Not Available,,3.11,3.77,AAA,INF955L01IY6,152904,7,5,6,9,27,Moderate Risk,Average
+Nippon India Corporate Bond Reg,Regular,Corporate Bond,16135,Not Available,Not Available,,3.11,3.77,AAA,INF223J01AY0,138453,7,5,6,9,27,Moderate Risk,Average,
 PGIM India Corporate Bond Reg,Regular,Corporate Bond,15644,Not Available,Not Available,,3.51,4.43,AAA,INF209K01785,103178,6,5,6,9,26,Moderate Risk,Average
 SBI Corporate Bond Reg,Regular,Corporate Bond,38937,Not Available,Not Available,,2.59,3.16,AAA,INF200KA1YM5,146207,7,6,6,9,28,Low Risk,Good
 Sundaram Corporate Bond Reg,Regular,Corporate Bond,17244,Not Available,Not Available,,3.11,3.86,AAA,INF903J01HW6,100789,6,5,6,9,26,Moderate Risk,Average
-Tata Corporate Bond Reg,Regular,Corporate Bond,41870,Not Available,Not Available,,3.46,5.1,AAA,INF277KA1299,149351,7,5,5,9,26,Moderate Risk,Average
-Tata Corporate Bond Seg Port1 Reg,Regular,Corporate Bond,40080,Not Available,Not Available,,,,AA,INF955L01IY6,152904,1,1,1,7,10,High Risk,Poor
-TRUSTMF Corporate Bond Reg,Regular,Corporate Bond,43066,Not Available,Not Available,,2.29,2.69,AAA,INF0GCD01537,151322,5,6,7,9,27,Moderate Risk,Average
+Tata Corporate Bond Reg,Regular,Corporate Bond,41870,Not Available,Not Available,,3.46,5.1,AAA,INF179KC1BV9,149366,7,5,5,9,26,Moderate Risk,Average,
+Tata Corporate Bond Seg Port1 Reg,Regular,Corporate Bond,40080,Not Available,Not Available,,,,AA,INF223J01AY0,138453,1,1,1,7,10,High Risk,Poor,
+TRUSTMF Corporate Bond Reg,Regular,Corporate Bond,43066,Not Available,Not Available,,2.29,2.69,AAA,INF966L01234,100631,5,6,7,9,27,Moderate Risk,Average,
 Union Corporate Bond Reg,Regular,Corporate Bond,36080,Not Available,Not Available,,3.47,4.81,AAA,INF582M01DY7,143239,7,5,6,9,27,Moderate Risk,Average
 UTI Corporate Bond Reg,Regular,Corporate Bond,37143,Not Available,Not Available,,3.07,4,AAA,INF789F1A447,144345,5,5,6,9,25,Moderate Risk,Average
 ABSL Credit Risk Reg,Regular,Credit Risk,29947,Not Available,Not Available,,2.14,2.6,AA,INF209KA1K47,134383,8,6,7,7,28,Low Risk,Good
 ABSL Credit Risk Seg Port1 Reg,Regular,Credit Risk,40442,Not Available,Not Available,,,,Cash,INF767K01535,105823,1,1,1,10,13,High Risk,Poor
 Axis Credit Risk Reg,Regular,Credit Risk,27229,Not Available,Not Available,,2.39,2.67,AA,INF846K01PO5,130309,10,6,7,7,30,Low Risk,Good
 Bandhan Credit Risk Reg,Regular,Credit Risk,33491,Not Available,Not Available,,2.04,2.27,AA,INF194KA1W39,140609,8,6,7,7,28,Low Risk,Good
-Bank of India Credit Risk Reg,Regular,Credit Risk,29480,Not Available,Not Available,,0.66,0.76,AAA,INF955L01IY6,152904,4,9,9,9,31,Low Risk,Good
+Bank of India Credit Risk Reg,Regular,Credit Risk,29480,Not Available,Not Available,,0.66,0.76,AAA,INF223J01AY0,138453,4,9,9,9,31,Low Risk,Good,
 Baroda BNP Paribas Credit Risk Reg,Regular,Credit Risk,29239,Not Available,Not Available,,2.06,2.66,AAA,INF955L01FP0,133486,8,6,7,9,30,Low Risk,Good
 Baroda BNP Paribas Credit Risk Seg Port1 Reg,Regular,Credit Risk,40938,Not Available,Not Available,,,,,INF955L01FP0,133486,1,1,1,1,4,High Risk,Poor
-DSP Credit Risk Reg,Regular,Credit Risk,16396,Not Available,Not Available,,2.55,3.4,AAA,INF0GCD01537,151322,8,6,6,9,29,Low Risk,Good
+DSP Credit Risk Reg,Regular,Credit Risk,16396,Not Available,Not Available,,2.55,3.4,AAA,INF966L01234,100631,8,6,6,9,29,Low Risk,Good,
 Franklin Ind Credit Risk Seg Port 2 Reg,Regular,Credit Risk,40584,Not Available,Not Available,,,,B,INF846K01PO5,130309,1,1,1,1,4,High Risk,Poor
 Franklin Ind Credit Risk Seg Port 3 Reg,Regular,Credit Risk,40824,Not Available,Not Available,,,,,INF846K01PO5,130309,1,1,1,1,4,High Risk,Poor
 HDFC Credit Risk Debt Reg,Regular,Credit Risk,25076,Not Available,Not Available,,2.48,3.78,AA,INF209K01LV0,108273,10,6,6,7,29,Low Risk,Good
 HSBC Credit Risk Reg,Regular,Credit Risk,16253,Not Available,Not Available,,1.69,2.15,AAA,INF917K01130,151043,8,7,7,9,31,Low Risk,Good
-ICICI Pru Credit Risk Reg,Regular,Credit Risk,17159,Not Available,Not Available,,2.38,3.63,AA,INF955L01IY6,152904,10,6,6,7,29,Low Risk,Good
+ICICI Pru Credit Risk Reg,Regular,Credit Risk,17159,Not Available,Not Available,,2.38,3.63,AA,INF223J01AY0,138453,10,6,6,7,29,Low Risk,Good,
 Invesco India Credit Risk Reg,Regular,Credit Risk,27553,Not Available,Not Available,,2.35,3,AAA,INF205K01I34,130721,7,6,7,9,29,Low Risk,Good
 Kotak Credit Risk Reg,Regular,Credit Risk,17139,Not Available,Not Available,,2.32,2.78,AA,INF178L01BO1,133782,9,6,7,7,29,Low Risk,Good
-Nippon India Credit Risk Reg,Regular,Credit Risk,16168,Not Available,Not Available,,1.93,2.17,AA,INF955L01IY6,152904,10,7,7,7,31,Low Risk,Good
+Nippon India Credit Risk Reg,Regular,Credit Risk,16168,Not Available,Not Available,,1.93,2.17,AA,INF223J01AY0,138453,10,7,7,7,31,Low Risk,Good,
 Nippon India Credit Risk Seg Port 1 Reg,Regular,Credit Risk,40697,Not Available,Not Available,,,0.07,B,INF846K01PO5,130309,1,1,10,1,13,High Risk,Poor
 Nippon India Credit Risk Seg Port 2 Regect,Regular,Credit Risk,40839,Not Available,Not Available,,,,,INF846K01PO5,130309,1,1,1,1,4,High Risk,Poor
 SBI Credit Risk Reg,Regular,Credit Risk,17180,Not Available,Not Available,,2.09,2.52,AA,INF200K01685,102505,10,6,7,7,30,Low Risk,Good
 UTI Credit Risk Reg,Regular,Credit Risk,15880,Not Available,Not Available,,2.02,2.61,AAA,INF789F01QZ1,117981,8,6,7,9,30,Low Risk,Good
-UTI Credit Risk Seg Port 2 Reg,Regular,Credit Risk,40761,Not Available,Not Available,,,0,Cash,INF955L01IY6,152904,1,1,10,10,22,Moderate Risk,Average
-UTI Credit Risk Seg Port 3 Reg,Regular,Credit Risk,40906,Not Available,Not Available,,,,,INF955L01IY6,152904,1,1,1,1,4,High Risk,Poor
-UTI Credit Risk Seg Port Reg,Regular,Credit Risk,40290,Not Available,Not Available,,,0,Cash,INF955L01IY6,152904,1,1,10,10,22,Moderate Risk,Average
+UTI Credit Risk Seg Port 2 Reg,Regular,Credit Risk,40761,Not Available,Not Available,,,0,Cash,INF223J01AY0,138453,1,1,10,10,22,Moderate Risk,Average,
+UTI Credit Risk Seg Port 3 Reg,Regular,Credit Risk,40906,Not Available,Not Available,,,,,INF223J01AY0,138453,1,1,1,1,4,High Risk,Poor,
+UTI Credit Risk Seg Port Reg,Regular,Credit Risk,40290,Not Available,Not Available,,,0,Cash,INF223J01AY0,138453,1,1,10,10,22,Moderate Risk,Average,
 ABSL Banking & PSU Debt Reg,Regular,Banking and PSU,15941,Not Available,Not Available,,3.44,4.52,AAA,INF209K01LV0,108273,6,5,6,9,26,Moderate Risk,Average
 Axis Banking & PSU Debt Reg,Regular,Banking and PSU,15680,Not Available,Not Available,,2.3,2.75,AAA,INF846K01CB0,117446,6,6,7,9,28,Low Risk,Good
 Bajaj Finserv Banking and PSU Reg,Regular,Banking and PSU,43851,Not Available,Not Available,,2.13,2.43,AAA,INF0QA701557,152165,5,6,7,9,27,Moderate Risk,Average
-Bandhan Banking and PSU Reg,Regular,Banking and PSU,18448,Not Available,Not Available,,1.75,2.06,AAA,INF194K01SN6,121280,5,7,7,9,28,Low Risk,Good
-Canara Robeco Banking and PSU Debt Reg,Regular,Banking and PSU,42432,Not Available,Not Available,,2.91,3.45,AAA,INF760K01KF7,150503,6,6,6,9,27,Moderate Risk,Average
+Bandhan Banking and PSU Reg,Regular,Banking and PSU,18448,Not Available,Not Available,,1.75,2.06,AAA,INF109KC1Z22,149456,5,7,7,9,28,Low Risk,Good,
+Canara Robeco Banking and PSU Debt Reg,Regular,Banking and PSU,42432,Not Available,Not Available,,2.91,3.45,AAA,INF179KA1RT1,130496,6,6,6,9,27,Moderate Risk,Average,
 DSP Banking & PSU Debt Reg,Regular,Banking and PSU,21204,Not Available,Not Available,,4.15,6.75,AAA,INF740K01ZP6,124172,7,4,5,9,25,Moderate Risk,Average
 Edelweiss Banking and PSU Debt Reg,Regular,Banking and PSU,21020,Not Available,Not Available,,2.36,2.65,AAA,INF843K01FK1,140283,6,6,7,9,28,Low Risk,Good
 Franklin India Banking & PSU Debt Reg,Regular,Banking and PSU,26029,Not Available,Not Available,,2.39,5.2,AAA,INF903J016H9,134356,7,6,5,9,27,Moderate Risk,Average
@@ -1035,11 +1035,11 @@ ABSL Floating Rate Reg,Regular,Floater,15819,Not Available,Not Available,,1.07,1
 Axis Floater Reg,Regular,Floater,41588,Not Available,Not Available,,4.24,8.26,AAA,INF846K012B8,149048,7,4,4,9,24,Moderate Risk,Average
 Bandhan Floater Reg,Regular,Floater,41304,Not Available,Not Available,,2.37,3.15,AAA,INF194KB1AP5,148705,7,6,6,9,28,Low Risk,Good
 DSP Floater Reg,Regular,Floater,41356,Not Available,Not Available,,2.67,4.19,AAA,INF740KA1PS7,148768,6,6,6,9,27,Moderate Risk,Average
-Franklin India Floating Rate Reg,Regular,Floater,16757,Not Available,Not Available,,2.22,8.13,AAA,INF955L01IY6,152904,7,6,4,9,26,Moderate Risk,Average
+Franklin India Floating Rate Reg,Regular,Floater,16757,Not Available,Not Available,,2.22,8.13,AAA,INF223J01AY0,138453,7,6,4,9,26,Moderate Risk,Average,
 HDFC Floating Rate Debt Reg,Regular,Floater,16037,Not Available,Not Available,,1.91,4.13,AAA,INF209K01LV0,108273,7,7,6,9,29,Low Risk,Good
-ICICI Pru Floating Interest Reg,Regular,Floater,15968,Not Available,Not Available,,1.97,3.88,AAA,INF955L01IY6,152904,6,7,6,9,28,Low Risk,Good
+ICICI Pru Floating Interest Reg,Regular,Floater,15968,Not Available,Not Available,,1.97,3.88,AAA,INF223J01AY0,138453,6,7,6,9,28,Low Risk,Good,
 Kotak Floating Rate Reg,Regular,Floater,39904,Not Available,Not Available,,1.65,3.86,AAA,INF174KA1DY6,147266,7,7,6,9,29,Low Risk,Good
-Nippon India Floater Reg,Regular,Floater,16076,Not Available,Not Available,,2.4,2.84,AAA,INF955L01IY6,152904,7,6,7,9,29,Low Risk,Good
+Nippon India Floater Reg,Regular,Floater,16076,Not Available,Not Available,,2.4,2.84,AAA,INF223J01AY0,138453,7,6,7,9,29,Low Risk,Good,
 SBI Floating Rate Debt Reg,Regular,Floater,41154,Not Available,Not Available,,1.02,3.89,AAA,INF200KA1R15,148543,4,8,6,9,27,Moderate Risk,Average
 Tata Floating Rate Reg,Regular,Floater,41544,Not Available,Not Available,,1.18,1.96,AAA,INF277KA1091,149003,5,8,8,9,30,Low Risk,Good
 UTI Floater Reg,Regular,Floater,38032,Not Available,Not Available,,0.81,1.78,AAA,INF789F1ACO4,145287,5,9,8,9,31,Low Risk,Good
@@ -1052,15 +1052,15 @@ Baroda BNP Paribas Gilt Reg,Regular,Gilt,15706,Nifty Composite Debt TR INR,Done,
 Canara Robeco Gilt Reg,Regular,Gilt,15745,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7.61,15.09,GOI/Cash,INF760K01AE1,100597,5,2,2,10,19,Moderately High Risk,Average
 DSP Gilt Reg,Regular,Gilt,16391,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,10.93,27.14,GOI/Cash,INF740K01615,100084,7,1,1,10,19,Moderately High Risk,Average
 Edelweiss Government Securities Reg,Regular,Gilt,24229,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7.39,16.97,GOI/Cash,INF843K01HC4,140297,4,2,2,10,18,Moderately High Risk,Average
-Franklin India Government Securities Reg,Regular,Gilt,16888,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7.28,23.19,GOI/Cash,INF955L01IY6,152904,7,2,1,10,20,Moderately High Risk,Average
+Franklin India Government Securities Reg,Regular,Gilt,16888,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7.28,23.19,GOI/Cash,INF223J01AY0,138453,7,2,1,10,20,Moderately High Risk,Average,
 Groww Gilt Reg,Regular,Gilt,45121,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,6.32,19.02,GOI/Cash,INF666M01KN6,153503,3,3,2,10,18,Moderately High Risk,Average
 HDFC Gilt Reg,Regular,Gilt,16046,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7.66,17.08,GOI/Cash,INF767K01535,105823,6,2,2,10,20,Moderately High Risk,Average
 HSBC Gilt Reg,Regular,Gilt,16236,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.22,,GOI/Cash,INF917K01BP1,151013,5,2,1,10,18,Moderately High Risk,Average
-ICICI Pru Gilt Reg,Regular,Gilt,15953,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.58,20.28,GOI/Cash,INF955L01IY6,152904,7,2,1,10,20,Moderately High Risk,Average
+ICICI Pru Gilt Reg,Regular,Gilt,15953,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.58,20.28,GOI/Cash,INF223J01AY0,138453,7,2,1,10,20,Moderately High Risk,Average,
 ICICI Pru Nifty 5 yr Benchmark G-SEC ETF,Regular,Gilt,42160,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,3.84,4.32,GOI/Cash,INF740K012I0,131297,3,5,6,10,24,Moderate Risk,Average
 Invesco India Gilt Reg,Regular,Gilt,16750,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,10.05,25.21,GOI/Cash,INF205K01SR1,107477,6,1,1,10,18,Moderately High Risk,Average
-JioBlackRock Nifty 8-13 yr G-Sec Index Reg,Regular,Gilt,45426,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7,9.3,GOI/Cash,INF955L01IY6,152904,4,3,4,10,21,Moderate Risk,Average
-Kotak Gilt Investment Reg,Regular,Gilt,16354,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,10.2,23.54,GOI/Cash,INF955L01IY6,152904,7,1,1,10,19,Moderately High Risk,Average
+JioBlackRock Nifty 8-13 yr G-Sec Index Reg,Regular,Gilt,45426,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,7,9.3,GOI/Cash,INF223J01AY0,138453,4,3,4,10,21,Moderate Risk,Average,
+Kotak Gilt Investment Reg,Regular,Gilt,16354,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,10.2,23.54,GOI/Cash,INF223J01AY0,138453,7,1,1,10,19,Moderately High Risk,Average,
 Kotak Gilt Investment PF & Trust Reg,Regular,Gilt,17766,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,10.2,23.54,GOI/Cash,INF903J016H9,134356,7,1,1,10,19,Moderately High Risk,Average
 LIC MF Gilt Reg,Regular,Gilt,16777,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,9.91,23.29,GOI/Cash,INF767K01709,100317,6,2,1,10,19,Moderately High Risk,Average
 LIC MF Nifty 8-13 yr G-Sec ETF,Regular,Gilt,29111,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,6.95,8.99,GOI/Cash,INF767K01923,100315,5,3,4,10,22,Moderate Risk,Average
@@ -1069,7 +1069,7 @@ Motilal Oswal 5 Year G-Sec FoF Reg,Regular,Gilt,41759,Nifty Composite Debt TR IN
 Motilal Oswal Nifty 5Y Benchmark G-Sec ETF,Regular,Gilt,41212,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,3.95,4.49,GOI/Cash,INF740K012I0,131297,3,5,6,10,24,Moderate Risk,Average
 Nippon India ETF Nifty 5Y Benchmark G-Sec,Regular,Gilt,41391,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,3.93,4.42,GOI/Cash,INF740K012I0,131297,3,5,6,10,24,Moderate Risk,Average
 Nippon India ETF Nifty 8-13 yr G-Sec LT Gilt,Regular,Gilt,32557,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,6.94,9.27,GOI/Cash,INF846K01AX8,116471,5,3,4,10,22,Moderate Risk,Average
-Nippon India Gilt Reg,Regular,Gilt,16078,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.81,17.89,GOI/Cash,INF955L01IY6,152904,7,2,2,10,21,Moderate Risk,Average
+Nippon India Gilt Reg,Regular,Gilt,16078,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.81,17.89,GOI/Cash,INF223J01AY0,138453,7,2,2,10,21,Moderate Risk,Average,
 PGIM India Gilt Reg,Regular,Gilt,15595,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,8.82,18.79,GOI/Cash,INF767K01535,105823,6,2,2,10,20,Moderately High Risk,Average
 Quant Gilt Reg,Regular,Gilt,42968,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,5.97,11.45,GOI/Cash,INF966L01BI1,151230,4,3,3,10,20,Moderately High Risk,Average
 SBI Gilt Reg,Regular,Gilt,17166,Nifty Composite Debt TR INR,Done,primary bm data not avail. Can use secondary bm,5.66,10.93,GOI/Cash,INF200K01982,101001,3,3,3,10,19,Moderately High Risk,Average
@@ -1081,69 +1081,69 @@ Zerodha Nifty 8-13 Yr G-Sec ETF,Regular,Gilt,45448,Nifty Composite Debt TR INR,D
 ABSL CRISIL 10 Year Gilt ETF,Regular,Gilt with 10 year,44486,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.09,9.61,GOI/Cash,INF846K01AX8,116471,5,2,4,10,21,Moderate Risk,Average
 Bandhan Gilt Fund with 10 year Constant Duration Reg,Regular,Gilt with 10 year,16728,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,6.8,9.37,GOI/Cash,INF194K01FA0,108753,5,3,4,10,22,Moderate Risk,Average
 DSP 10Y G-Sec Reg,Regular,Gilt with 10 year,28175,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.08,9.57,GOI/Cash,INF740K012I0,131297,5,2,4,10,21,Moderate Risk,Average
-ICICI Pru Constant Maturity Gilt Reg,Regular,Gilt with 10 year,27957,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.13,10,GOI/Cash,INF955L01IY6,152904,5,2,4,10,21,Moderate Risk,Average
+ICICI Pru Constant Maturity Gilt Reg,Regular,Gilt with 10 year,27957,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.13,10,GOI/Cash,INF223J01AY0,138453,5,2,4,10,21,Moderate Risk,Average,
 ICICI Pru Nifty 10 yr Benchmark G-Sec ETF,Regular,Gilt with 10 year,42946,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.1,9.59,GOI/Cash,INF740K012I0,131297,5,2,4,10,21,Moderate Risk,Average
 SBI Constant Maturity 10-Year Gilt Reg,Regular,Gilt with 10 year,17173,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,7.16,9.76,GOI/Cash,INF200K01AN9,101002,5,2,4,10,21,Moderate Risk,Average
 SBI Nifty 10Y Benchmark G-Sec ETF,Regular,Gilt with 10 year,32486,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,,,GOI/Cash,INF200K01AK5,101932,1,1,1,10,13,High Risk,Poor
 UTI Gilt Fund with 10 year Constant Duration Reg,Regular,Gilt with 10 year,42374,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,6.96,9.47,GOI/Cash,INF789F1AVI6,150409,5,3,4,10,22,Moderate Risk,Average
 UTI Nifty 10 yr Benchmark G-Sec ETF,Regular,Gilt with 10 year,44082,NIFTY Composite G-Sec Index,Done,Fetched 10 years(NSE) but avail till 5-4-16,,,GOI/Cash,INF789F1ACO4,145287,1,1,1,10,13,High Risk,Poor
 ABSL CRISIL IBX 50:50 Gilt+SDL Apr 2028 Index Reg,Regular,Target Maturity,42601,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.91,2.08,GOI/Cash,INF209KB12N5,150703,2,7,7,10,26,Moderate Risk,Average
+"g-sec index""",1.91,2.08,GOI/Cash,INF209KB12N5,150703,2,7,7,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX 60:40 SDL+ AAA PSU Apr 2026 Index Reg,Regular,Target Maturity,42832,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.07,0.07,GOI/Cash,INF209KB18O0,150936,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.07,0.07,GOI/Cash,INF209KB18O0,150936,1,10,10,10,INF740KA1QV9,149970,Good,
 ABSL CRISIL IBX 60:40 SDL+AAA PSU-Apr 2027 Reg,Regular,Target Maturity,42264,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.81,0.85,AAA,INF209KB17H6,150351,3,9,9,9,30,Low Risk,Good
+"g-sec index""",0.81,0.85,AAA,INF209KB17H6,150351,3,9,9,9,INF740KA1QV9,149970,Good,
 ABSL CRISIL-IBX AAA Fin Srvices Index-Sep 2027 Reg,Regular,Target Maturity,44685,Not Available,Not Available,,1.26,1.33,AAA,INF209KC1316,153033,6,8,8,9,31,Low Risk,Good
 ABSL CRISIL-IBX AAA NBFC-HFC Index-Sep 2026 Reg,Regular,Target Maturity,44616,Not Available,Not Available,,0.37,0.38,AAA,INF209KC1233,152945,7,10,10,9,36,Very Low Risk,Good
 ABSL CRISIL IBX Gilt Apr 2028 Index Reg,Regular,Target Maturity,43266,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.66,1.77,GOI/Cash,INF209KB19T7,151583,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.66,1.77,GOI/Cash,INF209KB19T7,151583,1,7,8,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt -Apr 2029 Index Reg,Regular,Target Maturity,42685,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.8,3.11,GOI/Cash,INF209KB10O7,150777,2,6,6,10,24,Moderate Risk,Average
+"g-sec index""",2.8,3.11,GOI/Cash,INF209KB10O7,150777,2,6,6,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt-April 2026 Index Reg,Regular,Target Maturity,42597,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.11,0.12,GOI/Cash,INF209KB18M4,150701,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.11,0.12,GOI/Cash,INF209KB18M4,150701,1,10,10,10,INF740KA1QV9,149970,Good,
 ABSL CRISIL IBX Gilt April 2033 Index Reg,Regular,Target Maturity,43983,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.2,6.49,GOI/Cash,INF209KB17Y1,152268,4,3,5,10,22,Moderate Risk,Average
+"g-sec index""",5.2,6.49,GOI/Cash,INF209KB17Y1,152268,4,3,5,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX Gilt June 2027 Index Reg,Regular,Target Maturity,44343,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.2,1.25,GOI/Cash,INF209KC1050,152660,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.2,1.25,GOI/Cash,INF209KC1050,152660,1,8,8,10,INF740KA1QV9,149970,Average,
 ABSL CRISIL IBX SDL Jun 2032 Index Reg,Regular,Target Maturity,43138,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.84,5.99,GOI/Cash,INF209KB12S4,151428,6,4,5,10,25,Moderate Risk,Average
+"g-sec index""",4.84,5.99,GOI/Cash,INF209KB12S4,151428,6,4,5,10,INF740KA1QV9,149970,Average,
 ABSL Nifty SDL Apr 2027 Reg,Regular,Target Maturity,42027,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.77,0.79,GOI/Cash,INF209KB19E9,149792,1,9,9,10,29,Low Risk,Good
+"g-sec index""",0.77,0.79,GOI/Cash,INF209KB19E9,149792,1,9,9,10,INF740KA1QV9,149970,Good,
 ABSL SDL + PSU Bond Sep 2026 60:40 Reg,Regular,Target Maturity,41726,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.4,0.41,AAA,INF209KB16B1,149198,3,10,10,9,32,Low Risk,Good
+"g-sec index""",0.4,0.41,AAA,INF209KB16B1,149198,3,10,10,9,INF740KA1QV9,149970,Good,
 ABSL Nifty SDL Sep 2027 Index Reg,Regular,Target Maturity,43270,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),1.36,1.42,GOI/Cash,INF209KB14T8,151560,2,8,8,10,28,Low Risk,Good
 Axis CRISIL IBX 50:50 Gilt Plus SDL Jun 2028 Index Reg,Regular,Target Maturity,43027,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.97,2.13,GOI/Cash,INF846K013N1,151297,3,7,7,10,27,Moderate Risk,Average
+"g-sec index""",1.97,2.13,GOI/Cash,INF846K013N1,151297,3,7,7,10,INF740KA1QV9,149970,Average,
 Axis CRISIL IBX 50:50 Gilt Plus SDL September 2027 Index Reg,Regular,Target Maturity,43146,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.34,1.4,GOI/Cash,INF846K015O4,151433,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.34,1.4,GOI/Cash,INF846K015O4,151433,1,8,8,10,INF740KA1QV9,149970,Average,
 Axis CRISIL-IBX AAA Bond Fin Srvices - Sep 2027 Index Reg,Regular,Target Maturity,44720,Not Available,Not Available,,1.37,1.45,AAA,INF846K014Y6,153050,7,8,8,9,32,Low Risk,Good
 Axis CRISIL-IBX AAA Bond NBFC-HFC-Jun 2027 Index Reg,Regular,Target Maturity,44816,Not Available,Not Available,,1.11,1.18,AAA,INF846K016Z8,153174,6,8,8,9,31,Low Risk,Good
 Axis CRISIL-IBX AAA Bond NBFC - Jun 2027 Index Reg,Regular,Target Maturity,44562,Not Available,Not Available,,1.17,1.24,AAA,INF846K016X3,152886,7,8,8,9,32,Low Risk,Good
 Axis CRISIL IBX SDL May 2027 Reg,Regular,Target Maturity,42096,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.17,1.21,GOI/Cash,INF846K010H9,149872,2,8,8,10,28,Low Risk,Good
+"g-sec index""",1.17,1.21,GOI/Cash,INF846K010H9,149872,2,8,8,10,INF740KA1QV9,149970,Good,
 Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF,Regular,Target Maturity,41480,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.15,0.15,AAA,INF846K010D8,149242,3,10,10,9,32,Low Risk,Good
+"g-sec index""",0.15,0.15,AAA,INF846K010D8,149242,3,10,10,9,INF740KA1QV9,149970,Good,
 Axis Nifty AAA Bond + SDL Apr 2026 50:50 ETF FoF Reg,Regular,Target Maturity,41766,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",,,AAA,INF846K010D8,149242,1,1,1,9,12,High Risk,Poor
+"g-sec index""",,,AAA,INF846K010D8,149242,1,1,1,9,INF740KA1QV9,149970,Poor,
 Axis Nifty SDL September 2026 Debt Index Reg,Regular,Target Maturity,42739,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),0.54,0.56,GOI/Cash,INF846K011L9,150851,1,9,9,10,29,Low Risk,Good
 Bandhan CRISIL-IBX 10:90 Gilt + SDL Index-Dec 2029 Reg,Regular,Target Maturity,45034,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",3.41,3.83,GOI/Cash,INF194KB1JO9,153391,3,5,6,10,24,Moderate Risk,Average
+"g-sec index""",3.41,3.83,GOI/Cash,INF194KB1JO9,153391,3,5,6,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX 90:10 SDL+Gilt- April 2032 Index Reg,Regular,Target Maturity,42791,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.8,5.9,GOI/Cash,INF194KB1EQ5,150873,7,4,5,10,26,Moderate Risk,Average
+"g-sec index""",4.8,5.9,GOI/Cash,INF194KB1EQ5,150873,7,4,5,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX 90:10 SDL+Gilt- November 2026 Index Reg,Regular,Target Maturity,42787,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.66,0.67,GOI/Cash,INF194KB1EW3,150869,1,9,9,10,29,Low Risk,Good
+"g-sec index""",0.66,0.67,GOI/Cash,INF194KB1EW3,150869,1,9,9,10,INF740KA1QV9,149970,Good,
 Bandhan CRISIL IBX 90:10 SDL+Gilt-September 2027 Index Reg,Regular,Target Maturity,42820,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.41,1.49,GOI/Cash,INF194K01SN6,121280,3,8,8,10,29,Low Risk,Good
+"g-sec index""",1.41,1.49,GOI/Cash,INF194K01SN6,121280,3,8,8,10,INF740KA1QV9,149970,Good,
 Bandhan Crisil IBX Gilt April 2026 Index Reg,Regular,Target Maturity,42669,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.18,0.19,GOI/Cash,INF194KB1EK8,150744,1,10,10,10,31,Low Risk,Good
+"g-sec index""",0.18,0.19,GOI/Cash,INF194KB1EK8,150744,1,10,10,10,INF740KA1QV9,149970,Good,
 Bandhan CRISIL IBX Gilt April 2028 Index Reg,Regular,Target Maturity,41372,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.69,1.8,GOI/Cash,INF194KB1EK8,150744,1,7,8,10,26,Moderate Risk,Average
+"g-sec index""",1.69,1.8,GOI/Cash,INF194KB1EK8,150744,1,7,8,10,INF740KA1QV9,149970,Average,
 Bandhan Crisil IBX Gilt April 2032 Index Reg,Regular,Target Maturity,43150,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",4.79,5.66,GOI/Cash,INF194KB1FI9,151409,4,4,5,10,23,Moderate Risk,Average
+"g-sec index""",4.79,5.66,GOI/Cash,INF194KB1FI9,151409,4,4,5,10,INF740KA1QV9,149970,Average,
 Bandhan CRISIL IBX Gilt June 2027 Index Reg,Regular,Target Maturity,41376,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.24,1.29,GOI/Cash,INF194KB1BL2,148786,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.24,1.29,GOI/Cash,INF194KB1BL2,148786,1,8,8,10,INF740KA1QV9,149970,Average,
 Baroda BNP Paribas Nifty SDL December 2026 Index Reg,Regular,Target Maturity,43046,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",0.85,0.87,GOI/Cash,INF251K01RI6,151279,1,9,9,10,29,Low Risk,Good
+"g-sec index""",0.85,0.87,GOI/Cash,INF251K01RI6,151279,1,9,9,10,INF740KA1QV9,149970,Good,
 Baroda BNP Paribas NIFTY SDL December 2028 Index Reg,Regular,Target Maturity,43305,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),2.55,2.81,GOI/Cash,INF251K01RO4,151576,3,6,7,10,26,Moderate Risk,Average
 BHARAT Bond ETF-April 2030,Regular,Target Maturity,40483,NIFTY Corporate Bond A-II TR INR,Done,Avail of till 2019 (NSE),3.37,3.85,AAA,INF754K01KV7,147854,6,5,6,9,26,Moderate Risk,Average
 BHARAT Bond ETF-April 2031,Regular,Target Maturity,41060,NIFTY Corporate Bond A-II TR INR,Done,Avail till 2020 (NSE),4.26,5.03,AAA,INF754K01LL6,148452,7,4,5,9,25,Moderate Risk,Average
@@ -1154,31 +1154,31 @@ BHARAT Bond ETF FOF-April 2033 Reg,Regular,Target Maturity,42896,NIFTY Corporate
 BHARAT Bond FOF-April 2030 Reg,Regular,Target Maturity,40490,NIFTY Corporate Bond A-II TR INR,Done,Avail of till 2019 (NSE),3.39,3.86,AAA,INF754K01KV7,147854,6,5,6,9,26,Moderate Risk,Average
 BHARAT Bond FOF-April 2031 Reg,Regular,Target Maturity,41067,NIFTY Corporate Bond A-II TR INR,Done,Avail till 2020 (NSE),4.25,5.02,AAA,INF754K01LL6,148452,7,4,5,9,25,Moderate Risk,Average
 DSP CRISIL-IBX 50:50 Gilt Plus SDL - April 2033 Index Reg,Regular,Target Maturity,43070,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.26,6.74,GOI/Cash,INF740KA1RY1,151327,6,3,5,10,24,Moderate Risk,Average
-DSP Nifty SDL + G-Sec Jun 2028 30:70 Reg,Regular,Target Maturity,42187,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),1.83,1.98,GOI/Cash,INF955L01IY6,152904,2,7,8,10,27,Moderate Risk,Average
+"g-sec index""",5.26,6.74,GOI/Cash,INF740KA1RY1,151327,6,3,5,10,INF740KA1QV9,149970,Average,
+DSP Nifty SDL + G-Sec Jun 2028 30:70 Reg,Regular,Target Maturity,42187,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),1.83,1.98,GOI/Cash,INF223J01AY0,138453,2,7,8,10,27,Moderate Risk,Average,
 DSP Nifty SDL Plus G-Sec Sep 2027 50:50 Index Reg,Regular,Target Maturity,43113,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.36,1.45,GOI/Cash,INF740KA1SE1,151370,2,8,8,10,28,Low Risk,Good
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL April 2037 Reg,Regular,Target Maturity,42589,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.71,10.74,GOI/Cash,INF754K01PB8,150720,7,2,3,10,22,Moderate Risk,Average
+"g-sec index""",7.71,10.74,GOI/Cash,INF754K01PB8,150720,7,2,3,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL June 2027 Reg,Regular,Target Maturity,42637,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.24,1.24,GOI/Cash,INF754K01PJ1,150771,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.24,1.24,GOI/Cash,INF754K01PJ1,150771,1,8,8,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL IBX 50:50 Gilt Plus SDL Sep 2028 Index Reg,Regular,Target Maturity,42709,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.2,2.35,GOI/Cash,INF754K01PR4,150848,3,6,7,10,26,Moderate Risk,Average
+"g-sec index""",2.2,2.35,GOI/Cash,INF754K01PR4,150848,3,6,7,10,INF740KA1QV9,149970,Average,
 Edelweiss CRISIL-IBX AAA Bond NBFC-HFC-Jun 2027 Index Reg,Regular,Target Maturity,44976,Not Available,Not Available,,1.21,1.29,AAA,INF754K01UK9,153334,7,8,8,9,32,Low Risk,Good
 Edelweiss CRISIL IBX AAA Fin Srvices Bond - Jan 2028 Index Reg,Regular,Target Maturity,44748,Not Available,Not Available,,1.69,1.76,AAA,INF754K01TT2,153130,7,7,8,9,31,Low Risk,Good
 Edelweiss NIFTY PSU Bond Plus SDL Apr 2026 50:50 Index Reg,Regular,Target Maturity,41380,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),0.13,0.12,AAA,INF754K01LZ6,148797,3,10,10,9,32,Low Risk,Good
 Edelweiss NIFTY PSU Bond Plus SDL Apr 2027 50:50 Index Reg,Regular,Target Maturity,41770,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),1.07,1.1,AAA,INF754K01MP5,149249,4,8,8,9,29,Low Risk,Good
-HDFC Nifty G-Sec Apr 2029 Index Reg,Regular,Target Maturity,43249,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),2.8,3.13,GOI/Cash,INF955L01IY6,152904,2,6,6,10,24,Moderate Risk,Average
+HDFC Nifty G-Sec Apr 2029 Index Reg,Regular,Target Maturity,43249,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),2.8,3.13,GOI/Cash,INF223J01AY0,138453,2,6,6,10,24,Moderate Risk,Average,
 HDFC Nifty G-sec Dec 2026 Index Reg,Regular,Target Maturity,42762,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),0.74,0.75,GOI/Cash,INF277KA1828,151306,1,9,9,10,29,Low Risk,Good
-HDFC Nifty G-Sec July 2031 Index Reg,Regular,Target Maturity,42764,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),4.6,5.35,GOI/Cash,INF955L01IY6,152904,4,4,5,10,23,Moderate Risk,Average
-HDFC Nifty G-Sec Jun 2027 Index Reg,Regular,Target Maturity,42927,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),1.27,1.32,GOI/Cash,INF955L01IY6,152904,1,8,8,10,27,Moderate Risk,Average
-HDFC NIFTY G-Sec Jun 2036 Index Reg,Regular,Target Maturity,43251,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),7.31,10.27,GOI/Cash,INF955L01IY6,152904,5,2,3,10,20,Moderately High Risk,Average
-HDFC Nifty G-Sec Sep 2032 Index Reg,Regular,Target Maturity,42929,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),5.18,6.53,GOI/Cash,INF955L01IY6,152904,5,3,5,10,23,Moderate Risk,Average
-HDFC Nifty SDL Oct 2026 Index Reg,Regular,Target Maturity,43194,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.53,0.54,GOI/Cash,INF955L01IY6,152904,1,9,9,10,29,Low Risk,Good
+HDFC Nifty G-Sec July 2031 Index Reg,Regular,Target Maturity,42764,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),4.6,5.35,GOI/Cash,INF223J01AY0,138453,4,4,5,10,23,Moderate Risk,Average,
+HDFC Nifty G-Sec Jun 2027 Index Reg,Regular,Target Maturity,42927,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),1.27,1.32,GOI/Cash,INF223J01AY0,138453,1,8,8,10,27,Moderate Risk,Average,
+HDFC NIFTY G-Sec Jun 2036 Index Reg,Regular,Target Maturity,43251,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),7.31,10.27,GOI/Cash,INF223J01AY0,138453,5,2,3,10,20,Moderately High Risk,Average,
+HDFC Nifty G-Sec Sep 2032 Index Reg,Regular,Target Maturity,42929,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),5.18,6.53,GOI/Cash,INF223J01AY0,138453,5,3,5,10,23,Moderate Risk,Average,
+HDFC Nifty SDL Oct 2026 Index Reg,Regular,Target Maturity,43194,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),0.53,0.54,GOI/Cash,INF223J01AY0,138453,1,9,9,10,29,Low Risk,Good,
 HDFC NIFTY SDL Plus G-Sec Jun 2027 40:60 Index Reg,Regular,Target Maturity,43338,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.19,1.23,GOI/Cash,INF740KA1QS5,149968,1,8,8,10,27,Moderate Risk,Average
 HSBC CRISIL IBX 50:50 Gilt+SDL Apr 2028 Reg,Regular,Target Maturity,42191,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.88,2.01,GOI/Cash,INF917K01AH0,150992,3,7,7,10,27,Moderate Risk,Average
+"g-sec index""",1.88,2.01,GOI/Cash,INF917K01AH0,150992,3,7,7,10,INF740KA1QV9,149970,Average,
 HSBC CRISIL IBX Gilt June 2027 Index Reg,Regular,Target Maturity,43207,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.28,1.33,GOI/Cash,INF336L01QW6,151480,1,8,8,10,27,Moderate Risk,Average
+"g-sec index""",1.28,1.33,GOI/Cash,INF336L01QW6,151480,1,8,8,10,INF740KA1QV9,149970,Average,
 ICICI Pru Nifty G-Sec Dec 2030 Index Reg,Regular,Target Maturity,42651,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),3.93,4.73,GOI/Cash,INF767K01535,105823,4,5,6,10,25,Moderate Risk,Average
 ICICI Pru Nifty PSU Bond + SDL Sep 2027 40:60 Index Reg,Regular,Target Maturity,41730,NIFTY Composite G-Sec Index,Done,Avail of 5 years (NSE),1.42,1.5,AAA,INF846K01CB0,117446,4,8,8,9,29,Low Risk,Good
 ICICI Pru Nifty SDL Dec 2028 Index Reg,Regular,Target Maturity,42647,NIFTY Composite G-Sec Index,Done,Avail of 4 years (NSE),2.48,2.76,GOI/Cash,INF767K01535,105823,4,6,7,10,27,Moderate Risk,Average
@@ -1194,10 +1194,10 @@ Kotak Nifty SDL Apr 2027 Top 12 Equal Weight Reg,Regular,Target Maturity,42084,N
 Kotak Nifty SDL Apr 2032 Top 12 Equal Weight Reg,Regular,Target Maturity,42088,NIFTY Composite G-Sec Index,Done,Avail till 2021(NSE),4.8,5.96,GOI/Cash,INF174KA1IO6,149862,7,4,5,10,26,Moderate Risk,Average
 Kotak Nifty SDL Jul 2026 Index Reg,Regular,Target Maturity,42958,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),0.41,0.41,GOI/Cash,INF174KA1KZ8,151216,1,10,10,10,31,Low Risk,Good
 Kotak Nifty SDL Jul 2033 Index Reg,Regular,Target Maturity,43166,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.3,6.84,GOI/Cash,INF174KA1MG4,151417,7,3,5,10,25,Moderate Risk,Average
+"g-sec index""",5.3,6.84,GOI/Cash,INF174KA1MG4,151417,7,3,5,10,INF740KA1QV9,149970,Average,
 Kotak Nifty SDL Plus AAA PSU Bond Jul 2028 60:40 Index Reg,Regular,Target Maturity,42643,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),1.99,2.16,AAA,INF174KA1JQ9,150723,5,7,7,9,28,Low Risk,Good
 Mirae Asset CRISIL IBX Gilt Index-April 2033 Index Reg,Regular,Target Maturity,42697,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.45,6.75,GOI/Cash,INF769K01IU1,150790,5,3,5,10,23,Moderate Risk,Average
+"g-sec index""",5.45,6.75,GOI/Cash,INF769K01IU1,150790,5,3,5,10,INF740KA1QV9,149970,Average,
 Mirae Asset Nifty AAA PSU Bond Plus SDL Apr 2026 50:50 Index Reg,Regular,Target Maturity,42701,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),0.14,0.14,AAA,INF769K01JA1,150786,2,10,10,9,31,Low Risk,Good
 Mirae Asset Nifty SDL Jun 2027 Index Reg,Regular,Target Maturity,42238,NIFTY Composite G-Sec Index,Done,Avail till 2022(NSE),1.25,1.26,GOI/Cash,INF769K01JW5,151694,3,8,8,10,29,Low Risk,Good
 Mirae Asset Nifty SDL June 2028 Index Reg,Regular,Target Maturity,43395,NIFTY Composite G-Sec Index,Done,Avail till 2023 (NSE),2.13,2.24,GOI/Cash,INF769K01JW5,151694,4,6,7,10,27,Moderate Risk,Average
@@ -1212,21 +1212,21 @@ Nippon India Nifty G-Sec Sep 2027 Mtrty Index Reg,Regular,Target Maturity,42816,
 Nippon India Nifty SDL Plus G-Sec-Jun 2028 Mtrty 70:30 Index Reg,Regular,Target Maturity,42735,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.92,2.07,GOI/Cash,INF204KC1AF3,151392,3,7,7,10,27,Moderate Risk,Average
 Nippon India Nifty SDL Plus G-Sec-Jun 2029 Mtrty 70:30 Index Reg,Regular,Target Maturity,43171,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),2.73,3.09,GOI/Cash,INF204KC1AF3,151392,4,6,6,10,26,Moderate Risk,Average
 PGIM India CRISIL IBX Gilt Index-Apr 2028 Reg,Regular,Target Maturity,43158,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.72,1.84,GOI/Cash,INF663L01X54,151404,1,7,8,10,26,Moderate Risk,Average
-SBI CPSE Bond + SDL Sep 2026 50:50 Reg,Regular,Target Maturity,41950,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),0.4,0.41,AAA,INF955L01IY6,152904,4,10,10,9,33,Low Risk,Good
+"g-sec index""",1.72,1.84,GOI/Cash,INF663L01X54,151404,1,7,8,10,INF740KA1QV9,149970,Average,
+SBI CPSE Bond + SDL Sep 2026 50:50 Reg,Regular,Target Maturity,41950,NIFTY Composite G-Sec Index,Done,Avail till 2021 (NSE),0.4,0.41,AAA,INF223J01AY0,138453,4,10,10,9,33,Low Risk,Good,
 SBI CRISIL IBX Gilt Index-April 2029 Reg,Regular,Target Maturity,42613,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",2.85,3.18,GOI/Cash,INF200KA15Q2,150707,2,6,6,10,24,Moderate Risk,Average
+"g-sec index""",2.85,3.18,GOI/Cash,INF200KA15Q2,150707,2,6,6,10,INF740KA1QV9,149970,Average,
 SBI CRISIL IBX Gilt Index-June 2036 Reg,Regular,Target Maturity,42593,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",7.29,10.26,GOI/Cash,INF200KA19P6,150683,5,2,3,10,20,Moderately High Risk,Average
+"g-sec index""",7.29,10.26,GOI/Cash,INF200KA19P6,150683,5,2,3,10,INF740KA1QV9,149970,Average,
 SBI CRISIL IBX SDL Index-September 2027 Reg,Regular,Target Maturity,42617,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.44,1.52,GOI/Cash,INF200KA11R9,150712,3,8,8,10,29,Low Risk,Good
+"g-sec index""",1.44,1.52,GOI/Cash,INF200KA11R9,150712,3,8,8,10,INF740KA1QV9,149970,Good,
 Tata Nifty G-Sec Dec 2026 Index Reg,Regular,Target Maturity,43058,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),0.69,0.71,GOI/Cash,INF277KA1828,151306,1,9,9,10,29,Low Risk,Good
 Tata Nifty G-Sec Dec 2029 Index Reg,Regular,Target Maturity,43011,Nifty Composite Debt TR INR,Done,Avail till 2022 (NSE),3.05,3.42,GOI/Cash,INF277KA1760,151275,2,5,6,10,23,Moderate Risk,Average
 Tata Nifty SDL+AAA PSU Bond Dec 27 60:40 Reg,Regular,Target Maturity,42260,NIFTY Composite G-Sec Index,Done,Avail till 2022 (NSE),1.58,1.67,AAA,INF767K01535,105823,3,7,8,9,27,Moderate Risk,Average
 UTI CRISIL SDL Maturity April 2033 Index Reg,Regular,Target Maturity,42945,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",5.5,7.11,GOI/Cash,INF789F1AWW5,151184,7,3,4,10,24,Moderate Risk,Average
+"g-sec index""",5.5,7.11,GOI/Cash,INF789F1AWW5,151184,7,3,4,10,INF740KA1QV9,149970,Average,
 UTI CRISIL SDL Maturity June 2027 Index Reg,Regular,Target Maturity,42991,NIFTY Composite G-Sec Index,,"primary bm data not avail. Can use nifty composite
-g-sec index",1.21,1.26,GOI/Cash,INF789F1AWY1,151238,2,8,8,10,28,Low Risk,Good
+"g-sec index""",1.21,1.26,GOI/Cash,INF789F1AWY1,151238,2,8,8,10,INF740KA1QV9,149970,Good,
 UTI Nifty SDL Plus AAA PSU Bond Apr 2026 75:25 Index Reg,Regular,Target Maturity,43131,Nifty SDL Plus AAA PSU Bond Apr 2026 75:25 Index,Done,Avail till 2022 (NSE),0.18,0.18,AAA,INF789F1AXK8,151363,1,10,10,9,30,Low Risk,Good
 UTI Nifty SDL Plus AAA PSU Bond Apr 2028 75:25 Index Reg,Regular,Target Maturity,43246,Nifty SDL Plus AAA PSU Bond Apr 2028 75:25 Index,Done,Avail till 2022 (NSE),1.97,2.15,AAA,INF789F1AXQ5,151488,3,7,7,9,26,Moderate Risk,Average
 ABSL US Treasury 1-3 Year Bonds ETFs Passive FoF Reg,Regular,Others,43824,Not Available,Not Available,,,1.89,D,INF209KB13W4,152142,1,1,8,1,11,High Risk,Poor
