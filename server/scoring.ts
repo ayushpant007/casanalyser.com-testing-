@@ -1,4 +1,4 @@
-import xlsx from "xlsx";
+import fs from "fs";
 import path from "path";
 
 interface ScoringRecord {
@@ -7,7 +7,7 @@ interface ScoringRecord {
   category: string;
   isin: string;
   schemeCode: number;
-  fundType: "equity" | "hybrid" | "debt" | "solution";
+  fundType: "equity" | "hybrid" | "debt" | "solution" | "commodity";
   totalScore: number;
   riskCategory: string;
   fundRating: string;
@@ -50,16 +50,10 @@ const ABBREV_MAP: Record<string, string> = {
 
 function normalizeName(name: string): Set<string> {
   let n = name.toLowerCase();
-  
-  // apply abbreviation expansions
   for (const [abbr, full] of Object.entries(ABBREV_MAP)) {
     n = n.replace(new RegExp(`\\b${abbr}\\b`, "g"), full);
   }
-
-  // remove special chars except spaces
   n = n.replace(/[-&().,\/\\*]/g, " ");
-
-  // tokenize and filter stop words
   const tokens = n.split(/\s+/).filter(t => t.length > 1 && !STOP_WORDS.has(t));
   return new Set(tokens);
 }
@@ -74,6 +68,125 @@ function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
   return union === 0 ? 0 : intersection / union;
 }
 
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (const ch of line) {
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ""; }
+    else { current += ch; }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+const SCORE_KEYWORDS = [
+  "score", "quality", "risk & return", "risk&return", "risk-adj",
+  "diversification", "valuation", "portbreadth", "portfolio breadth",
+  "vol &", "volatility &", "debt quality",
+];
+
+function isScoreColumn(header: string): boolean {
+  const lower = header.toLowerCase();
+  return SCORE_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+const SKIP_COLS = new Set([
+  "isin", "isin (growth / div payout)", "isin (div reinvestment)",
+  "scheme code", "scheme_code", "plan", "fund name", "category", "subcategory",
+  "risk category", "fund rating", "fund_rating", "fund url",
+]);
+
+function addRowsFromCSV(
+  filePath: string,
+  fundType: ScoringRecord["fundType"],
+  db: Map<string, ScoringRecord>,
+  nameIdx: Array<{ tokens: Set<string>; record: ScoringRecord }>
+) {
+  try {
+    const lines = fs.readFileSync(filePath, "utf-8").split(/\r?\n/);
+    if (lines.length < 2) return;
+
+    const header = parseCSVLine(lines[0]);
+
+    const findCol = (...names: string[]) => {
+      for (const name of names) {
+        const idx = header.findIndex(h => h.toLowerCase() === name.toLowerCase());
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    };
+
+    const isinIdx        = findCol("ISIN", "isin", "ISIN (Growth / Div Payout)");
+    const schemeCodeIdx  = findCol("Scheme Code", "scheme_code");
+    const fundNameIdx    = findCol("Fund Name");
+    const planIdx        = findCol("Plan");
+    const categoryIdx    = findCol("Category");
+    const riskCatIdx     = findCol("Risk Category");
+    const fundRatingIdx  = findCol("Fund Rating", "fund_rating");
+    const totalScoreIdx  = findCol("Total Score (40)", "total_score", "Total Score (Available)");
+
+    if (isinIdx === -1 || fundNameIdx === -1) {
+      console.warn(`[Scoring] Missing key columns in ${path.basename(filePath)}`);
+      return;
+    }
+
+    let count = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const cols = parseCSVLine(line);
+
+      const isin = (isinIdx < cols.length ? cols[isinIdx] : "").trim();
+      if (!isin || !isin.startsWith("INF")) continue;
+
+      const metrics: Record<string, number | string | null> = {};
+      const scores: Record<string, number | null> = {};
+
+      for (let j = 0; j < header.length; j++) {
+        const key = header[j];
+        if (!key || SKIP_COLS.has(key.toLowerCase())) continue;
+
+        const val = j < cols.length ? cols[j].trim() : "";
+
+        if (isScoreColumn(key)) {
+          scores[key] = val !== "" && !isNaN(Number(val)) ? Number(val) : null;
+        } else {
+          if (val === "") {
+            metrics[key] = null;
+          } else if (!isNaN(Number(val))) {
+            metrics[key] = Number(val);
+          } else {
+            metrics[key] = val;
+          }
+        }
+      }
+
+      const record: ScoringRecord = {
+        fundName:     fundNameIdx < cols.length ? cols[fundNameIdx].trim() : "",
+        plan:         planIdx >= 0 && planIdx < cols.length ? cols[planIdx].trim() : "",
+        category:     categoryIdx >= 0 && categoryIdx < cols.length ? cols[categoryIdx].trim() : "",
+        isin,
+        schemeCode:   schemeCodeIdx >= 0 && schemeCodeIdx < cols.length ? Number(cols[schemeCodeIdx]) || 0 : 0,
+        fundType,
+        totalScore:   totalScoreIdx >= 0 && totalScoreIdx < cols.length ? Number(cols[totalScoreIdx]) || 0 : 0,
+        riskCategory: riskCatIdx >= 0 && riskCatIdx < cols.length ? cols[riskCatIdx].trim() : "",
+        fundRating:   fundRatingIdx >= 0 && fundRatingIdx < cols.length ? cols[fundRatingIdx].trim() : "",
+        metrics,
+        scores,
+      };
+
+      db.set(isin, record);
+      nameIdx.push({ tokens: normalizeName(record.fundName), record });
+      count++;
+    }
+    console.log(`[Scoring] Loaded ${count} records from ${path.basename(filePath)} (${fundType})`);
+  } catch (e: any) {
+    console.error(`[Scoring] Failed to load ${filePath}:`, e.message);
+  }
+}
+
 let scoringDb: Map<string, ScoringRecord> | null = null;
 let nameIndex: Array<{ tokens: Set<string>; record: ScoringRecord }> | null = null;
 
@@ -82,55 +195,11 @@ function loadScoring(): { db: Map<string, ScoringRecord>; nameIdx: Array<{ token
   const nameIdx: Array<{ tokens: Set<string>; record: ScoringRecord }> = [];
   const base = path.join(process.cwd(), "Scoring");
 
-  const addRows = (filePath: string, fundType: ScoringRecord["fundType"]) => {
-    try {
-      const wb = xlsx.readFile(filePath);
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = xlsx.utils.sheet_to_json<any>(ws);
-      for (const row of rows) {
-        const isin = (row["ISIN"] || "").toString().trim();
-        if (!isin) continue;
-
-        const metrics: Record<string, number | string | null> = {};
-        const scores: Record<string, number | null> = {};
-
-        for (const [key, val] of Object.entries(row)) {
-          if (["ISIN", "Scheme Code", "VR ID", "Plan", "Fund Name", "Category", "Risk Category", "Fund Rating"].includes(key)) continue;
-          const isScore = key.includes("Score(") || key === "Debt Quality" || key === "Risk&Return" || key === "Diversification" || key === "Valuation" || key === "PortBreadth" || key === "Total Score(40)";
-          if (isScore) {
-            scores[key] = val != null ? Number(val) : null;
-          } else {
-            metrics[key] = val != null ? val : null;
-          }
-        }
-
-        const record: ScoringRecord = {
-          fundName: row["Fund Name"] || "",
-          plan: row["Plan"] || "",
-          category: row["Category"] || "",
-          isin,
-          schemeCode: Number(row["Scheme Code"]) || 0,
-          fundType,
-          totalScore: Number(row["Total Score(40)"]) || 0,
-          riskCategory: row["Risk Category"] || "",
-          fundRating: row["Fund Rating"] || "",
-          metrics,
-          scores,
-        };
-
-        db.set(isin, record);
-        nameIdx.push({ tokens: normalizeName(record.fundName), record });
-      }
-      console.log(`Loaded ${rows.length} records from ${path.basename(filePath)} (${fundType})`);
-    } catch (e: any) {
-      console.error(`Failed to load ${filePath}:`, e.message);
-    }
-  };
-
-  addRows(path.join(base, "All_Funds_Metrices_Scored.xlsx"), "equity");
-  addRows(path.join(base, "Hybrid_Funds_Metrices_Scored.xlsx"), "hybrid");
-  addRows(path.join(base, "Debt_Funds_Metrices_Scored.xlsx"), "debt");
-  addRows(path.join(base, "Solution_Oriented_Funds_Scored.xlsx"), "solution");
+  addRowsFromCSV(path.join(base, "Equity_Funds.csv"),            "equity",    db, nameIdx);
+  addRowsFromCSV(path.join(base, "Hybrid_Funds.csv"),            "hybrid",    db, nameIdx);
+  addRowsFromCSV(path.join(base, "Debt_Funds.csv"),              "debt",      db, nameIdx);
+  addRowsFromCSV(path.join(base, "Solution_Oriented_Funds.csv"), "solution",  db, nameIdx);
+  addRowsFromCSV(path.join(base, "Commodities_Funds.csv"),       "commodity", db, nameIdx);
 
   return { db, nameIdx };
 }
@@ -159,7 +228,6 @@ export function lookupByName(schemeName: string, preferPlan?: string): ScoringRe
 
   for (const { tokens, record } of nameIndex!) {
     const sim = jaccardSimilarity(queryTokens, tokens);
-    // Give small bonus when the plan type matches
     const planBonus = preferPlan && record.plan.toLowerCase() === preferPlan.toLowerCase() ? 0.05 : 0;
     const total = sim + planBonus;
 
@@ -170,7 +238,6 @@ export function lookupByName(schemeName: string, preferPlan?: string): ScoringRe
     }
   }
 
-  // Only return if similarity is above threshold
   return bestScore >= 0.35 ? bestRecord : null;
 }
 

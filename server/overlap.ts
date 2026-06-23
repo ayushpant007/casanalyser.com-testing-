@@ -53,11 +53,11 @@ export interface OverlapAnalysisResult {
 
 // ── CSV file configs ────────────────────────────────────────────────────────
 const CSV_FILES = [
-  { path: "attached_assets/Equity_holdings_-_Main_1781164821041.csv", holdingTypeCol: null, companyCol: "Company Name", weightCol: "% Assets" },
-  { path: "attached_assets/Hybrid_Holding_-_main_1781164821040.csv", holdingTypeCol: "Holding Type", companyCol: "Company", weightCol: "% Assets" },
-  { path: "attached_assets/Solution_Oriented_Holdings_-_main_1781164821039.csv", holdingTypeCol: "Holding Type", companyCol: "Company", weightCol: "% Assets" },
-  { path: "attached_assets/Debt_holding_-_main_1781164821043.csv", holdingTypeCol: null, companyCol: "Company", weightCol: "% Assets" },
-  { path: "attached_assets/Commodities_Holding_-_vr_commodity_holdings_REGULAR.csv_1781164821045.csv", holdingTypeCol: null, companyCol: "Company Name", weightCol: "% Assets" },
+  { path: "Scoring/Equity_Top_Holdings.csv",            holdingTypeCol: null,           isinCol: "ISIN (Growth / Div Payout)", companyCol: "Company Name", weightCol: "% of Assets" },
+  { path: "Scoring/Hybrid_Top_Holdings.csv",            holdingTypeCol: "Holdings Type", isinCol: "ISIN",                       companyCol: "Company Name", weightCol: "% of Assets" },
+  { path: "Scoring/Solution_Oriented_Top_Holdings.csv", holdingTypeCol: "Holdings Type", isinCol: "ISIN",                       companyCol: "Company Name", weightCol: "% of Assets" },
+  { path: "Scoring/Debt_Top_Holdings.csv",              holdingTypeCol: null,           isinCol: "ISIN",                       companyCol: "Company Name", weightCol: "% of Assets" },
+  { path: "Scoring/Commodities_Top_Holdings.csv",       holdingTypeCol: "Holdings Type", isinCol: "ISIN",                       companyCol: "Company Name", weightCol: "% of Assets" },
 ];
 
 // ── In-memory cache ─────────────────────────────────────────────────────────
@@ -135,7 +135,7 @@ export function loadHoldings(): { nameMap: Map<string, FundHoldings>; isinMap: M
 
     const header = parseCSVLine(lines[0]);
     const fundNameIdx  = header.indexOf("Fund Name");
-    const isinIdx      = header.indexOf("ISIN");
+    const isinIdx      = (cfg as any).isinCol ? header.indexOf((cfg as any).isinCol) : header.indexOf("ISIN");
     const companyIdx   = header.indexOf(cfg.companyCol);
     const weightIdx    = header.indexOf(cfg.weightCol);
     const typeIdx      = cfg.holdingTypeCol ? header.indexOf(cfg.holdingTypeCol) : -1;
