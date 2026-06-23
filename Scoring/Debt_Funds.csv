@@ -49,8 +49,8 @@ Bank of India Credit Risk Dir,debt,Credit Risk,Direct,INF761K01DG8,133868,17.38,
 Baroda BNP Paribas Credit Risk Dir,debt,Credit Risk,Direct,INF955L01FR6,133488,6.97,8.37,9.27,Debt: Credit Risk,8.54,9.69,10.11,8.2,1.58,AAA,1.93,8,8,8,9,33,Good,25,https://www.valueresearchonline.com/funds/29239/
 Baroda BNP Paribas Credit Risk Seg Port1 Dir,debt,Credit Risk,Direct,INF955L01IT6,148333,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40938/
 DSP Credit Risk Dir,debt,Credit Risk,Direct,INF740K01OS4,119082,10,16.58,13.03,Debt: Credit Risk,8.54,9.69,10.11,7.75,2.4,AA,2.98,8,6,7,7,28,Good,22,https://www.valueresearchonline.com/funds/16396/
-Franklin Ind Credit Risk Seg Port 2 Dir,debt,Credit Risk,Direct,,118553,,,,,,,,,,B,,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40584/
-Franklin Ind Credit Risk Seg Port 3 Dir,debt,Credit Risk,Direct,,118552,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40824/
+Franklin Ind Credit Risk Seg Port 2 Dir,debt,Credit Risk,Direct,INF090I01JL3,118553,,,,,,,,,,B,,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40584/
+Franklin Ind Credit Risk Seg Port 3 Dir,debt,Credit Risk,Direct,INF090I01JJ7,118552,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40824/
 HDFC Credit Risk Debt Dir,debt,Credit Risk,Direct,INF179KA1FZ3,128051,7.08,8.09,7.18,Debt: Credit Risk,8.54,9.69,10.11,8.8,2.35,AA,3.48,10,6,6,7,29,Good,25,https://www.valueresearchonline.com/funds/25076/
 HSBC Credit Risk Dir,debt,Credit Risk,Direct,INF917K01UH8,151045,6.15,11.77,9.42,Debt: Credit Risk,8.54,9.69,10.11,8.31,1.68,AAA,2.07,8,7,7,9,31,Good,25,https://www.valueresearchonline.com/funds/16253/
 ICICI Pru Credit Risk Dir,debt,Credit Risk,Direct,INF109K01V00,120711,8.15,8.97,7.94,Debt: Credit Risk,8.54,9.69,10.11,8.93,2.15,AA,3.11,9,6,6,7,28,Good,25,https://www.valueresearchonline.com/funds/17159/
@@ -72,8 +72,8 @@ Bandhan Dynamic Bond Dir,debt,Dynamic Bond,Direct,INF194K01N63,118416,6.14,7.44,
 Baroda BNP Paribas Dynamic Bond Dir,debt,Dynamic Bond,Direct,INF251K01GW0,150180,2,6.31,6.04,Debt: Dynamic Bond,3.84,7,6.37,7.47,3.75,AAA,5.62,6,5,5,9,25,Average,18,https://www.valueresearchonline.com/funds/16213/
 Canara Robeco Dynamic Bond Dir,debt,Dynamic Bond,Direct,INF760K01EC7,118284,2.11,5.87,5.43,Debt: Dynamic Bond,3.84,7,6.37,6.97,2.76,AAA,4.54,5,6,6,9,26,Average,9,https://www.valueresearchonline.com/funds/16577/
 DSP Strategic Bond Dir,debt,Dynamic Bond,Direct,INF740K01QG4,119239,2.27,6.56,6.01,Debt: Dynamic Bond,3.84,7,6.37,7.57,8.17,AAA,18.9,8,2,2,9,21,Average,15,https://www.valueresearchonline.com/funds/16443/
-Franklin Ind Dyn Accrual Seg Port 2 Dir,debt,Dynamic Bond,Direct,,118496,,,,,,,,4.17,0.01,B,0.01,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40600/
-Franklin Ind Dyn Accrual Seg Port 3 Dir,debt,Dynamic Bond,Direct,,118495,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40828/
+Franklin Ind Dyn Accrual Seg Port 2 Dir,debt,Dynamic Bond,Direct,INF090I01GZ9,118496,,,,,,,,4.17,0.01,B,0.01,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40600/
+Franklin Ind Dyn Accrual Seg Port 3 Dir,debt,Dynamic Bond,Direct,INF090I01HB8,118495,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40828/
 Groww Dynamic Term Dir,debt,Dynamic Bond,Direct,INF666M01EK5,145589,2.46,5.66,5.18,Debt: Dynamic Bond,3.84,7,6.37,7.24,4.35,AAA,8.42,5,6,6,9,26,Average,11,https://www.valueresearchonline.com/funds/38300/
 HDFC Dynamic Debt Dir,debt,Dynamic Bond,Direct,INF179K01WB4,119075,3.38,6.8,7.01,Debt: Dynamic Bond,3.84,7,6.37,7.53,7.69,AAA,19.74,8,2,2,9,21,Average,25,https://www.valueresearchonline.com/funds/16061/
 HSBC Dynamic Bond Dir,debt,Dynamic Bond,Direct,INF917K01HA0,151087,3.27,6.86,5.82,Debt: Dynamic Bond,3.84,7,6.37,7.4,3.98,AAA,7.15,7,4,4,9,24,Average,18,https://www.valueresearchonline.com/funds/16218/
@@ -202,7 +202,7 @@ Sundaram Liquid Dir,debt,Liquid,Direct,INF173K01GU0,149664,6.31,7,6.22,Debt: Liq
 TRUSTMF Liquid Dir,debt,Liquid,Direct,INF0GCD01255,148841,6.24,6.92,6.14,Debt: Liquid,6.22,6.92,6.14,6.65,0.11,AAA,0.11,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/41413/
 Tata Liquid Dir,debt,Liquid,Direct,INF277K01YE6,119861,6.33,7,6.19,Debt: Liquid,6.22,6.92,6.14,6.59,0.1,AAA,0.1,4,10,10,9,33,Good,25,https://www.valueresearchonline.com/funds/16723/
 The Wealth Company Liquid Dir,debt,Liquid,Direct,INF2F0001081,153883,,,,Debt: Liquid,,,,6.67,0.13,AAA,0.13,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/45509/
-UTI Liquid Dir,debt,Liquid,Direct,INF789F01XQ6,120304,6.36,7,6.21,Debt: Liquid,6.22,6.92,6.14,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/15758/
+UTI Liquid Dir,debt,Liquid,Direct,INF789F1AD46,120304,6.36,7,6.21,Debt: Liquid,6.22,6.92,6.14,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/15758/
 Unifi Liquid Dir,debt,Liquid,Direct,INF1MIY01056,153570,6.02,,,Debt: Liquid,6.22,,,5.45,0,CASH,0,1,10,10,10,31,Good,2,https://www.valueresearchonline.com/funds/45229/
 Union Liquid Dir,debt,Liquid,Direct,INF582M01674,119303,6.34,7.01,6.22,Debt: Liquid,6.22,6.92,6.14,6.15,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/16419/
 WhiteOak Capital Liquid Dir,debt,Liquid,Direct,INF03VN01043,145971,6.2,6.88,5.99,Debt: Liquid,6.22,6.92,6.14,6.1,0.1,AAA,0.1,2,10,10,9,31,Good,22,https://www.valueresearchonline.com/funds/38646/
@@ -228,7 +228,7 @@ Baroda BNP Paribas Medium Duration-Seg Port 1 Dir,debt,Low Duration,Direct,,1502
 Canara Robeco Savings Dir,debt,Low Duration,Direct,INF760K01ET1,118291,6.09,7.24,6.28,Debt: Low Duration,6.18,7.39,6.62,7.54,0.85,AAA,1.17,8,9,8,9,34,Good,25,https://www.valueresearchonline.com/funds/16604/
 DSP Low Duration Dir,debt,Low Duration,Direct,INF740K013Q1,133925,5.94,7.18,6.33,Debt: Low Duration,6.18,7.39,6.62,7.12,0.98,AAA,1.15,6,9,8,9,32,Good,25,https://www.valueresearchonline.com/funds/29616/
 Edelweiss Low Duration Dir,debt,Low Duration,Direct,INF754K01UP8,153416,6.15,,,Debt: Low Duration,6.18,,,7.71,0.9,AAA,0.93,6,9,9,9,33,Good,25,https://www.valueresearchonline.com/funds/45057/
-Franklin Ind Low Duration Seg Port 2 Dir,debt,Low Duration,Direct,,118530,,,,,,,,4.17,0.01,B,0.01,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40611/
+Franklin Ind Low Duration Seg Port 2 Dir,debt,Low Duration,Direct,INF090I01HG7,118530,,,,,,,,4.17,0.01,B,0.01,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40611/
 Franklin India Low Duration Dir,debt,Low Duration,Direct,INF090I01YG2,153369,6.59,,,Debt: Low Duration,6.18,,,7.81,0.58,AAA,1.16,,,,,,N/A,22,https://www.valueresearchonline.com/funds/45010/
 HDFC CRISIL-IBX Financial Services 9-12 Months Debt Index Dir,debt,Low Duration,Direct,INF179KC1KI7,154308,,,,Debt: Low Duration,,,,7.91,0.77,AAA,0.78,8,9,9,9,35,Good,23,https://www.valueresearchonline.com/funds/45934/
 HDFC Low Duration Dir,debt,Low Duration,Direct,INF179K01VF7,118942,6.23,7.54,6.67,Debt: Low Duration,6.18,7.39,6.62,7.82,0.95,AAA,1.93,8,9,8,9,34,Good,25,https://www.valueresearchonline.com/funds/16011/
@@ -516,7 +516,7 @@ Mirae Asset Ultra Short Duration Dir,debt,Ultra Short Duration,Direct,INF769K01G
 Motilal Oswal Ultra Short Term Dir,debt,Ultra Short Duration,Direct,INF247L01247,124234,6.05,6.46,5.62,Debt: Ultra Short Duration,6.44,7.21,6.43,6.15,0.31,AAA,0.31,2,10,10,9,31,Good,14,https://www.valueresearchonline.com/funds/21385/
 Nippon India CRISIL-IBX Financial Services 3-6 Months Debt Index Dir,debt,Ultra Short Duration,Direct,INF204KC1GX3,154271,,,,Debt: Ultra Short Duration,,,,7.28,0.2,AAA,0.2,7,10,10,9,36,Good,23,https://www.valueresearchonline.com/funds/45885/
 Nippon India Ultra Short Duration Dir,debt,Ultra Short Duration,Direct,INF204K01YH3,143494,6.78,7.57,7.37,Debt: Ultra Short Duration,6.44,7.21,6.43,7.83,0.45,AAA,0.59,8,10,9,9,36,Good,25,https://www.valueresearchonline.com/funds/16091/
-Nippon India Ultra Short Duration Seg Port 1 Direct,debt,Ultra Short Duration,Direct,INF204K01YH3,147675,,,,,,,,10.75,,BBB,0.07,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40332/
+Nippon India Ultra Short Duration Seg Port 1 Direct,debt,Ultra Short Duration,Direct,INF204KB10H2,147675,,,,,,,,10.75,,BBB,0.07,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40332/
 PGIM India Ultra Short Duration Dir,debt,Ultra Short Duration,Direct,INF223J01QO7,138358,6.11,7.06,6.3,Debt: Ultra Short Duration,6.44,7.21,6.43,7.13,0.32,AAA,0.33,3,10,10,9,32,Good,19,https://www.valueresearchonline.com/funds/16397/
 SBI Ultra Short Duration Dir,debt,Ultra Short Duration,Direct,INF200K01TF5,119828,6.25,7.16,6.3,Debt: Ultra Short Duration,6.44,7.21,6.43,7.77,0.46,AAA,0.71,6,10,9,9,34,Good,25,https://www.valueresearchonline.com/funds/16890/
 Sundaram Ultra Short Duration Dir,debt,Ultra Short Duration,Direct,INF173K01HI3,149539,6.31,7.25,6.44,Debt: Ultra Short Duration,6.44,7.21,6.43,7.45,0.38,AAA,0.44,6,9,9,9,33,Good,25,https://www.valueresearchonline.com/funds/16635/
@@ -586,7 +586,7 @@ Nippon India Credit Risk Inst,debt,Credit Risk,Regular,INF204K01FT7,112939,8.2,8
 Nippon India Credit Risk Reg,debt,Credit Risk,Regular,,138905,7.37,8.15,8.42,Debt: Credit Risk,7.72,8.86,9.27,9.12,2.11,AA,2.43,10,6,7,7,30,Good,25,https://www.valueresearchonline.com/funds/2789/
 Nippon India Credit Risk Seg Port 1 Inst,debt,Credit Risk,Regular,INF204KB13Q7,148263,,,,,,,,8.79,2.04,B,2.34,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40700/
 Nippon India Credit Risk Seg Port 1 Reg,debt,Credit Risk,Regular,,148217,,,,,,,,8.79,2.04,B,2.34,,,,,,N/A,1,https://www.valueresearchonline.com/funds/40694/
-Nippon India Credit Risk Seg Port 2 Inst,debt,Credit Risk,Regular,INF204KB13Q7,148094,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40842/
+Nippon India Credit Risk Seg Port 2 Inst,debt,Credit Risk,Regular,INF204KB17L9,148094,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40842/
 Nippon India Credit Risk Seg Port 2 Reg,debt,Credit Risk,Regular,,148217,,,,,,,,,,,,,,,,,N/A,0,https://www.valueresearchonline.com/funds/40836/
 SBI Credit Risk Reg,debt,Credit Risk,Regular,INF200K01685,102505,6.81,7.64,6.94,Debt: Credit Risk,7.72,8.86,9.27,8.7,2.18,AA,2.73,10,6,7,7,30,Good,25,https://www.valueresearchonline.com/funds/2298/
 UTI Credit Risk Reg,debt,Credit Risk,Regular,INF789F01QZ1,117981,5.69,7,9.38,Debt: Credit Risk,7.72,8.86,9.27,8.32,2.14,AAA,2.69,9,6,7,9,31,Good,23,https://www.valueresearchonline.com/funds/15382/
@@ -684,7 +684,7 @@ Axis Liquid Ret,debt,Liquid,Regular,INF846K01354,112713,5.77,6.41,5.62,Debt: Liq
 Bajaj Finserv Liquid Reg,debt,Liquid,Regular,INF0QA701094,151837,6.12,,,Debt: Liquid,5.8,,,6.48,0.09,AAA,0.09,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/43588/
 Bandhan Liquid Reg,debt,Liquid,Regular,INF194K01VX9,108690,6.16,6.83,6.06,Debt: Liquid,5.8,6.7,5.95,6.43,0.11,AAA,0.11,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/2198/
 Bank of India Liquid Reg,debt,Liquid,Regular,INF761K01306,109254,6.28,6.96,6.16,Debt: Liquid,5.8,6.7,5.95,6.43,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/8383/
-Baroda BNP Paribas Liquid,debt,Liquid,Regular,,139344,6.16,6.83,6.09,Debt: Liquid,5.8,6.7,5.95,6.59,0.1,AAA,0.1,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/10235/
+Baroda BNP Paribas Liquid,debt,Liquid,Regular,INF955L01GR4,139344,6.16,6.83,6.09,Debt: Liquid,5.8,6.7,5.95,6.59,0.1,AAA,0.1,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/10235/
 Baroda BNP Paribas Liquid Reg,debt,Liquid,Regular,INF955L01484,111704,6.16,6.84,6.1,Debt: Liquid,5.8,6.7,5.95,6.59,0.1,AAA,0.1,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/1234/
 Canara Robeco Liquid Reg,debt,Liquid,Regular,INF760K01CW9,109353,6.22,6.91,6.12,Debt: Liquid,5.8,6.7,5.95,6.33,0.07,AAA,0.07,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/8325/
 Canara Robeco Liquid Unclaimed,debt,Liquid,Regular,INF760K01IC8,139235,,,,,,,,6.33,0.07,AAA,0.07,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/32305/
@@ -693,7 +693,7 @@ DSP Liquidity Reg,debt,Liquid,Regular,INF740K01FK9,103347,6.27,6.91,6.1,Debt: Li
 Edelweiss Liquid Reg,debt,Liquid,Regular,INF754K01GZ6,140182,6.28,6.88,6.04,Debt: Liquid,5.8,6.7,5.95,6.51,0.11,AAA,0.1,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/5902/
 Edelweiss Liquid Retail,debt,Liquid,Regular,INF754K01HE9,140176,6.28,6.88,6.04,Debt: Liquid,5.8,6.7,5.95,6.51,0.11,AAA,0.1,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/9276/
 Franklin Inda Liquid Reg,debt,Liquid,Regular,INF090I01BB1,100538,5.58,6.23,5.43,Debt: Liquid,5.8,6.7,5.95,6.81,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/522/
-Franklin India Liquid Inst,debt,Liquid,Regular,,102441,5.86,6.52,5.71,Debt: Liquid,5.8,6.7,5.95,6.81,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/2276/
+Franklin India Liquid Inst,debt,Liquid,Regular,INF090I01BD7,102441,5.86,6.52,5.71,Debt: Liquid,5.8,6.7,5.95,6.81,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/2276/
 Franklin India Liquid SIP,debt,Liquid,Regular,,100544,6.28,6.94,6.13,Debt: Liquid,5.8,6.7,5.95,6.81,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/2869/
 Franklin India Liquid Unclaimed,debt,Liquid,Regular,INF090I01LO3,139889,,,,,,,,6.81,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/32949/
 Groww Liquid Reg,debt,Liquid,Regular,INF666M01014,115991,6.22,6.9,5.98,Debt: Liquid,5.8,6.7,5.95,6.41,0.07,AAA,0.07,2,10,10,9,31,Good,15,https://www.valueresearchonline.com/funds/13490/
@@ -732,8 +732,8 @@ Sundaram Liquid Reg,debt,Liquid,Regular,INF173K01DA9,149661,6.1,6.82,6.06,Debt: 
 TRUSTMF Liquid Reg,debt,Liquid,Regular,INF0GCD01198,148833,6.08,6.76,5.98,Debt: Liquid,5.8,6.7,5.95,6.65,0.11,AAA,0.11,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/41409/
 Tata Liquid Reg,debt,Liquid,Regular,INF277K01YD8,102672,6.21,6.88,6.07,Debt: Liquid,5.8,6.7,5.95,6.59,0.1,AAA,0.1,4,10,10,9,33,Good,25,https://www.valueresearchonline.com/funds/2442/
 The Wealth Company Liquid Reg,debt,Liquid,Regular,INF2F0001149,153888,,,,Debt: Liquid,,,,6.67,0.13,AAA,0.13,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/45505/
-UTI Liquid Discontinued Reg,debt,Liquid,Regular,INF789F01BB4,102009,6.25,6.65,5.74,Debt: Liquid,5.8,6.7,5.95,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/1761/
-UTI Liquid Reg,debt,Liquid,Regular,INF789F01PH1,102012,6.25,6.9,6.12,Debt: Liquid,5.8,6.7,5.95,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/1968/
+UTI Liquid Discontinued Reg,debt,Liquid,Regular,INF789F1AG35,102009,6.25,6.65,5.74,Debt: Liquid,5.8,6.7,5.95,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/1761/
+UTI Liquid Reg,debt,Liquid,Regular,INF789F1AF85,102012,6.25,6.9,6.12,Debt: Liquid,5.8,6.7,5.95,6.62,0.1,AAA,0.1,3,10,10,9,32,Good,25,https://www.valueresearchonline.com/funds/1968/
 Unifi Liquid Reg,debt,Liquid,Regular,INF1MIY01064,153571,5.96,,,Debt: Liquid,5.8,,,5.45,0,CASH,0,1,10,10,10,31,Good,2,https://www.valueresearchonline.com/funds/45228/
 Union Liquid Reg,debt,Liquid,Regular,INF582M01013,115398,6.24,6.9,6.12,Debt: Liquid,5.8,6.7,5.95,6.15,0.11,AAA,0.11,2,10,10,9,31,Good,25,https://www.valueresearchonline.com/funds/12929/
 WhiteOak Capital Liquid Reg,debt,Liquid,Regular,INF03VN01126,145968,6.09,6.77,5.89,Debt: Liquid,5.8,6.7,5.95,6.1,0.1,AAA,0.1,2,10,10,9,31,Good,22,https://www.valueresearchonline.com/funds/38641/
