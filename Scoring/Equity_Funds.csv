@@ -563,7 +563,7 @@ Kotak Midcap Dir,equity,equity,Direct,9.86,21.27,19.23,BSE 150 MidCap TRI,4.99,1
 Kotak Nifty Midcap 150 ETF,equity,equity,Direct,7.69,,,BSE 150 MidCap TRI,4.99,,,,,,,,,INF174K01KM7,119757,25,https://www.valueresearchonline.com/funds/45037/,1,1,1,1,1,5,High Risk,Poor
 Kotak Nifty Midcap 150 Index Dir,equity,equity,Direct,7.31,,,BSE 150 MidCap TRI,4.99,,,,,,,,,INF174KA1VQ4,153401,25,https://www.valueresearchonline.com/funds/45040/,1,1,1,1,1,5,High Risk,Poor
 Kotak Nifty Midcap 150 Momentum 50 Index Dir,equity,equity,Direct,3.28,,,BSE 150 MidCap TRI,4.99,,,,,,,,,INF174KA1TM7,152916,25,https://www.valueresearchonline.com/funds/44573/,1,1,1,1,1,5,High Risk,Poor
-Kotak Nifty Midcap 50 ETF,equity,equity,Direct,8.69,21.93,,BSE 150 MidCap TRI,4.99,19.78,,1.32,1.02,0.88,18.87,22.56,1.54,INF174KA1ZC5,149757,25,https://www.valueresearchonline.com/funds/41983/,8,8,1,3,3,23,Moderate Risk,Average
+Kotak Nifty Midcap 50 ETF,equity,equity,Direct,8.69,21.93,,BSE 150 MidCap TRI,4.99,19.78,,1.32,1.02,0.88,18.87,22.56,1.54,INF174KA1IB3,149757,25,https://www.valueresearchonline.com/funds/41983/,8,8,1,3,3,23,Moderate Risk,Average
 Kotak Nifty Midcap 50 Index Dir,equity,equity,Direct,8.35,,,BSE 150 MidCap TRI,4.99,,,,,,,,,INF174KA1SR8,152767,25,https://www.valueresearchonline.com/funds/44446/,1,1,1,1,1,5,High Risk,Poor
 LIC MF Midcap Dir,equity,equity,Direct,4.03,19.29,15.49,BSE 150 MidCap TRI,4.99,19.78,17.6,-1.19,1.02,0.75,19.09,20.09,1.3,INF192K01MW4,150814,25,https://www.valueresearchonline.com/funds/33333/,4,8,1,3,2,18,Moderately High Risk,Average
 LIC MF Nifty Midcap 100 ETF,equity,equity,Direct,7.74,,,BSE 150 MidCap TRI,4.99,,,,,,,,,INF767K01EW0,120279,25,https://www.valueresearchonline.com/funds/44166/,1,1,1,1,1,5,High Risk,Poor
@@ -683,7 +683,7 @@ ICICI Pru Nifty Private Bank Index Dir,equity,equity,Direct,,,,BSE Bankex TRI,,,
 ITI Banking and Financial Services Dir,equity,equity,Direct,9.18,14.34,,BSE Bankex TRI,3.87,10.11,,5.01,0.94,0.48,16.06,13.64,1.9,INF00XX01BU6,149321,25,https://www.valueresearchonline.com/funds/41834/,12,4,2,4,3,25,Moderate Risk,Average
 Invesco India Financial Services Dir,equity,equity,Direct,9.21,20.21,16.91,BSE Bankex TRI,3.87,10.11,11.39,10.71,0.84,0.86,15.31,19.03,2.26,INF205K01KY4,120385,25,https://www.valueresearchonline.com/funds/16702/,12,8,3,5,4,32,Low Risk,Good
 Kotak Banking & Financial Services Dir,equity,equity,Direct,7.94,15.25,,BSE Bankex TRI,3.87,10.11,,5.26,0.95,0.5,16.01,13.93,,INF174KA1MD1,151384,25,https://www.valueresearchonline.com/funds/43128/,12,6,2,4,1,25,Moderate Risk,Average
-Kotak Nifty Bank ETF,equity,equity,Direct,4.44,10.19,11.46,BSE Bankex TRI,3.87,10.11,11.39,-0.03,1,0.18,16.41,8.78,1.41,INF174KA1ZB7,133122,14,https://www.valueresearchonline.com/funds/28873/,4,4,2,4,2,16,Moderately High Risk,Average
+Kotak Nifty Bank ETF,equity,equity,Direct,4.44,10.19,11.46,BSE Bankex TRI,3.87,10.11,11.39,-0.03,1,0.18,16.41,8.78,1.41,INF174K01F59,133122,14,https://www.valueresearchonline.com/funds/28873/,4,4,2,4,2,16,Moderately High Risk,Average
 Kotak Nifty Financial Services Ex-Bank Index Dir,equity,equity,Direct,6.9,,,BSE Bankex TRI,3.87,,,,,,,,,INF174KA1OR7,151911,25,https://www.valueresearchonline.com/funds/43674/,1,1,1,1,1,5,High Risk,Poor
 Kotak Nifty PSU Bank ETF,equity,equity,Direct,27.69,29.62,30.37,BSE Bankex TRI,3.87,10.11,11.39,18.16,1.11,0.82,26.18,27.28,2.63,INF373I01023,106929,12,https://www.valueresearchonline.com/funds/6157/,12,8,1,3,4,28,Low Risk,Good
 LIC MF Banking & Financial Services Dir,equity,equity,Direct,4.01,9.98,10.93,BSE Bankex TRI,3.87,10.11,11.39,1.37,0.92,0.26,15.87,9.94,1.72,INF767K01NK6,134017,25,https://www.valueresearchonline.com/funds/29707/,8,4,3,4,3,22,Moderate Risk,Average
@@ -1007,7 +1007,7 @@ ICICI Pru Nifty India Consumption ETF,equity,equity,Direct,2.02,12.72,,BSE 500 T
 ITI Bharat Consumption Dir,equity,equity,Direct,4.14,,,BSE 500 TRI,1.84,,,,,,,,,INF00XX01DG1,153260,25,https://www.valueresearchonline.com/funds/44922/,1,1,1,1,1,5,High Risk,Poor
 Invesco India Consumption Dir,equity,equity,Direct,,,,BSE 500 TRI,,,,,,,,,,INF205KA1BI6,153900,25,https://www.valueresearchonline.com/funds/45529/,1,1,1,1,1,5,High Risk,Poor
 Kotak Consumption Dir,equity,equity,Direct,4.94,,,BSE 500 TRI,1.84,,,,,,,,,INF174KA1PP8,152169,25,https://www.valueresearchonline.com/funds/43860/,1,1,1,1,1,5,High Risk,Poor
-Kotak NIFTY India Consumption ETF,equity,equity,Direct,2.1,12.82,,BSE 500 TRI,1.84,13.36,,-0.04,0.98,0.47,16.44,13.66,1.01,INF174KA1ZF8,150492,25,https://www.valueresearchonline.com/funds/42398/,4,4,2,4,2,16,Moderately High Risk,Average
+Kotak NIFTY India Consumption ETF,equity,equity,Direct,2.1,12.82,,BSE 500 TRI,1.84,13.36,,-0.04,0.98,0.47,16.44,13.66,1.01,INF174KA1JE5,150492,25,https://www.valueresearchonline.com/funds/42398/,4,4,2,4,2,16,Moderately High Risk,Average
 LIC MF Consumption Dir,equity,equity,Direct,,,,BSE 500 TRI,,,,,,,,,,INF767K01SD0,153948,25,https://www.valueresearchonline.com/funds/45568/,1,1,1,1,1,5,High Risk,Poor
 Mahindra Manulife Consumption Dir,equity,equity,Direct,0.2,11.6,12.75,BSE 500 TRI,1.84,13.36,12.53,-1.2,0.94,0.4,15.75,12.22,0.92,INF174V01663,145356,25,https://www.valueresearchonline.com/funds/37847/,4,4,3,4,1,16,Moderately High Risk,Average
 Mirae Asset Great Consumer Dir,equity,equity,Direct,1.7,12.46,14.89,BSE 500 TRI,1.84,13.36,12.53,-0.57,1.01,0.44,17.09,13.41,0.95,INF769K01BL5,118837,25,https://www.valueresearchonline.com/funds/16584/,4,4,2,3,1,14,Moderately High Risk,Average
@@ -1046,7 +1046,7 @@ HDFC Silver ETF,equity,equity,Direct,116.37,47.28,,Domestic Prices of Silver,128
 HDFC Silver ETF FoF Dir,equity,equity,Direct,114.22,46.89,,Domestic Prices of Silver,128.63,50.65,,1.71,0.89,1.13,38.13,49.05,2.94,INF179KC1DU7,150737,1,https://www.valueresearchonline.com/funds/42666/,8,10,1,4,4,27,Low Risk,Good
 ICICI Pru Silver ETF,equity,equity,Direct,117.55,47.66,,Domestic Prices of Silver,128.63,50.65,,-0.53,0.98,1.08,41.65,50.78,2.61,INF109KC1Y56,149464,1,https://www.valueresearchonline.com/funds/41982/,4,10,1,4,4,23,Moderate Risk,Average
 ICICI Pru Silver ETF FoF Dir,equity,equity,Direct,114.63,47.11,,Domestic Prices of Silver,128.63,50.65,,4.48,0.82,1.2,35.41,48.2,3.35,INF109KC1Y98,149775,1,https://www.valueresearchonline.com/funds/42023/,12,10,1,5,4,32,Low Risk,Good
-Kotak Silver ETF,equity,equity,Direct,117.15,47.53,,Domestic Prices of Silver,128.63,50.65,,-0.6,0.98,1.08,41.58,50.65,2.57,INF174KA1ZD3,150948,1,https://www.valueresearchonline.com/funds/42858/,4,10,1,4,4,23,Moderate Risk,Average
+Kotak Silver ETF,equity,equity,Direct,117.15,47.53,,Domestic Prices of Silver,128.63,50.65,,-0.6,0.98,1.08,41.58,50.65,2.57,INF174KA1KU9,150948,1,https://www.valueresearchonline.com/funds/42858/,4,10,1,4,4,23,Moderate Risk,Average
 Kotak Silver ETF FoF Dir,equity,equity,Direct,115.83,46.96,,Domestic Prices of Silver,128.63,50.65,,4.37,0.82,1.19,35.47,48.16,,INF174KA1MQ3,151603,1,https://www.valueresearchonline.com/funds/43295/,12,10,1,5,1,29,Low Risk,Good
 Mirae Asset Silver ETF,equity,equity,Direct,116.78,47.45,,Domestic Prices of Silver,128.63,50.65,,,,,,,,INF769K01FY9,148419,1,https://www.valueresearchonline.com/funds/43544/,1,1,1,1,1,5,High Risk,Poor
 Mirae Asset Silver ETF FoF Dir,equity,equity,Direct,,,,Domestic Prices of Silver,,,,,,,,,,INF769K01QS8,154279,1,https://www.valueresearchonline.com/funds/45902/,1,1,1,1,1,5,High Risk,Poor
@@ -1055,7 +1055,7 @@ Nippon India Silver ETF,equity,equity,Direct,116.69,47.24,,Domestic Prices of Si
 Nippon India Silver ETF FoF Dir,equity,equity,Direct,114.19,46.66,,Domestic Prices of Silver,128.63,50.65,,-1.41,0.98,1.06,41.68,49.89,2.51,INF204KC1378,149760,1,https://www.valueresearchonline.com/funds/41987/,4,10,1,4,4,23,Moderate Risk,Average
 SBI Silver ETF,equity,equity,Direct,116.82,,,Domestic Prices of Silver,128.63,,,,,,,,,INF200KB1217,152725,1,https://www.valueresearchonline.com/funds/44407/,1,1,1,1,1,5,High Risk,Poor
 SBI Silver ETF FoF Dir,equity,equity,Direct,117.09,,,Domestic Prices of Silver,128.63,,,,,,,,,INF200KB1233,152735,1,https://www.valueresearchonline.com/funds/44422/,1,1,1,1,1,5,High Risk,Poor
-Tata Silver ETF,equity,equity,Direct,117.11,,,Domestic Prices of Silver,128.63,,,,,,,,,INF174KA1ZD3,150948,1,https://www.valueresearchonline.com/funds/44020/,1,1,1,1,1,5,High Risk,Poor
+Tata Silver ETF,equity,equity,Direct,117.11,,,Domestic Prices of Silver,128.63,,,,,,,,,INF174KA1KU9,150948,1,https://www.valueresearchonline.com/funds/44020/,1,1,1,1,1,5,High Risk,Poor
 Tata Silver ETF FoF Dir,equity,equity,Direct,110.34,,,Domestic Prices of Silver,128.63,,,,,,,,,INF277KA1943,152293,1,https://www.valueresearchonline.com/funds/44026/,1,1,1,1,1,5,High Risk,Poor
 UTI Silver ETF,equity,equity,Direct,114.89,46.62,,Domestic Prices of Silver,128.63,50.65,,-0.94,0.97,1.07,41.32,49.99,,INF200KB1217,152725,1,https://www.valueresearchonline.com/funds/43485/,4,10,1,4,1,20,Moderate Risk,Average
 UTI Silver ETF FoF Dir,equity,equity,Direct,114.44,47,,Domestic Prices of Silver,128.63,50.65,,4,0.83,1.18,35.88,48.31,,INF789F1AYL4,151731,1,https://www.valueresearchonline.com/funds/43487/,12,10,1,5,1,29,Low Risk,Good
@@ -1986,4 +1986,4 @@ Templeton India Value Reg,equity,equity,Regular,-0.96,12.94,14.99,BSE 500 TRI,1.
 UTI Nifty 500 Value 50 Index Reg,equity,equity,Regular,20.09,29.49,,BSE 500 TRI,1.84,13.36,,14.43,1.17,1.15,20.72,29.62,,INF789F1AYO8,151738,25,https://www.valueresearchonline.com/funds/43494/,12,10,1,2,1,26,Moderate Risk,Average
 UTI Value Reg,equity,equity,Regular,-0.6,14.98,12.98,BSE 500 TRI,1.84,13.36,12.53,1.45,0.95,0.6,14.96,14.91,1.51,INF789F01AG5,103098,25,https://www.valueresearchonline.com/funds/2820/,8,6,3,4,3,24,Moderate Risk,Average
 Union Value Reg,equity,equity,Regular,4.09,15.35,14.35,BSE 500 TRI,1.84,13.36,12.53,2.21,0.93,0.65,14.77,15.48,1.55,INF582M01EO6,145471,25,https://www.valueresearchonline.com/funds/38205/,10,6,3,4,3,26,Moderate Risk,Average
-,,,,,,,,,,,,,,,,,N/A,N/A,,,1,1,1,1,1,5,High Risk,Poor
+,,,,,,,,,,,,,,,,,N/A,N/A,,,1,1,1,1,1,5,High Risk,Poor
