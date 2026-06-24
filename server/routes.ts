@@ -80,8 +80,14 @@ const GROQ_MODELS = [
   "llama-3.3-70b-versatile",    // 12,000 TPM — fallback
 ];
 
-// ~15,000 chars ≈ 3,750 tokens; keeps us well under free-tier TPM limits
-const GROQ_MAX_PROMPT_CHARS = 60_000;
+// Groq free-tier TPM budgets (input + output tokens combined):
+//   llama-3.1-8b-instant  → 20,000 TPM  → target ≤13k input + 4k output = 17k total
+//   llama-3.3-70b-versatile → 12,000 TPM → target ≤8k input + 3k output = 11k total
+// 1 token ≈ 4 chars on average
+const GROQ_LIMITS = [
+  { model: "llama-3.1-8b-instant",      maxPromptChars: 48_000, maxTokens: 4096 }, // ~12k input tokens
+  { model: "llama-3.3-70b-versatile",   maxPromptChars: 28_000, maxTokens: 3072 }, // ~7k input tokens
+];
 
 async function generateWithGroqFallback(prompt: string): Promise<string> {
   const groqKey = process.env.GROQ_API_KEY;
@@ -89,20 +95,19 @@ async function generateWithGroqFallback(prompt: string): Promise<string> {
 
   const groq = new Groq({ apiKey: groqKey });
 
-  // Truncate if needed to stay within free-tier TPM limits
-  const truncatedPrompt = prompt.length > GROQ_MAX_PROMPT_CHARS
-    ? prompt.slice(0, GROQ_MAX_PROMPT_CHARS) + "\n\n[Note: Input was truncated to fit model limits. Analyse the above data.]"
-    : prompt;
-
   let lastGroqError: any;
-  for (const model of GROQ_MODELS) {
+  for (const { model, maxPromptChars, maxTokens } of GROQ_LIMITS) {
+    const truncatedPrompt = prompt.length > maxPromptChars
+      ? prompt.slice(0, maxPromptChars) + "\n\n[Note: Input truncated to fit model limits. Analyse the above data and produce the full JSON output.]"
+      : prompt;
+
     try {
-      console.log(`[Groq] All Gemini keys exhausted — trying ${model}`);
+      console.log(`[Groq] Trying ${model} (prompt: ${truncatedPrompt.length} chars, max_tokens: ${maxTokens})`);
       const completion = await groq.chat.completions.create({
         model,
         messages: [{ role: "user", content: truncatedPrompt }],
         temperature: 0,
-        max_tokens: 8192,
+        max_tokens: maxTokens,
       });
       return completion.choices[0]?.message?.content || "";
     } catch (err: any) {
