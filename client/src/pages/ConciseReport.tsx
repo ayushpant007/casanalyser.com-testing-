@@ -2788,7 +2788,7 @@ export default function ConciseReport() {
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Pair</div>
                         <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Overlap</div>
                       </div>
-                      {overlapData.similarPairs.slice(0, 5).map((pair, idx) => {
+                      {overlapData.similarPairs.map((pair, idx) => {
                         const color = pair.overlapScore >= 30 ? "#ef4444" : pair.overlapScore >= 15 ? "#f59e0b" : "#10b981";
                         return (
                           <div
