@@ -74,21 +74,43 @@ function is429Error(err: any): boolean {
   return msg.includes("429") || msg.includes("quota") || msg.includes("too many requests") || msg.includes("resource_exhausted");
 }
 
+// Groq model chain — tried in order (free tier TPM limits: 8b=20k, 70b=12k)
+const GROQ_MODELS = [
+  "llama-3.1-8b-instant",       // 20,000 TPM — best for large CAS statements
+  "llama-3.3-70b-versatile",    // 12,000 TPM — fallback
+];
+
+// ~15,000 chars ≈ 3,750 tokens; keeps us well under free-tier TPM limits
+const GROQ_MAX_PROMPT_CHARS = 60_000;
+
 async function generateWithGroqFallback(prompt: string): Promise<string> {
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) throw new Error("No GROQ_API_KEY configured");
 
   const groq = new Groq({ apiKey: groqKey });
-  console.log("[Groq] All Gemini keys exhausted — falling back to Groq llama-3.3-70b-versatile");
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0,
-    max_tokens: 8192,
-  });
+  // Truncate if needed to stay within free-tier TPM limits
+  const truncatedPrompt = prompt.length > GROQ_MAX_PROMPT_CHARS
+    ? prompt.slice(0, GROQ_MAX_PROMPT_CHARS) + "\n\n[Note: Input was truncated to fit model limits. Analyse the above data.]"
+    : prompt;
 
-  return completion.choices[0]?.message?.content || "";
+  let lastGroqError: any;
+  for (const model of GROQ_MODELS) {
+    try {
+      console.log(`[Groq] All Gemini keys exhausted — trying ${model}`);
+      const completion = await groq.chat.completions.create({
+        model,
+        messages: [{ role: "user", content: truncatedPrompt }],
+        temperature: 0,
+        max_tokens: 8192,
+      });
+      return completion.choices[0]?.message?.content || "";
+    } catch (err: any) {
+      console.error(`[Groq] Model ${model} failed:`, err.message);
+      lastGroqError = err;
+    }
+  }
+  throw lastGroqError || new Error("All Groq models failed");
 }
 
 async function generateWithFallback(prompt: string, options: { model?: string, responseMimeType?: string } = {}) {
