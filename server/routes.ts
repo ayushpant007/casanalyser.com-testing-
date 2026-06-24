@@ -9,6 +9,7 @@ import path from "path";
 import os from "os";
 import { promisify } from "util";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { insertUserSchema, insertContactMessageSchema } from "@shared/schema";
 import { registerChatRoutes } from "./replit_integrations/chat/routes";
 import { registerImageRoutes } from "./replit_integrations/image/routes";
@@ -68,6 +69,28 @@ function is503Error(err: any): boolean {
   return msg.includes("503") || msg.includes("service unavailable") || msg.includes("high demand");
 }
 
+function is429Error(err: any): boolean {
+  const msg = (err?.message || "").toLowerCase();
+  return msg.includes("429") || msg.includes("quota") || msg.includes("too many requests") || msg.includes("resource_exhausted");
+}
+
+async function generateWithGroqFallback(prompt: string): Promise<string> {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) throw new Error("No GROQ_API_KEY configured");
+
+  const groq = new Groq({ apiKey: groqKey });
+  console.log("[Groq] All Gemini keys exhausted — falling back to Groq llama-3.3-70b-versatile");
+
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0,
+    max_tokens: 8192,
+  });
+
+  return completion.choices[0]?.message?.content || "";
+}
+
 async function generateWithFallback(prompt: string, options: { model?: string, responseMimeType?: string } = {}) {
   const primaryModel = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite").toLowerCase().replace(/\s+/g, '-');
 
@@ -75,6 +98,7 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
   const modelsToTry = [primaryModel, ...GEMINI_FALLBACK_MODELS.filter(m => m !== primaryModel)];
 
   let lastError: any;
+  let allQuotaExhausted = true;
 
   for (const modelName of modelsToTry) {
     let overloaded = false;
@@ -103,9 +127,12 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
         console.error(`Gemini call failed [model=${modelName}, key=${key.substring(0, 8)}]:`, err.message);
         lastError = err;
         if (is503Error(err)) {
-          // 503 = this model is overloaded; no point retrying other keys for same model
           overloaded = true;
+          allQuotaExhausted = false; // 503 is not a quota error
           break;
+        }
+        if (!is429Error(err)) {
+          allQuotaExhausted = false; // Some other error, not quota
         }
       }
     }
@@ -115,7 +142,16 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
     } else {
       console.warn(`[Gemini] Model "${modelName}" failed on all keys. Trying next model in chain...`);
     }
-    // Always continue to the next model, regardless of error type
+  }
+
+  // If all Gemini keys hit 429 quota limits, try Groq as last resort
+  if (process.env.GROQ_API_KEY) {
+    try {
+      return await generateWithGroqFallback(prompt);
+    } catch (groqErr: any) {
+      console.error("[Groq] Fallback also failed:", groqErr.message);
+      throw groqErr;
+    }
   }
 
   throw lastError || new Error("All Gemini models and API keys failed");

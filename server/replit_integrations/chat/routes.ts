@@ -1,8 +1,36 @@
 import type { Express, Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { chatStorage } from "./storage";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_4 || "");
+const CHAT_GEMINI_KEYS = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+].filter(Boolean) as string[];
+
+function isChatQuotaError(err: any): boolean {
+  const msg = (err?.message || "").toLowerCase();
+  return msg.includes("429") || msg.includes("quota") || msg.includes("too many requests") || msg.includes("resource_exhausted");
+}
+
+async function getGroqChatResponse(messages: { role: "user" | "assistant"; content: string }[], userMessage: string): Promise<string> {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) throw new Error("No GROQ_API_KEY configured");
+  const groq = new Groq({ apiKey: groqKey });
+  const history = messages.map(m => ({
+    role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+    content: m.content,
+  }));
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: history,
+    temperature: 0.7,
+    max_tokens: 4096,
+  });
+  return completion.choices[0]?.message?.content || "";
+}
 
 export function registerChatRoutes(app: Express): void {
   // Get all conversations
@@ -77,25 +105,57 @@ export function registerChatRoutes(app: Express): void {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      // Stream response from Gemini
       const rawModel = process.env.GEMINI_MODEL || "gemini-2.0-flash";
       const sanitizedModel = rawModel.toLowerCase().replace(/\s+/g, '-');
-      const model = genAI.getGenerativeModel({ model: sanitizedModel });
-      const chat = model.startChat({
-        history: chatMessages.slice(0, -1).map(m => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        })),
-      });
 
-      const result = await chat.sendMessageStream(content);
       let fullResponse = "";
+      let geminiSucceeded = false;
 
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        if (chunkText) {
-          fullResponse += chunkText;
-          res.write(`data: ${JSON.stringify({ content: chunkText })}\n\n`);
+      // Try each Gemini key in rotation
+      for (const key of CHAT_GEMINI_KEYS) {
+        try {
+          const genAI = new GoogleGenerativeAI(key);
+          const model = genAI.getGenerativeModel({ model: sanitizedModel });
+          const chat = model.startChat({
+            history: chatMessages.slice(0, -1).map(m => ({
+              role: m.role === "assistant" ? "model" : "user",
+              parts: [{ text: m.content }],
+            })),
+          });
+
+          const result = await chat.sendMessageStream(content);
+
+          for await (const chunk of result.stream) {
+            const chunkText = chunk.text();
+            if (chunkText) {
+              fullResponse += chunkText;
+              res.write(`data: ${JSON.stringify({ content: chunkText })}\n\n`);
+            }
+          }
+          geminiSucceeded = true;
+          break;
+        } catch (err: any) {
+          console.error(`[Chat] Gemini key ${key.substring(0, 8)} failed: ${err.message}`);
+          if (!isChatQuotaError(err)) {
+            // Non-quota error — don't try more keys
+            throw err;
+          }
+          // 429 quota — try next key
+        }
+      }
+
+      // If all Gemini keys hit quota, fall back to Groq (non-streaming)
+      if (!geminiSucceeded) {
+        if (process.env.GROQ_API_KEY) {
+          console.log("[Chat] All Gemini keys quota-exhausted — using Groq fallback");
+          fullResponse = await getGroqChatResponse(chatMessages.slice(0, -1), content);
+          // Stream the Groq response as chunks for frontend compatibility
+          const chunkSize = 100;
+          for (let i = 0; i < fullResponse.length; i += chunkSize) {
+            res.write(`data: ${JSON.stringify({ content: fullResponse.slice(i, i + chunkSize) })}\n\n`);
+          }
+        } else {
+          throw new Error("All Gemini API keys have exceeded their quota. Please try again later.");
         }
       }
 
@@ -106,7 +166,6 @@ export function registerChatRoutes(app: Express): void {
       res.end();
     } catch (error) {
       console.error("Error sending message:", error);
-      // Check if headers already sent (SSE streaming started)
       if (res.headersSent) {
         res.write(`data: ${JSON.stringify({ error: "Failed to send message" })}\n\n`);
         res.end();
