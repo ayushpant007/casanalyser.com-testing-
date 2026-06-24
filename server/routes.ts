@@ -86,7 +86,6 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
           model: modelName,
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 65536,
             ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
           }
         });
@@ -218,7 +217,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
 
       // Truncate very large PDFs to avoid Gemini output token limits causing truncated JSON
-      const MAX_TEXT_CHARS = 70_000;
+      const MAX_TEXT_CHARS = 120_000;
       if (text.length > MAX_TEXT_CHARS) {
         console.warn(`[PDF] Text too long (${text.length} chars) — truncating to ${MAX_TEXT_CHARS} chars`);
         text = text.slice(0, MAX_TEXT_CHARS);
@@ -277,11 +276,10 @@ Extract:
    - Comparison with Category Ratio (Current % vs Target % from CSV)
    - Category-Fund Type Comparison (Large Cap, Mid Cap, Small Cap, etc. for Equity portion)
    - Comparison with Type Ratio (Current % vs Target % from CSV)
-6. Transactions (SIP detection only, LIMIT TO 30 MOST RECENT): [{"date": string, "scheme_name": string, "type": string, "amount": number}]
+6. Transactions (SIP detection only): [{"date": string, "scheme_name": string, "type": string, "amount": number}]
    - Identify type as "SIP" for transactions explicitly tagged as SIP, "Purchase – SIP", "Purchase – Systematic", or "Systematic Investment".
    - Identify type as "PURCHASE" for one-time purchases (Lumpsum, Online, Initial, NFO).
    - For amount, use the numerical value (e.g., if it says ₹1,000, extract 1000).
-   - IMPORTANT: Extract at most 30 transactions total. Skip older ones if there are more than 30.
 
 Return ONLY valid JSON with this exact structure: {
   "investor_name": string,
@@ -529,20 +527,7 @@ ${text}`;
       analysisJobs.set(jobId, { status: "done", report, createdAt: analysisJobs.get(jobId)!.createdAt });
     } catch (error: any) {
       console.error("Analysis job error:", error);
-      const rawMsg: string = error.message || "";
-      let userMessage: string;
-      if (error.status === 429 || rawMsg.includes("429") || rawMsg.includes("quota")) {
-        userMessage = "AI service quota exhausted for today. All API keys have hit their free-tier daily limit. Please try again after midnight (IST) or contact the admin to add a paid API key.";
-      } else if (error.status === 503 || rawMsg.includes("503") || rawMsg.includes("high demand") || rawMsg.includes("overloaded")) {
-        userMessage = "AI service is currently overloaded. Please wait a few minutes and try again.";
-      } else if (rawMsg.includes("timeout")) {
-        userMessage = "Analysis timed out. Your PDF may be too large. Please try again.";
-      } else if (rawMsg.includes("Unterminated") || rawMsg.includes("JSON")) {
-        userMessage = "AI returned an incomplete response. Please try again — this is usually temporary.";
-      } else {
-        userMessage = "Analysis failed: " + rawMsg;
-      }
-      analysisJobs.set(jobId, { status: "error", message: userMessage, createdAt: analysisJobs.get(jobId)!.createdAt });
+      analysisJobs.set(jobId, { status: "error", message: "Analysis failed: " + error.message, createdAt: analysisJobs.get(jobId)!.createdAt });
     } finally {
       try { await fs.unlink(tempPath); } catch (e) { /* ignore */ }
     }
