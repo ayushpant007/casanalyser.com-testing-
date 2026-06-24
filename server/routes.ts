@@ -529,7 +529,20 @@ ${text}`;
       analysisJobs.set(jobId, { status: "done", report, createdAt: analysisJobs.get(jobId)!.createdAt });
     } catch (error: any) {
       console.error("Analysis job error:", error);
-      analysisJobs.set(jobId, { status: "error", message: "Analysis failed: " + error.message, createdAt: analysisJobs.get(jobId)!.createdAt });
+      const rawMsg: string = error.message || "";
+      let userMessage: string;
+      if (error.status === 429 || rawMsg.includes("429") || rawMsg.includes("quota")) {
+        userMessage = "AI service quota exhausted for today. All API keys have hit their free-tier daily limit. Please try again after midnight (IST) or contact the admin to add a paid API key.";
+      } else if (error.status === 503 || rawMsg.includes("503") || rawMsg.includes("high demand") || rawMsg.includes("overloaded")) {
+        userMessage = "AI service is currently overloaded. Please wait a few minutes and try again.";
+      } else if (rawMsg.includes("timeout")) {
+        userMessage = "Analysis timed out. Your PDF may be too large. Please try again.";
+      } else if (rawMsg.includes("Unterminated") || rawMsg.includes("JSON")) {
+        userMessage = "AI returned an incomplete response. Please try again — this is usually temporary.";
+      } else {
+        userMessage = "Analysis failed: " + rawMsg;
+      }
+      analysisJobs.set(jobId, { status: "error", message: userMessage, createdAt: analysisJobs.get(jobId)!.createdAt });
     } finally {
       try { await fs.unlink(tempPath); } catch (e) { /* ignore */ }
     }
