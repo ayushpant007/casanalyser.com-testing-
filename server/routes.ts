@@ -407,7 +407,11 @@ Text content:
 ${text}`;
 
       const analysisRawResult = await generateWithFallback(analysisPrompt, { responseMimeType: "application/json" });
-      const analysisRawStr = typeof analysisRawResult === 'string' ? analysisRawResult : "";
+      // Strip markdown code fences that some models (e.g. Groq) wrap around JSON
+      const analysisRawStr = (typeof analysisRawResult === 'string' ? analysisRawResult : "")
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```\s*$/i, "")
+        .trim();
 
       let analysis: any = {};
       try {
