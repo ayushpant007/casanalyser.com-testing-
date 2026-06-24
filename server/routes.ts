@@ -55,33 +55,71 @@ const GEMINI_KEYS = [
 
 const GEMINI_TIMEOUT_MS = 180_000; // 3 minutes per key attempt
 
+// Fallback model chain — tried in order when a model returns 503 (high demand)
+const GEMINI_FALLBACK_MODELS = [
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash",
+];
+
+function is503Error(err: any): boolean {
+  const msg = (err?.message || "").toLowerCase();
+  return msg.includes("503") || msg.includes("service unavailable") || msg.includes("high demand");
+}
+
 async function generateWithFallback(prompt: string, options: { model?: string, responseMimeType?: string } = {}) {
-  const modelName = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite").toLowerCase().replace(/\s+/g, '-');
+  const primaryModel = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite").toLowerCase().replace(/\s+/g, '-');
+
+  // Build model list: primary first, then the rest of the chain (skip duplicates)
+  const modelsToTry = [primaryModel, ...GEMINI_FALLBACK_MODELS.filter(m => m !== primaryModel)];
+
   let lastError: any;
 
-  for (const key of GEMINI_KEYS) {
-    try {
-      const client = new GoogleGenerativeAI(key);
-      const model = client.getGenerativeModel({ 
-        model: modelName,
-        generationConfig: {
-          temperature: 0,
-          ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
-        }
-      });
+  for (const modelName of modelsToTry) {
+    let overloaded = false;
 
-      // Race the Gemini call against a timeout so it never hangs indefinitely
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Gemini timeout after ${GEMINI_TIMEOUT_MS / 1000}s`)), GEMINI_TIMEOUT_MS)
-      );
-      const result = await Promise.race([model.generateContent(prompt), timeoutPromise]);
-      return result.response.text();
-    } catch (err: any) {
-      console.error(`Gemini call failed with key starting with ${key.substring(0, 8)}:`, err.message);
-      lastError = err;
+    for (const key of GEMINI_KEYS) {
+      try {
+        const client = new GoogleGenerativeAI(key);
+        const model = client.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            temperature: 0,
+            ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
+          }
+        });
+
+        // Race the Gemini call against a timeout so it never hangs indefinitely
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Gemini timeout after ${GEMINI_TIMEOUT_MS / 1000}s`)), GEMINI_TIMEOUT_MS)
+        );
+        const result = await Promise.race([model.generateContent(prompt), timeoutPromise]);
+        if (modelName !== primaryModel) {
+          console.log(`[Gemini] Primary model overloaded — succeeded with fallback model: ${modelName}`);
+        }
+        return result.response.text();
+      } catch (err: any) {
+        console.error(`Gemini call failed [model=${modelName}, key=${key.substring(0, 8)}]:`, err.message);
+        lastError = err;
+        if (is503Error(err)) {
+          // 503 = this model is overloaded; no point retrying other keys for same model
+          overloaded = true;
+          break;
+        }
+      }
     }
+
+    if (overloaded) {
+      console.warn(`[Gemini] Model "${modelName}" is overloaded (503). Trying next model in chain...`);
+      continue; // try next model
+    }
+
+    // Non-503 failure — all keys exhausted for this model; stop here
+    break;
   }
-  throw lastError || new Error("All Gemini API keys failed");
+
+  throw lastError || new Error("All Gemini models and API keys failed");
 }
 
 // ── Create nifty500_benchmark table and seed initial data on startup ──────────
