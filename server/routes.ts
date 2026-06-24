@@ -60,7 +60,7 @@ const GEMINI_FALLBACK_MODELS = [
   "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
   "gemini-2.0-flash-lite",
-  "gemini-1.5-flash",
+  "gemini-2.0-flash",
 ];
 
 function is503Error(err: any): boolean {
