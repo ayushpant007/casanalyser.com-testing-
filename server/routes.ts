@@ -64,6 +64,52 @@ const GEMINI_FALLBACK_MODELS = [
   "gemini-2.0-flash",
 ];
 
+// Closes any open JSON brackets/braces in a truncated string
+function closeOpenJSON(partial: string): string {
+  const stack: string[] = [];
+  let inString = false;
+  let escape = false;
+  for (const ch of partial) {
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+  return partial + stack.reverse().join('');
+}
+
+// Smart JSON repair for truncated AI responses
+function smartRepairJSON(raw: string): any {
+  if (!raw || raw.trim() === '') return {};
+
+  // Strategy 1: direct parse
+  try { return JSON.parse(raw); } catch {}
+
+  // Strategy 2: close open brackets on the full string
+  try { return JSON.parse(closeOpenJSON(raw)); } catch {}
+
+  // Strategy 3: cut at the last complete array item (},  or }, pattern) then close
+  const lastCompleteItem = raw.lastIndexOf('},');
+  if (lastCompleteItem !== -1) {
+    const candidate = raw.slice(0, lastCompleteItem + 1);
+    try { return JSON.parse(closeOpenJSON(candidate)); } catch {}
+  }
+
+  // Strategy 4: scan backwards for the deepest valid JSON sub-string
+  for (let end = raw.length; end > 10; end = Math.floor(end * 0.9)) {
+    const candidate = raw.slice(0, end);
+    const lastBrace = candidate.lastIndexOf('}');
+    if (lastBrace === -1) break;
+    try { return JSON.parse(candidate.slice(0, lastBrace + 1)); } catch {}
+    try { return JSON.parse(closeOpenJSON(candidate.slice(0, lastBrace + 1))); } catch {}
+  }
+
+  return {};
+}
+
 function is503Error(err: any): boolean {
   const msg = (err?.message || "").toLowerCase();
   return msg.includes("503") || msg.includes("service unavailable") || msg.includes("high demand");
@@ -367,24 +413,12 @@ ${text}`;
       try {
         analysis = JSON.parse(analysisRawStr || "{}");
       } catch (jsonErr: any) {
-        // Response was truncated mid-JSON — try to recover by trimming to the last valid position
-        console.warn(`[JSON] Parse failed (${jsonErr.message}) — attempting repair on ${analysisRawStr.length} char response`);
-        let repaired = analysisRawStr;
-        // Try progressively shorter strings until we find valid JSON
-        for (let trim = 0; trim < 5000; trim += 10) {
-          const candidate = repaired.slice(0, repaired.length - trim);
-          // Find last complete closing brace/bracket
-          const lastBrace = candidate.lastIndexOf("}");
-          if (lastBrace === -1) break;
-          try {
-            analysis = JSON.parse(candidate.slice(0, lastBrace + 1));
-            console.warn(`[JSON] Repaired by trimming ${trim + (repaired.length - lastBrace - 1)} chars from end`);
-            break;
-          } catch { continue; }
-        }
+        console.warn(`[JSON] Parse failed (${jsonErr.message}) — attempting smart repair on ${analysisRawStr.length} char response`);
+        analysis = smartRepairJSON(analysisRawStr);
         if (Object.keys(analysis).length === 0) {
           throw new Error(`AI response was truncated and could not be repaired. PDF may be too large — try a shorter statement.`);
         }
+        console.warn(`[JSON] Smart repair succeeded — recovered ${Object.keys(analysis).length} top-level keys`);
       }
 
       analysis.cas_source = detectCasSource(text);
