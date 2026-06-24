@@ -112,11 +112,10 @@ async function generateWithFallback(prompt: string, options: { model?: string, r
 
     if (overloaded) {
       console.warn(`[Gemini] Model "${modelName}" is overloaded (503). Trying next model in chain...`);
-      continue; // try next model
+    } else {
+      console.warn(`[Gemini] Model "${modelName}" failed on all keys. Trying next model in chain...`);
     }
-
-    // Non-503 failure — all keys exhausted for this model; stop here
-    break;
+    // Always continue to the next model, regardless of error type
   }
 
   throw lastError || new Error("All Gemini models and API keys failed");
