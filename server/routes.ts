@@ -74,19 +74,14 @@ function is429Error(err: any): boolean {
   return msg.includes("429") || msg.includes("quota") || msg.includes("too many requests") || msg.includes("resource_exhausted");
 }
 
-// Groq model chain — tried in order (free tier TPM limits: 8b=20k, 70b=12k)
-const GROQ_MODELS = [
-  "llama-3.1-8b-instant",       // 20,000 TPM — best for large CAS statements
-  "llama-3.3-70b-versatile",    // 12,000 TPM — fallback
-];
-
-// Groq free-tier TPM budgets (input + output tokens combined):
-//   llama-3.1-8b-instant  → 20,000 TPM  → target ≤13k input + 4k output = 17k total
-//   llama-3.3-70b-versatile → 12,000 TPM → target ≤8k input + 3k output = 11k total
-// 1 token ≈ 4 chars on average
+// Actual Groq free-tier TPM limits (verified from live errors):
+//   llama-3.3-70b-versatile  → 12,000 TPM  (better quality, higher limit → try first)
+//   llama-3.1-8b-instant     →  6,000 TPM  (last resort, very small window)
+// Observed ratio: ~3 chars per token for CAS statement text.
+// Budget formula: maxPromptChars/3 + maxTokens < TPM limit × 0.85 (safety buffer)
 const GROQ_LIMITS = [
-  { model: "llama-3.1-8b-instant",      maxPromptChars: 48_000, maxTokens: 4096 }, // ~12k input tokens
-  { model: "llama-3.3-70b-versatile",   maxPromptChars: 28_000, maxTokens: 3072 }, // ~7k input tokens
+  { model: "llama-3.3-70b-versatile", maxPromptChars: 21_000, maxTokens: 2_000 }, // ~7k+2k=9k < 12k ✅
+  { model: "llama-3.1-8b-instant",    maxPromptChars:  9_000, maxTokens: 1_000 }, // ~3k+1k=4k <  6k ✅
 ];
 
 async function generateWithGroqFallback(prompt: string): Promise<string> {
