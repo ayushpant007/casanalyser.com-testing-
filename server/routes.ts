@@ -216,6 +216,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         return;
       }
 
+      // Truncate very large PDFs to avoid Gemini output token limits causing truncated JSON
+      const MAX_TEXT_CHARS = 120_000;
+      if (text.length > MAX_TEXT_CHARS) {
+        console.warn(`[PDF] Text too long (${text.length} chars) — truncating to ${MAX_TEXT_CHARS} chars`);
+        text = text.slice(0, MAX_TEXT_CHARS);
+      }
+
       let csvContent = "";
       try {
         csvContent = await fs.readFile(path.join(process.cwd(), "server/assets/category_ratios.csv"), "utf-8");
@@ -297,7 +304,30 @@ ${text}`;
 
       const analysisRawResult = await generateWithFallback(analysisPrompt, { responseMimeType: "application/json" });
       const analysisRawStr = typeof analysisRawResult === 'string' ? analysisRawResult : "";
-      const analysis = JSON.parse(analysisRawStr || "{}");
+
+      let analysis: any = {};
+      try {
+        analysis = JSON.parse(analysisRawStr || "{}");
+      } catch (jsonErr: any) {
+        // Response was truncated mid-JSON — try to recover by trimming to the last valid position
+        console.warn(`[JSON] Parse failed (${jsonErr.message}) — attempting repair on ${analysisRawStr.length} char response`);
+        let repaired = analysisRawStr;
+        // Try progressively shorter strings until we find valid JSON
+        for (let trim = 0; trim < 5000; trim += 10) {
+          const candidate = repaired.slice(0, repaired.length - trim);
+          // Find last complete closing brace/bracket
+          const lastBrace = candidate.lastIndexOf("}");
+          if (lastBrace === -1) break;
+          try {
+            analysis = JSON.parse(candidate.slice(0, lastBrace + 1));
+            console.warn(`[JSON] Repaired by trimming ${trim + (repaired.length - lastBrace - 1)} chars from end`);
+            break;
+          } catch { continue; }
+        }
+        if (Object.keys(analysis).length === 0) {
+          throw new Error(`AI response was truncated and could not be repaired. PDF may be too large — try a shorter statement.`);
+        }
+      }
 
       analysis.cas_source = detectCasSource(text);
 
