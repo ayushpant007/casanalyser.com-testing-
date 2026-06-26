@@ -199,94 +199,94 @@ export default function ConciseReport() {
   const [isExporting, setIsExporting] = useState(false);
 
   const [actionSelections, setActionSelections] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_actions_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_actions_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const updateAction = (schemeName: string, value: string) => {
     setActionSelections(prev => {
       const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_actions_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_actions_${reportSlug}`, JSON.stringify(next));
       return next;
     });
   };
 
   const [targetCategory, setTargetCategory] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_target_cat_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_target_cat_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const [targetFund, setTargetFund] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_target_fund_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_target_fund_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const [targetSubCategory, setTargetSubCategory] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_target_subcat_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_target_subcat_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const updateTargetCategory = useCallback((schemeName: string, value: string) => {
     setTargetCategory(prev => {
       const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_target_cat_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_cat_${reportSlug}`, JSON.stringify(next));
       return next;
     });
     // Reset subcategory and fund when category changes
     setTargetSubCategory(prev => {
       const next = { ...prev, [schemeName]: "" };
-      if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_subcat_${reportSlug}`, JSON.stringify(next));
       return next;
     });
     setTargetFund(prev => {
       const next = { ...prev, [schemeName]: "" };
-      if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_fund_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const updateTargetSubCategory = useCallback((schemeName: string, value: string) => {
     setTargetSubCategory(prev => {
       const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_target_subcat_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_subcat_${reportSlug}`, JSON.stringify(next));
       return next;
     });
     // Reset fund when subcategory changes
     setTargetFund(prev => {
       const next = { ...prev, [schemeName]: "" };
-      if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_fund_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const updateTargetFund = useCallback((schemeName: string, value: string) => {
     setTargetFund(prev => {
       const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_target_fund_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_target_fund_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const [remarks, setRemarks] = useState<Record<string, string>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_remarks_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_remarks_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const updateRemarks = useCallback((schemeName: string, value: string) => {
     setRemarks(prev => {
       const next = { ...prev, [schemeName]: value };
-      if (reportId) localStorage.setItem(`fin_remarks_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_remarks_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const [fundSchemes, setFundSchemes] = useState<string[]>([]);
   const [fundSearchQuery, setFundSearchQuery] = useState<Record<string, string>>({});
   const [openFundDropdown, setOpenFundDropdown] = useState<string | null>(null);
 
   const [recommendedFunds, setRecommendedFunds] = useState<Array<{ id: string; category: string; subCategory: string; fund: string }>>(() => {
-    if (!reportId) return [];
-    try { return JSON.parse(localStorage.getItem(`fin_recommended_${reportId}`) || "[]"); } catch { return []; }
+    if (!reportSlug) return [];
+    try { return JSON.parse(localStorage.getItem(`fin_recommended_${reportSlug}`) || "[]"); } catch { return []; }
   });
 
   const [schemeData, setSchemeData] = useState<Array<{ category: string; subCategory: string; schemeName: string }>>([]);
@@ -295,26 +295,26 @@ export default function ConciseReport() {
     const newId = `rec_${Date.now()}`;
     setRecommendedFunds(prev => {
       const next = [...prev, { id: newId, category: "", subCategory: "", fund: "" }];
-      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_recommended_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const updateRecommendedFund = useCallback((id: string, field: string, value: string) => {
     setRecommendedFunds(prev => {
       const next = prev.map(f => f.id === id ? { ...f, [field]: value } : f);
-      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_recommended_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   const deleteRecommendedFund = useCallback((id: string) => {
     setRecommendedFunds(prev => {
       const next = prev.filter(f => f.id !== id);
-      if (reportId) localStorage.setItem(`fin_recommended_${reportId}`, JSON.stringify(next));
+      if (reportSlug) localStorage.setItem(`fin_recommended_${reportSlug}`, JSON.stringify(next));
       return next;
     });
-  }, [reportId]);
+  }, [reportSlug]);
 
   useEffect(() => {
     // Load the scheme data CSV for recommended funds section
@@ -349,13 +349,13 @@ export default function ConciseReport() {
   }, []);
 
   const [storedPerformances, setStoredPerformances] = useState<Record<string, any>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_perf_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_perf_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const [storedScoring, setStoredScoring] = useState<Record<string, any>>(() => {
-    if (!reportId) return {};
-    try { return JSON.parse(localStorage.getItem(`fin_scoring_${reportId}`) || "{}"); } catch { return {}; }
+    if (!reportSlug) return {};
+    try { return JSON.parse(localStorage.getItem(`fin_scoring_${reportSlug}`) || "{}"); } catch { return {}; }
   });
 
   const [isAutoAnalyzing, setIsAutoAnalyzing] = useState(false);
@@ -447,7 +447,7 @@ export default function ConciseReport() {
       const scoringId = isin || encodeURIComponent(schemeName);
       const scoringParams = new URLSearchParams({ schemeName, plan });
       const [perfRes, scoringRes] = await Promise.allSettled([
-        fetch(`/api/scrape-performance/${perfId}?reportId=${reportId}`),
+        fetch(`/api/scrape-performance/${perfId}?reportSlug=${report?.id ?? ""}`),
         fetch(`/api/scoring/${scoringId}?${scoringParams}`)
       ]);
       if (perfRes.status === "fulfilled" && perfRes.value.ok) {
@@ -469,8 +469,8 @@ export default function ConciseReport() {
         setAnalyzeProgress({ done: Math.min(i + BATCH, funds.length), total: funds.length });
       }
       try {
-        localStorage.setItem(`fin_perf_${reportId}`, JSON.stringify(newPerfs));
-        localStorage.setItem(`fin_scoring_${reportId}`, JSON.stringify(newScoring));
+        localStorage.setItem(`fin_perf_${reportSlug}`, JSON.stringify(newPerfs));
+        localStorage.setItem(`fin_scoring_${reportSlug}`, JSON.stringify(newScoring));
       } catch (_) {}
       setIsAutoAnalyzing(false);
     };
