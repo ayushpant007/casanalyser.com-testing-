@@ -58,10 +58,10 @@ const GEMINI_TIMEOUT_MS = 180_000; // 3 minutes per key attempt
 
 // Fallback model chain — tried in order when a model returns 503 (high demand)
 const GEMINI_FALLBACK_MODELS = [
-  "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
-  "gemini-2.0-flash-lite",
+  "gemini-2.5-flash-lite",
   "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
 ];
 
 // Closes any open JSON brackets/braces in a truncated string
@@ -160,7 +160,7 @@ async function generateWithGroqFallback(prompt: string): Promise<string> {
 }
 
 async function generateWithFallback(prompt: string, options: { model?: string, responseMimeType?: string } = {}) {
-  const primaryModel = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite").toLowerCase().replace(/\s+/g, '-');
+  const primaryModel = (options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash").toLowerCase().replace(/\s+/g, '-');
 
   // Build model list: primary first, then the rest of the chain (skip duplicates)
   const modelsToTry = [primaryModel, ...GEMINI_FALLBACK_MODELS.filter(m => m !== primaryModel)];
