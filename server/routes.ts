@@ -641,7 +641,7 @@ ${text}`;
         storage.createAnalysis({
           userId,
           fileName: originalName,
-          reportUrl: `/reports/${report.id}/concise`,
+          reportUrl: `/reports/${report.slug}/concise`,
         }).catch((err) => console.error("[analysis-track] failed:", err));
       }
 
@@ -700,7 +700,7 @@ ${text}`;
   });
 
   app.get(api.reports.get.path, async (req, res) => {
-    const report = await storage.getReport(Number(req.params.id));
+    const report = await storage.getReportBySlug(req.params.slug);
     if (!report) return res.status(404).json({ message: "Report not found" });
     res.json(report);
   });

@@ -6,6 +6,7 @@ export * from "./models/chat";
 
 export const reports = pgTable("reports", {
   id: serial("id").primaryKey(),
+  slug: text("slug").unique(), // Random unguessable token used in public URLs
   filename: text("filename").notNull(),
   investorType: text("investor_type"),
   ageGroup: text("age_group"),

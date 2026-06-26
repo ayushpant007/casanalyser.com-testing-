@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 interface UploadCardProps {
-  onSuccess: (reportId: number) => void;
+  onSuccess: (reportSlug: string) => void;
   externalFile?: File | null;
 }
 
@@ -46,7 +46,7 @@ export function UploadCard({ onSuccess, externalFile }: UploadCardProps) {
           toast({ title: "Analysis Complete", description: "Your portfolio has been successfully analyzed." });
           setFile(null);
           setPassword("");
-          onSuccess(data.id);
+          onSuccess(data.slug!);
         },
         onError: (err) => {
           toast({ title: "Analysis Failed", description: err.message, variant: "destructive" });

@@ -187,11 +187,13 @@ function FundDetailModal({ fund, perf, scoring, onClose }: { fund: any; perf: an
 }
 
 export default function ConciseReport() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const reportId = params.id ? parseInt(params.id) : null;
-  const { data: report, isLoading } = useReport(reportId);
-  const { data: overlapData, isLoading: overlapLoading } = useOverlapAnalysis(reportId);
+  const reportSlug = params.slug || null;
+  const { data: report, isLoading } = useReport(reportSlug);
+  // Overlap analysis uses the internal numeric id, only available after report loads
+  const reportNumericId = report?.id ?? null;
+  const { data: overlapData, isLoading: overlapLoading } = useOverlapAnalysis(reportNumericId);
   const reportRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);

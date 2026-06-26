@@ -35,7 +35,7 @@ export const api = {
     },
     get: {
       method: "GET" as const,
-      path: "/api/reports/:id",
+      path: "/api/reports/:slug",
       responses: {
         200: z.custom<typeof reports.$inferSelect>(),
         404: z.object({ message: z.string() }),

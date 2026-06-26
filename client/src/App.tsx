@@ -19,7 +19,7 @@ function Router() {
       <Route path="/" component={Intro} />
       <Route path="/app" component={Home} />
       <Route path="/cdsl" component={CDSL} />
-      <Route path="/reports/:id/concise" component={ConciseReport} />
+      <Route path="/reports/:slug/concise" component={ConciseReport} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/contact" component={Contact} />

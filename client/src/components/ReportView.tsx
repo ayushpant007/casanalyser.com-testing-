@@ -872,7 +872,7 @@ export function ReportView({ report }: ReportViewProps) {
                     localStorage.setItem(`fin_perf_${report.id}`, JSON.stringify(performances));
                     localStorage.setItem(`fin_scoring_${report.id}`, JSON.stringify(scoringRecords));
                   } catch (_) {}
-                  navigate(`/reports/${report.id}/concise`);
+                  navigate(`/reports/${report.slug}/concise`);
                 }}
                 variant="outline"
                 disabled={!allAnalyzed}

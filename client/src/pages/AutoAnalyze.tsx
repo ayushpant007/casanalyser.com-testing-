@@ -5,10 +5,10 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { BarChart2, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 
 export default function AutoAnalyze() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const reportId = params.id ? parseInt(params.id) : null;
-  const { data: report, isLoading } = useReport(reportId);
+  const reportSlug = params.slug || null;
+  const { data: report, isLoading } = useReport(reportSlug);
 
   const [progress, setProgress] = useState(0);
   const [current, setCurrent] = useState("");
@@ -26,7 +26,7 @@ export default function AutoAnalyze() {
     const funds: any[] = (analysis.mf_snapshot || []).filter((mf: any) => mf.isin);
 
     if (!funds.length) {
-      navigate(`/reports/${report.id}/concise`);
+      navigate(`/reports/${report.slug}/concise`);
       return;
     }
 
@@ -48,7 +48,7 @@ export default function AutoAnalyze() {
       } catch (_) {}
 
       setCompleted(true);
-      setTimeout(() => navigate(`/reports/${report.id}/concise`), 800);
+      setTimeout(() => navigate(`/reports/${report.slug}/concise`), 800);
     };
 
     runAll().catch((err) => setError(err.message));

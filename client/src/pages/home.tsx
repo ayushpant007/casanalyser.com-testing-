@@ -467,7 +467,7 @@ export default function Home() {
                   }}
                 />
                 <UploadCard
-                  onSuccess={(id) => navigate(`/reports/${id}/concise`)}
+                  onSuccess={(slug) => navigate(`/reports/${slug}/concise`)}
                   externalFile={externalFile}
                 />
               </motion.div>

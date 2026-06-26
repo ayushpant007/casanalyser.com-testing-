@@ -21,9 +21,15 @@ function generateSessionToken(): string {
   return randomBytes(32).toString("hex");
 }
 
+// Generate a short random slug for public-facing report URLs (16 hex chars = 64 bits of entropy)
+function generateReportSlug(): string {
+  return randomBytes(8).toString("hex");
+}
+
 export interface IStorage {
   createReport(report: InsertReport): Promise<Report>;
   getReport(id: number): Promise<Report | undefined>;
+  getReportBySlug(slug: string): Promise<Report | undefined>;
   getAllReports(): Promise<Report[]>;
   createUser(user: InsertUser): Promise<{ user: User; sessionToken: string }>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -35,12 +41,19 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async createReport(report: InsertReport): Promise<Report> {
-    const [newReport] = await db.insert(reports).values(report).returning();
+    // Attach a random slug so the public URL is never guessable
+    const slug = generateReportSlug();
+    const [newReport] = await db.insert(reports).values({ ...report, slug }).returning();
     return newReport;
   }
 
   async getReport(id: number): Promise<Report | undefined> {
     const [report] = await db.select().from(reports).where(eq(reports.id, id));
+    return report;
+  }
+
+  async getReportBySlug(slug: string): Promise<Report | undefined> {
+    const [report] = await db.select().from(reports).where(eq(reports.slug, slug));
     return report;
   }
 

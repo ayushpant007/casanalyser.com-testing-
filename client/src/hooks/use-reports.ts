@@ -27,14 +27,14 @@ export function useReports() {
   });
 }
 
-// GET /api/reports/:id
-export function useReport(id: number | null) {
+// GET /api/reports/:slug  — slug is the unguessable token used in public URLs
+export function useReport(slug: string | null) {
   return useQuery({
-    queryKey: [api.reports.get.path, id],
-    enabled: !!id,
+    queryKey: [api.reports.get.path, slug],
+    enabled: !!slug,
     queryFn: async () => {
-      if (!id) return null;
-      const url = api.reports.get.path.replace(":id", id.toString());
+      if (!slug) return null;
+      const url = api.reports.get.path.replace(":slug", slug);
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch report");
       const data = await res.json();
