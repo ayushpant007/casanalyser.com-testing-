@@ -264,11 +264,31 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           message: parsed.error.issues[0]?.message || "Invalid input",
         });
       }
-      const user = await storage.createUser(parsed.data);
-      res.json({ id: user.id, email: user.email });
+      const { user, sessionToken } = await storage.createUser(parsed.data);
+      // Return the session token so the frontend can persist it in localStorage
+      res.json({ email: user.email, sessionToken });
     } catch (err: any) {
       console.error("Failed to create user:", err);
       res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  // Verify a session token sent from localStorage on every page load
+  app.post("/api/session/verify", async (req, res) => {
+    try {
+      const token = String(req.body?.sessionToken || "").trim();
+      if (!token) return res.json({ valid: false });
+
+      const user = await storage.getUserBySessionToken(token);
+      if (!user) return res.json({ valid: false });
+
+      // Update last_seen in background — don't await to keep response fast
+      storage.touchUserLastSeen(user.id).catch(() => {});
+
+      res.json({ valid: true, name: user.name, email: user.email });
+    } catch (err: any) {
+      console.error("Session verify error:", err);
+      res.json({ valid: false });
     }
   });
 
@@ -296,7 +316,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ── Background analysis worker ────────────────────────────────────────────
-  async function runAnalysisJob(jobId: string, fileBuffer: Buffer, originalName: string, password: string, investorType: string, ageGroup: string) {
+  async function runAnalysisJob(jobId: string, fileBuffer: Buffer, originalName: string, password: string, investorType: string, ageGroup: string, userId?: number) {
     const tempPath = path.join(os.tmpdir(), `upload-${Date.now()}.pdf`);
     try {
       await fs.writeFile(tempPath, fileBuffer);
@@ -616,6 +636,15 @@ ${text}`;
 
       const report = await storage.createReport({ filename: originalName, investorType, ageGroup, analysis });
 
+      // Track the analysis against the user if we have a userId
+      if (userId) {
+        storage.createAnalysis({
+          userId,
+          fileName: originalName,
+          reportUrl: `/reports/${report.id}/concise`,
+        }).catch((err) => console.error("[analysis-track] failed:", err));
+      }
+
       uploadCasToDrive(fileBuffer, originalName, analysis.investor_name, password)
         .then((result) => { if (result) console.log(`CAS uploaded to Google Drive: ${result.webViewLink}`); })
         .catch((err) => { console.error("Google Drive upload failed:", err); });
@@ -638,11 +667,21 @@ ${text}`;
     const ageGroup = req.body.ageGroup || "20-35";
     const jobId = generateJobId();
 
+    // Resolve user from session token (sent by the frontend)
+    let userId: number | undefined;
+    const sessionToken = String(req.body.sessionToken || "").trim();
+    if (sessionToken) {
+      try {
+        const user = await storage.getUserBySessionToken(sessionToken);
+        if (user) userId = user.id;
+      } catch (_) {}
+    }
+
     // Store job as processing immediately
     analysisJobs.set(jobId, { status: "processing", createdAt: Date.now() });
 
     // Start heavy work in background — do NOT await
-    runAnalysisJob(jobId, req.file.buffer, req.file.originalname, password, investorType, ageGroup);
+    runAnalysisJob(jobId, req.file.buffer, req.file.originalname, password, investorType, ageGroup, userId);
 
     // Respond immediately so the proxy never times out
     res.status(202).json({ jobId });

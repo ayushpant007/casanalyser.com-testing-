@@ -95,6 +95,10 @@ export function useAnalyzeReport() {
       if (investorType) formData.append("investorType", investorType);
       if (ageGroup) formData.append("ageGroup", ageGroup);
 
+      // Include session token so the backend can link this analysis to a user
+      const sessionToken = localStorage.getItem("cas_session_token");
+      if (sessionToken) formData.append("sessionToken", sessionToken);
+
       // Step 1: POST to start the job — returns immediately with a jobId
       const startRes = await fetch(api.analyze.path, {
         method: api.analyze.method,

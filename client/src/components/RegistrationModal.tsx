@@ -16,6 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
+// localStorage key for the session token
+export const SESSION_TOKEN_KEY = "cas_session_token";
+
 interface RegistrationModalProps {
   open: boolean;
   onClose: () => void;
@@ -41,10 +44,15 @@ export function RegistrationModal({
   const onSubmit = async (values: InsertUser) => {
     setSubmitting(true);
     try {
-      await apiRequest("POST", "/api/users", values);
-      toast({
-        title: "Welcome to Cas analyzer",
-      });
+      const res = await apiRequest("POST", "/api/users", values);
+      const data = await res.json();
+
+      // Persist the session token so the user is recognised on future visits
+      if (data.sessionToken) {
+        localStorage.setItem(SESSION_TOKEN_KEY, data.sessionToken);
+      }
+
+      toast({ title: "Welcome to Cas analyzer" });
       onSuccess();
     } catch (err: any) {
       toast({

@@ -1,0 +1,151 @@
+# Task: Implement Persistent User Sessions Without Changing Existing User Experience
+
+## Goal
+
+Keep the current frontend UX exactly the same.
+
+Users should **NOT** see any Login or Signup screen.
+
+The current flow must remain:
+
+1. User enters Name, Email, Phone Number (only on first visit)
+2. User uploads CAS
+3. CAS is analyzed
+
+However, returning users should be automatically recognized so they are **not asked for their details again**, and every analysis should be linked to the same user.
+
+---
+
+## Current System
+
+* We already have a Supabase `users` table.
+* First-time users are inserted into this table.
+* Do NOT replace or remove this flow.
+
+---
+
+## Required Changes
+
+### 1. Add Session Token
+
+Add a new column to the `users` table:
+
+* `session_token` (UUID or secure random string, unique)
+* `last_seen` (timestamp)
+
+---
+
+### 2. First-Time User Flow
+
+When a user submits:
+
+* Name
+* Email
+* Phone
+
+Backend should:
+
+1. Check if a user with this email already exists.
+2. If not:
+
+   * Create the user.
+   * Generate a secure session token.
+   * Save the session token in the database.
+3. Save the session token in browser localStorage.
+4. Continue the existing CAS analysis flow.
+
+Do not change the UI.
+
+---
+
+### 3. Returning User Flow
+
+When the website loads:
+
+1. Check localStorage for `session_token`.
+2. If found:
+
+   * Send it to the backend.
+   * Find the corresponding user.
+3. If the token is valid:
+
+   * Skip the Name/Email/Phone form completely.
+   * Automatically use that user.
+   * Update `last_seen`.
+4. Allow the user to directly upload a CAS.
+
+---
+
+### 4. Invalid Token
+
+If:
+
+* no token exists
+* token is invalid
+* user deleted
+
+then:
+
+* remove the localStorage token
+* show the existing Name/Email/Phone form
+
+---
+
+### 5. Analysis Tracking
+
+Every CAS analysis must store:
+
+* user_id
+* analysis timestamp
+* filename (if available)
+
+Create an `analysis` table if it doesn't already exist.
+
+Example:
+
+* id
+* user_id
+* file_name
+* created_at
+* report_url (optional)
+
+Each analysis must always be linked to the correct user.
+
+---
+
+### 7. Security
+
+* Generate cryptographically secure session tokens.
+* Never expose database IDs directly to the frontend.
+* Validate the session token on every request.
+* Never trust localStorage without backend verification.
+
+---
+
+### 8. Frontend
+
+Do NOT redesign the UI.
+
+The only behavioral change should be:
+
+First Visit:
+Name → Email → Phone → Upload CAS
+
+Second Visit:
+Upload CAS directly
+
+No Login screen.
+No Signup screen.
+No Password.
+No OTP.
+
+---
+
+### 9. Code Quality
+
+* Keep the code modular.
+* Add comments where needed.
+* Reuse existing APIs wherever possible.
+* Do not break the existing upload or analysis flow.
+
+The final result should feel like the user is automatically remembered across visits while keeping the current simple onboarding experience.

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import { SiGoogle } from "react-icons/si";
 import { OnboardingModal } from "@/components/OnboardingModal";
-import { RegistrationModal } from "@/components/RegistrationModal";
+import { RegistrationModal, SESSION_TOKEN_KEY } from "@/components/RegistrationModal";
 import casAnalyzerLogo from "@assets/ChatGPT_Image_Apr_23,_2026,_02_45_29_PM_1776935868469.png";
 import financialFriendLogo from "@assets/ChatGPT_Image_Apr_24__2026__02_36_06_PM-removebg-preview_1777021600827.png";
 
@@ -98,22 +98,50 @@ export default function Home() {
   const [loadingPdfId, setLoadingPdfId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showRegistration, setShowRegistration] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(true);
+  // null = still checking, true = recognised, false = new user
+  const [isRegistered, setIsRegistered] = useState<boolean | null>(null);
   const [, navigate] = useLocation();
 
+  // On mount: verify session token from localStorage before showing the form
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const registered = localStorage.getItem("finanalyze_user_registered");
-    if (!registered) {
+
+    const token = localStorage.getItem(SESSION_TOKEN_KEY);
+
+    if (!token) {
+      // No token — definitely a new user, show registration after a short delay
       setIsRegistered(false);
       const t = setTimeout(() => setShowRegistration(true), 400);
       return () => clearTimeout(t);
     }
-    const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
-    if (!onboardingSeen) {
-      const t = setTimeout(() => setShowOnboarding(true), 400);
-      return () => clearTimeout(t);
-    }
+
+    // Verify the token with the backend
+    fetch("/api/session/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionToken: token }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.valid) {
+          // Returning user — skip registration form entirely
+          setIsRegistered(true);
+          const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
+          if (!onboardingSeen) {
+            setTimeout(() => setShowOnboarding(true), 400);
+          }
+        } else {
+          // Token invalid or user deleted — clear it and prompt registration
+          localStorage.removeItem(SESSION_TOKEN_KEY);
+          setIsRegistered(false);
+          setTimeout(() => setShowRegistration(true), 400);
+        }
+      })
+      .catch(() => {
+        // Network error — fall back to showing registration
+        setIsRegistered(false);
+        setTimeout(() => setShowRegistration(true), 400);
+      });
   }, []);
 
   const closeOnboarding = () => {
@@ -126,12 +154,9 @@ export default function Home() {
   const handleRegistrationSuccess = () => {
     setShowRegistration(false);
     setIsRegistered(true);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("finanalyze_user_registered", "1");
-      const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
-      if (!onboardingSeen) {
-        setTimeout(() => setShowOnboarding(true), 300);
-      }
+    const onboardingSeen = localStorage.getItem("finanalyze_onboarding_seen");
+    if (!onboardingSeen) {
+      setTimeout(() => setShowOnboarding(true), 300);
     }
   };
 
@@ -495,7 +520,7 @@ export default function Home() {
         open={showRegistration}
         onClose={() => setShowRegistration(false)}
         onSuccess={handleRegistrationSuccess}
-        dismissible={isRegistered}
+        dismissible={isRegistered === true}
       />
       <OnboardingModal
         open={showOnboarding}
