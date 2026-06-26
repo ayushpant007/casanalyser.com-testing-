@@ -2144,28 +2144,27 @@ export default function ConciseReport() {
                             : `₹${(Math.abs(currentAmt) / 1000).toFixed(1)} K`)
                         : "";
                       return (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between flex-wrap gap-x-2 gap-y-0.5">
                             <div className="flex items-center gap-2">
                               <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
                               <span className="text-xs font-bold text-slate-700">{label}</span>
                               {badge}
                             </div>
+                            {currentAmt !== undefined && gainVal && (
+                              <span className="text-[11px] font-black whitespace-nowrap" style={{ color: textColor || gainColor }}>
+                                {gainLabel} {gainVal}
+                              </span>
+                            )}
                           </div>
                           <div className="relative h-10 rounded-xl overflow-hidden" style={{ background: trackColor }}>
                             <div
-                              className="absolute inset-y-0 left-0 rounded-xl flex items-center px-3 transition-all duration-700"
+                              className="absolute inset-y-0 left-0 rounded-xl transition-all duration-700"
                               style={{
                                 width: `${Math.max(4, (Math.abs(pct) / maxPct) * 100)}%`,
                                 background: color,
                               }}
-                            >
-                              {currentAmt !== undefined && (
-                                <span className="text-[11px] font-black text-white whitespace-nowrap overflow-hidden text-ellipsis">
-                                  {gainLabel} {gainVal}
-                                </span>
-                              )}
-                            </div>
+                            />
                           </div>
                         </div>
                       );
