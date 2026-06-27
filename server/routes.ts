@@ -1173,6 +1173,83 @@ ${text}`;
     }
   });
 
+  // ── Live stock price via Yahoo Finance ─────────────────────────────────
+  const stockQuoteCache = new Map<string, { price: number; symbol: string; fetchedAt: number }>();
+  const STOCK_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  async function yahooSearch(query: string): Promise<string | null> {
+    try {
+      const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=6&newsCount=0&listsCount=0`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; CASAnalyser/1.0)" },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return null;
+      const data: any = await res.json();
+      const quotes: any[] = data?.quotes || [];
+      // Prefer NSE (.NS) then BSE (.BO) then any EQUITY type
+      const nse = quotes.find((q: any) => q.symbol?.endsWith(".NS") && q.quoteType === "EQUITY");
+      const bse = quotes.find((q: any) => q.symbol?.endsWith(".BO") && q.quoteType === "EQUITY");
+      const any_ = quotes.find((q: any) => q.quoteType === "EQUITY");
+      const winner = nse || bse || any_;
+      return winner?.symbol || null;
+    } catch { return null; }
+  }
+
+  async function yahooPrice(symbol: string): Promise<number | null> {
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1d`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; CASAnalyser/1.0)" },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return null;
+      const data: any = await res.json();
+      const meta = data?.chart?.result?.[0]?.meta;
+      return meta?.regularMarketPrice || meta?.previousClose || null;
+    } catch { return null; }
+  }
+
+  app.get("/api/stock-quote/:isin", async (req, res) => {
+    const isin = (req.params.isin || "").toUpperCase().trim();
+    if (!isin.startsWith("INE")) return res.status(400).json({ error: "Not an equity ISIN" });
+
+    const cached = stockQuoteCache.get(isin);
+    if (cached && Date.now() - cached.fetchedAt < STOCK_CACHE_TTL) {
+      return res.json({ price: cached.price, symbol: cached.symbol, source: "cache" });
+    }
+
+    try {
+      // 1. Search by ISIN
+      let symbol = await yahooSearch(isin);
+      let price: number | null = null;
+
+      if (symbol) {
+        price = await yahooPrice(symbol);
+      }
+
+      // 2. If ISIN search fails, try with the stock name hint from query param
+      if (!price) {
+        const name = (req.query.name as string | undefined) || "";
+        if (name) {
+          const sym2 = await yahooSearch(`${name} NSE`);
+          if (sym2) { symbol = sym2; price = await yahooPrice(sym2); }
+        }
+      }
+
+      if (!price || !symbol) {
+        return res.json({ price: null, symbol: null, source: "not_found" });
+      }
+
+      stockQuoteCache.set(isin, { price, symbol, fetchedAt: Date.now() });
+      console.log(`[StockQuote] ${isin} → ${symbol} @ ₹${price}`);
+      return res.json({ price, symbol, source: "yahoo" });
+    } catch (err: any) {
+      console.error("[StockQuote] Error:", err.message);
+      return res.json({ price: null, symbol: null, source: "error", error: err.message });
+    }
+  });
+
   // ── Overlap Analysis endpoint ───────────────────────────────────────────
   app.get("/api/overlap/:id", async (req, res) => {
     try {

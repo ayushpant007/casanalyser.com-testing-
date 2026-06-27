@@ -364,6 +364,35 @@ export default function ConciseReport() {
   const hasAutoStarted = useRef(false);
   const userHasManuallyToggled = useRef(false);
 
+  // ── Live stock prices from Yahoo Finance ─────────────────────────────────
+  const [stockLivePrices, setStockLivePrices] = useState<Record<string, { price: number | null; symbol: string | null; loading: boolean }>>({});
+
+  useEffect(() => {
+    if (!report) return;
+    const stocks: any[] = ((report.analysis as any)?.stock_snapshot || []).filter(
+      (s: any) => (s.isin || "").toUpperCase().startsWith("INE") && s.name
+    );
+    if (stocks.length === 0) return;
+    // Mark all as loading
+    const initial: typeof stockLivePrices = {};
+    stocks.forEach(s => { initial[s.isin] = { price: null, symbol: null, loading: true }; });
+    setStockLivePrices(initial);
+    // Fetch each in parallel
+    stocks.forEach(async (st) => {
+      try {
+        const url = `/api/stock-quote/${st.isin}?name=${encodeURIComponent(st.name || "")}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        setStockLivePrices(prev => ({
+          ...prev,
+          [st.isin]: { price: data.price ?? null, symbol: data.symbol ?? null, loading: false },
+        }));
+      } catch {
+        setStockLivePrices(prev => ({ ...prev, [st.isin]: { price: null, symbol: null, loading: false } }));
+      }
+    });
+  }, [report?.id]);
+
   // ── Live Nifty 500 benchmark from Supabase ────────────────────────────────
   const [niftyLive, setNiftyLive] = useState<{ return_1y: number; return_3y: number; as_of_date: string | null; source: string } | null>(null);
   useEffect(() => {
@@ -3195,13 +3224,14 @@ export default function ConciseReport() {
                 </div>
                 {/* Table */}
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm min-w-[520px]">
+                  <table className="w-full text-sm min-w-[580px]">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200">
                         <th className="text-left px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Stock</th>
                         <th className="text-center px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">ISIN</th>
-                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Quantity</th>
-                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Market Price (₹)</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Qty</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Live Price (₹)</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">CAS Price (₹)</th>
                         <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Current Value (₹)</th>
                       </tr>
                     </thead>
@@ -3211,11 +3241,19 @@ export default function ConciseReport() {
                         .sort((a: any, b: any) => (b.current_value || 0) - (a.current_value || 0))
                         .map((st: any, idx: number) => {
                           const pct = totalStockValue > 0 ? ((st.current_value || 0) / totalStockValue) * 100 : 0;
+                          const live = stockLivePrices[st.isin];
+                          const livePrice = live?.price ?? null;
+                          const casPrice = st.market_price || 0;
+                          const priceDiff = livePrice && casPrice > 0 ? ((livePrice - casPrice) / casPrice) * 100 : null;
+                          const liveValue = livePrice && st.quantity > 0 ? livePrice * st.quantity : null;
                           return (
                             <tr key={idx} className="border-b border-slate-100 hover:bg-emerald-50 transition-colors" data-testid={`row-stock-${idx}`}>
                               <td className="px-4 py-3">
                                 <p className="font-semibold text-slate-800 text-xs leading-tight">{st.name}</p>
-                                <div className="mt-1 h-1 w-full max-w-[120px] bg-slate-100 rounded-full overflow-hidden">
+                                {live?.symbol && (
+                                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">{live.symbol}</p>
+                                )}
+                                <div className="mt-1 h-1 w-full max-w-[100px] bg-slate-100 rounded-full overflow-hidden">
                                   <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${Math.min(pct, 100)}%` }} />
                                 </div>
                               </td>
@@ -3225,11 +3263,45 @@ export default function ConciseReport() {
                               <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs font-medium">
                                 {st.quantity > 0 ? st.quantity.toLocaleString("en-IN") : "—"}
                               </td>
-                              <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs font-medium">
-                                {st.market_price > 0 ? `₹${inr(st.market_price, 2)}` : "—"}
+                              {/* Live price column */}
+                              <td className="px-4 py-3 text-right tabular-nums text-xs">
+                                {live?.loading ? (
+                                  <span className="inline-flex items-center gap-1 text-slate-400">
+                                    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                    fetching…
+                                  </span>
+                                ) : livePrice ? (
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">LIVE</span>
+                                      <span className="font-bold text-slate-900">₹{inr(livePrice, 2)}</span>
+                                    </div>
+                                    {priceDiff !== null && (
+                                      <span className={`text-[10px] font-semibold ${priceDiff >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                        {priceDiff >= 0 ? "▲" : "▼"} {Math.abs(priceDiff).toFixed(2)}% vs CAS
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400 text-[10px]">unavailable</span>
+                                )}
                               </td>
-                              <td className="px-4 py-3 text-right font-bold text-slate-900 tabular-nums text-xs">
-                                {st.current_value > 0 ? `₹${inr(st.current_value, 2)}` : "—"}
+                              {/* CAS price */}
+                              <td className="px-4 py-3 text-right text-slate-500 tabular-nums text-xs">
+                                {casPrice > 0 ? `₹${inr(casPrice, 2)}` : "—"}
+                              </td>
+                              {/* Current value — prefer live if available */}
+                              <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">
+                                {liveValue ? (
+                                  <div className="flex flex-col items-end gap-0.5">
+                                    <span className="text-slate-900">₹{inr(liveValue, 2)}</span>
+                                    {st.current_value > 0 && (
+                                      <span className="text-[9px] text-slate-400">CAS: ₹{inr(st.current_value, 2)}</span>
+                                    )}
+                                  </div>
+                                ) : st.current_value > 0 ? (
+                                  `₹${inr(st.current_value, 2)}`
+                                ) : "—"}
                               </td>
                             </tr>
                           );
@@ -3237,7 +3309,7 @@ export default function ConciseReport() {
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-900 text-white">
-                        <td colSpan={4} className="px-4 py-3 text-right text-xs uppercase tracking-wider text-[#3aded1] font-bold">Total Market Value</td>
+                        <td colSpan={5} className="px-4 py-3 text-right text-xs uppercase tracking-wider text-[#3aded1] font-bold">Total Value (CAS)</td>
                         <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalStockValue)}</td>
                       </tr>
                     </tfoot>
