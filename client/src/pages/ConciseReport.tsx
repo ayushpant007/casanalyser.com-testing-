@@ -3169,6 +3169,84 @@ export default function ConciseReport() {
             );
           })()}
 
+          {/* ── Stock Snapshot ───────────────────────────────────────────────── */}
+          {(() => {
+            const stockSnapshot: any[] = (analysis.stock_snapshot || []).filter(
+              (s: any) => (s.isin || "").toUpperCase().startsWith("INE") && s.name
+            );
+            if (stockSnapshot.length === 0) return null;
+            const inr = (n: number, dp = 2) =>
+              n.toLocaleString("en-IN", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+            const totalStockValue = stockSnapshot.reduce((s: number, st: any) => s + (st.current_value || 0), 0);
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" data-testid="section-stock-snapshot">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-5 text-white">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-white" data-testid="text-stock-snapshot-heading">Stock Snapshot</h3>
+                      <p className="text-emerald-200 text-xs mt-0.5">{stockSnapshot.length} equity holding{stockSnapshot.length !== 1 ? "s" : ""} from your Demat account</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-emerald-200 font-semibold uppercase tracking-wider mb-0.5">Total Value</p>
+                      <p className="text-xl font-black text-white">₹{inr(totalStockValue)}</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[520px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Stock</th>
+                        <th className="text-center px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">ISIN</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Quantity</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Market Price (₹)</th>
+                        <th className="text-right px-4 py-3 font-semibold text-slate-500 text-xs uppercase tracking-wider">Current Value (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stockSnapshot
+                        .slice()
+                        .sort((a: any, b: any) => (b.current_value || 0) - (a.current_value || 0))
+                        .map((st: any, idx: number) => {
+                          const pct = totalStockValue > 0 ? ((st.current_value || 0) / totalStockValue) * 100 : 0;
+                          return (
+                            <tr key={idx} className="border-b border-slate-100 hover:bg-emerald-50 transition-colors" data-testid={`row-stock-${idx}`}>
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-slate-800 text-xs leading-tight">{st.name}</p>
+                                <div className="mt-1 h-1 w-full max-w-[120px] bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${Math.min(pct, 100)}%` }} />
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{st.isin}</span>
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs font-medium">
+                                {st.quantity > 0 ? st.quantity.toLocaleString("en-IN") : "—"}
+                              </td>
+                              <td className="px-4 py-3 text-right text-slate-700 tabular-nums text-xs font-medium">
+                                {st.market_price > 0 ? `₹${inr(st.market_price, 2)}` : "—"}
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-slate-900 tabular-nums text-xs">
+                                {st.current_value > 0 ? `₹${inr(st.current_value, 2)}` : "—"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-slate-900 text-white">
+                        <td colSpan={4} className="px-4 py-3 text-right text-xs uppercase tracking-wider text-[#3aded1] font-bold">Total Market Value</td>
+                        <td className="px-4 py-3 text-right font-bold tabular-nums text-xs">₹{inr(totalStockValue)}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* ── Full Portfolio Audit ────────────────────────────────────────── */}
           {mfSnapshot.length > 0 && (() => {
             const auditPL = totalUnrealised;

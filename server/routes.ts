@@ -394,8 +394,18 @@ Extract:
        • "fund_category": infer from scheme name (e.g. Equity, Debt, Hybrid)
        • "fund_type": infer from scheme name
        • "folio_no": ""
-     IGNORE rows where ISIN starts with "INE" (these are equity stocks, not mutual funds).
-5. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
+     IGNORE rows where ISIN starts with "INE" in mf_snapshot — those go into stock_snapshot instead (see item 5 below).
+5. Equity Stock Holdings (Demat): [{"name": string, "isin": string, "quantity": number, "market_price": number, "current_value": number}]
+   - Scan CDSL / NSDL Demat Holding Statement sections for rows where ISIN starts with "INE" (equity stocks, NOT mutual funds).
+   - "name": The security/company name from the Security column (strip trailing junk like "#", "FV RS 2/-" etc.)
+   - "isin": The full INE... ISIN code (12 characters)
+   - "quantity": The "Current Balance" / "Free Balance" / "Free Bal" column (the freely available quantity — exclude frozen/pledged)
+   - "market_price": The "Market Price / Face Value" column value (the per-share market price, NOT face value)
+   - "current_value": The "Value (₹)" / "Market Value" / "Value in ₹" column — use directly from statement, do NOT recalculate
+   - If current_value is not present, calculate as quantity × market_price
+   - Both CDSL and NSDL formats use similar keywords — identify by column headers, not by position
+   - Do NOT include INF... ISINs here (those are mutual funds and belong in mf_snapshot)
+6. Comparison Tables (using the CSV ratios for the given Age Group and Risk Profile):
    - Current Category Allocation (Equity, Debt, Hybrid, Others)
    - Comparison with Category Ratio (Current % vs Target % from CSV)
    - Category-Fund Type Comparison (Large Cap, Mid Cap, Small Cap, etc. for Equity portion)
@@ -411,6 +421,7 @@ Return ONLY valid JSON with this exact structure: {
   "account_summaries": [...], 
   "asset_allocation": [...], 
   "mf_snapshot": [...],
+  "stock_snapshot": [{"name": string, "isin": string, "quantity": number, "market_price": number, "current_value": number}],
   "category_comparison": [{"category": string, "current_pct": number, "target_pct": number}],
   "type_comparison": [{"type": string, "current_pct": number, "target_pct": number}],
   "transactions": [{"date": string, "scheme_name": string, "type": string, "amount": number}]
@@ -447,15 +458,101 @@ ${text}`;
 
       analysis.cas_source = detectCasSource(text);
 
-      // ── Strip equity stocks (INE ISINs) from mf_snapshot ──────────────────
+      // ── Strip equity stocks (INE ISINs) from mf_snapshot, rescue into stock_snapshot ──
       if (Array.isArray(analysis.mf_snapshot)) {
         const before = analysis.mf_snapshot.length;
+        const rescued: any[] = [];
         analysis.mf_snapshot = analysis.mf_snapshot.filter((m: any) => {
           const isin: string = (m.isin || "").trim().toUpperCase();
-          return !isin.startsWith("INE");
+          if (isin.startsWith("INE")) { rescued.push(m); return false; }
+          return true;
         });
+        if (rescued.length > 0) {
+          if (!Array.isArray(analysis.stock_snapshot)) analysis.stock_snapshot = [];
+          const existingStockIsins = new Set<string>((analysis.stock_snapshot as any[]).map((s: any) => s.isin));
+          for (const m of rescued) {
+            if (existingStockIsins.has(m.isin)) continue;
+            analysis.stock_snapshot.push({
+              name: m.scheme_name || m.isin,
+              isin: m.isin,
+              quantity: m.units || 0,
+              market_price: m.nav || 0,
+              current_value: m.valuation || 0,
+            });
+            existingStockIsins.add(m.isin);
+          }
+          console.log(`[Filter] Rescued ${rescued.length} equity stock(s) from mf_snapshot → stock_snapshot`);
+        }
         const removed = before - analysis.mf_snapshot.length;
         if (removed > 0) console.log(`[Filter] Removed ${removed} equity stock(s) (INE ISINs) from mf_snapshot`);
+      }
+
+      // ── Server-side equity stock extraction from raw PDF text ─────────────
+      try {
+        if (!Array.isArray(analysis.stock_snapshot)) analysis.stock_snapshot = [];
+        const existingStockIsins = new Set<string>(
+          (analysis.stock_snapshot as any[]).map((s: any) => s.isin).filter(Boolean)
+        );
+        const parseNum2 = (s: string) => parseFloat(s.replace(/,/g, "")) || 0;
+        const pdfLines = text.split(/\r?\n/);
+
+        for (let i = 0; i < pdfLines.length; i++) {
+          const ineMatch = pdfLines[i].match(/\b(INE[A-Z0-9]{9})\b/);
+          if (!ineMatch) continue;
+          const isin = ineMatch[1];
+          if (existingStockIsins.has(isin)) continue;
+
+          // Gather context lines around the ISIN
+          const ctxLines = pdfLines.slice(Math.max(0, i - 1), i + 10);
+          const block = ctxLines.join(" ");
+
+          // Extract all positive numbers from context block
+          const nums = [...block.matchAll(/([\d,]+\.?\d*)/g)]
+            .map(m => parseNum2(m[1]))
+            .filter(n => n > 0 && n < 1e10);
+
+          if (nums.length < 2) continue;
+
+          // Extract stock name: strip ISIN from the line, use next line if too short
+          let nameLine = pdfLines[i].replace(/\b(INE[A-Z0-9]{9})\b/, "").trim();
+          if (nameLine.length < 5 && pdfLines[i + 1]) nameLine = pdfLines[i + 1].trim();
+          // Clean trailing numbers and junk
+          const name = nameLine.replace(/[\s\d,.\-#]+$/, "").trim().replace(/\s+/g, " ")
+            .replace(/#\s*(EQUITY\s+SHARES?|SHARES?)\s*$/i, "")
+            .replace(/\s+/g, " ").trim() || isin;
+
+          // current_value = largest number; find market_price + quantity that multiply to it
+          const sortedNums = [...nums].sort((a, b) => b - a);
+          const currentValue = sortedNums[0];
+          let marketPrice = 0, quantity = 0;
+
+          for (const mp of nums) {
+            if (mp === currentValue) continue;
+            const impliedQty = currentValue / mp;
+            // Accept if implied qty is a reasonable integer
+            if (impliedQty >= 1 && impliedQty <= 1_000_000) {
+              const rounded = Math.round(impliedQty);
+              if (Math.abs(impliedQty - rounded) < 0.05) {
+                quantity = rounded;
+                marketPrice = mp;
+                break;
+              }
+            }
+          }
+          // Fallback: second-largest = market price
+          if (marketPrice === 0 && sortedNums.length >= 2) {
+            marketPrice = sortedNums[1];
+            quantity = marketPrice > 0 ? Math.round(currentValue / marketPrice) : 0;
+          }
+
+          if (currentValue <= 0) continue;
+
+          (analysis.stock_snapshot as any[]).push({ name, isin, quantity, market_price: marketPrice, current_value: currentValue });
+          existingStockIsins.add(isin);
+          console.log(`[Stock] Added: ${isin} | ${name} | qty=${quantity} mp=${marketPrice} val=${currentValue}`);
+        }
+      } catch (stockErr) {
+        console.error("[Stock] Extraction error:", stockErr);
       }
 
       // ── Server-side Demat MF extraction ───────────────────────────────────
