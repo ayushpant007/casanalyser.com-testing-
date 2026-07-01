@@ -249,6 +249,52 @@ async function initNiftyBenchmarkTable() {
   }
 }
 
+// ── Stock Market Cap Category Lookup ─────────────────────────────────────────
+let stockCapCache: Map<string, string> | null = null;
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === "," && !inQuotes) { result.push(current.trim()); current = ""; }
+    else { current += ch; }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+async function loadStockCapDb(): Promise<Map<string, string>> {
+  if (stockCapCache) return stockCapCache;
+  const csvPath = path.join(process.cwd(), "attached_assets", "AverageMarketCapitalization31Dec2025_-_Sheet1_1782891607359.csv");
+  const content = await fs.readFile(csvPath, "utf-8");
+  const lines = content.split(/\r?\n/);
+  const map = new Map<string, string>();
+  // Fixed column indices based on known CSV structure:
+  // 0:Sr.No, 1:Company name, 2:ISIN, 3:BSE Symbol, 4:BSE cap, 5:NSE Symbol, 6:NSE cap, 7:MSEI Symbol, 8:MSEI cap, 9:Avg, 10:Category
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const cols = parseCSVLine(line);
+    if (cols.length < 11) continue;
+    const category = cols[10]?.trim();
+    if (!["Large Cap", "Mid Cap", "Small Cap"].includes(category)) continue;
+    const isin = cols[2]?.trim().toUpperCase();
+    const name = cols[1]?.trim().toLowerCase();
+    const bseSym = cols[3]?.trim().toLowerCase();
+    const nseSym = cols[5]?.trim().toLowerCase();
+    if (isin) map.set(isin, category);
+    if (name) map.set(`name:${name}`, category);
+    if (bseSym && bseSym !== "-") map.set(`sym:${bseSym}`, category);
+    if (nseSym && nseSym !== "-") map.set(`sym:${nseSym}`, category);
+  }
+  stockCapCache = map;
+  console.log(`[StockCap] Loaded ${map.size} entries from market cap CSV`);
+  return map;
+}
+
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerImageRoutes(app);
@@ -1277,6 +1323,49 @@ ${text}`;
     } catch (err: any) {
       console.error("Overlap analysis error:", err);
       res.status(500).json({ message: "Failed to compute overlap analysis" });
+    }
+  });
+
+  // ── Stock Market Cap Category Lookup ───────────────────────────────────────
+  app.post("/api/stock-cap-lookup", async (req, res) => {
+    try {
+      const { stocks } = req.body;
+      if (!Array.isArray(stocks)) return res.status(400).json({ error: "stocks array required" });
+
+      const db = await loadStockCapDb();
+      const result: Record<string, string> = {};
+
+      for (const s of stocks) {
+        const isin = (s.isin || "").trim().toUpperCase();
+        const name = (s.name || "").trim().toLowerCase();
+
+        let category: string | undefined;
+
+        // 1. Match by ISIN
+        if (isin) category = db.get(isin);
+
+        // 2. Fallback: exact name match
+        if (!category && name) category = db.get(`name:${name}`);
+
+        // 3. Fallback: partial name match (first 20 chars)
+        if (!category && name && name.length >= 5) {
+          const prefix = name.substring(0, Math.min(name.length, 20));
+          for (const [key, val] of db.entries()) {
+            if (key.startsWith("name:") && key.slice(5).startsWith(prefix)) {
+              category = val;
+              break;
+            }
+          }
+        }
+
+        if (category && isin) result[isin] = category;
+        else if (category && name) result[name] = category;
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      console.error("Stock cap lookup error:", err);
+      res.status(500).json({ error: "Failed to lookup stock categories" });
     }
   });
 

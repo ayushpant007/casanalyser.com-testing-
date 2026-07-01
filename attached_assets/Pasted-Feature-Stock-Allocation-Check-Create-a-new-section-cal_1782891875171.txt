@@ -1,0 +1,108 @@
+Feature: Stock Allocation Check
+
+Create a new section called "Stock Allocation Check" below the existing "Asset Allocation Check" section.
+
+Objective
+
+Analyze all stocks present in the user's CAS/portfolio and categorize them into:
+
+Large Cap
+Mid Cap
+Small Cap
+
+Then compare the Current Allocation with the Ideal Allocation (based on the user's age group and risk appetite), similar to how the Asset Allocation Check section works.
+
+Data Source
+
+Use the attached CSV file (Stocks Allocation - Stocks.csv).
+
+This CSV contains the mapping of each stock's ISIN to its market-cap category.
+
+The required category is available in the column:
+
+Categorization as per SEBI Circular dated Oct 6, 2017
+
+Possible values are:
+
+Large Cap
+Mid Cap
+Small Cap
+Steps to Follow
+Step 1: Extract Portfolio Stocks
+
+Read all stocks from the uploaded CAS/portfolio.
+
+For each stock, collect:
+
+ISIN (preferred)
+Stock Name
+Symbol (if available)
+Step 2: Identify the Stock Category
+
+For every stock:
+
+First, try to match using ISIN.
+If ISIN is unavailable, match using Stock Name or Symbol.
+Search the stock in the provided CSV.
+Read the value from the column:
+Categorization as per SEBI Circular dated Oct 6, 2017
+Classify the stock as:
+Large Cap
+Mid Cap
+Small Cap
+Step 3: Calculate Current Allocation
+
+Using the current market value of each stock in the portfolio:
+
+Calculate total value invested in Large Cap stocks.
+Calculate total value invested in Mid Cap stocks.
+Calculate total value invested in Small Cap stocks.
+
+Convert these into percentages of the total stock portfolio.
+
+Example:
+
+Large Cap → 48%
+Mid Cap → 32%
+Small Cap → 20%
+
+These will be the Current Allocation.
+
+Step 4: Get Ideal Allocation
+
+Use the user's selected:
+
+Age Group
+Risk Appetite
+
+Fetch the corresponding Ideal Allocation from the Stock Allocation dataset already created.
+
+Example:
+
+Category	Ideal
+Large Cap	45%
+Mid Cap	35%
+Small Cap	20%
+Step 5: Compare & Display
+
+Create a UI exactly like the existing Asset Allocation Check section.
+
+Display a table with:
+
+Category	Ideal	Current	Status
+Large Cap	45%	52%	Overweight
+Mid Cap	35%	30%	Underweight
+Small Cap	20%	18%	Slightly Underweight
+Status Logic
+Balanced → Current is within ±5% of Ideal.
+Overweight → Current is more than 5% above Ideal.
+Underweight → Current is more than 5% below Ideal.
+
+Use the same colors, badges, and UI design as the existing Asset Allocation Check section for consistency.
+
+Important
+Match stocks by ISIN whenever possible.
+If ISIN is missing, fall back to Stock Name or Symbol.
+Ignore stocks that cannot be matched to the CSV.
+Use only Large Cap, Mid Cap, and Small Cap classifications from the CSV.
+The new section should match the styling and behavior of the existing Asset Allocation Check section.

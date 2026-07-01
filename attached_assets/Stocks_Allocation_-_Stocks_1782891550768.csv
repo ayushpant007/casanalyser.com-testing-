@@ -1,0 +1,17 @@
+Age Group,Risk Appetite,Large Cap (%),Mid Cap (%),Small Cap (%)
+20-35,Conservative,60,30,10
+20-35,Moderate,50,35,15
+20-35,Aggressive,40,40,20
+20-35,High Aggressive,30,45,25
+35-50,Conservative,65,25,10
+35-50,Moderate,55,30,15
+35-50,Aggressive,45,35,20
+35-50,High Aggressive,35,40,25
+50-60,Conservative,75,20,5
+50-60,Moderate,65,25,10
+50-60,Aggressive,55,30,15
+50-60,High Aggressive,45,35,20
+60+,Conservative,85,10,5
+60+,Moderate,75,20,5
+60+,Aggressive,65,25,10
+60+,High Aggressive,55,30,15

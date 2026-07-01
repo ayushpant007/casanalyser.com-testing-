@@ -4,7 +4,7 @@ import { ArrowUpRight, TrendingUp, AlertTriangle, Lightbulb, PieChart as PieChar
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useMemo, Fragment } from "react";
+import { useState, useRef, useMemo, Fragment, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -320,6 +320,39 @@ const IDEAL_ALLOCATIONS: Record<string, Record<string, Record<string, string>>> 
   }
 };
 
+const STOCK_IDEAL_ALLOCATIONS: Record<string, Record<string, { largeCap: number; midCap: number; smallCap: number }>> = {
+  "20-35": {
+    "Conservative":    { largeCap: 60, midCap: 30, smallCap: 10 },
+    "Moderate":        { largeCap: 50, midCap: 35, smallCap: 15 },
+    "Aggressive":      { largeCap: 40, midCap: 40, smallCap: 20 },
+    "High Aggressive": { largeCap: 30, midCap: 45, smallCap: 25 },
+  },
+  "35-50": {
+    "Conservative":    { largeCap: 65, midCap: 25, smallCap: 10 },
+    "Moderate":        { largeCap: 55, midCap: 30, smallCap: 15 },
+    "Aggressive":      { largeCap: 45, midCap: 35, smallCap: 20 },
+    "High Aggressive": { largeCap: 35, midCap: 40, smallCap: 25 },
+  },
+  "50-60": {
+    "Conservative":    { largeCap: 75, midCap: 20, smallCap: 5 },
+    "Moderate":        { largeCap: 65, midCap: 25, smallCap: 10 },
+    "Aggressive":      { largeCap: 55, midCap: 30, smallCap: 15 },
+    "High Aggressive": { largeCap: 45, midCap: 35, smallCap: 20 },
+  },
+  "60+": {
+    "Conservative":    { largeCap: 85, midCap: 10, smallCap: 5 },
+    "Moderate":        { largeCap: 75, midCap: 20, smallCap: 5 },
+    "Aggressive":      { largeCap: 65, midCap: 25, smallCap: 10 },
+    "High Aggressive": { largeCap: 55, midCap: 30, smallCap: 15 },
+  },
+};
+
+const STOCK_CAP_META: Record<string, { color: string; subtitle: string }> = {
+  "Large Cap": { color: "#3b82f6", subtitle: "Top 100 by market cap" },
+  "Mid Cap":   { color: "#8b5cf6", subtitle: "101st–250th by market cap" },
+  "Small Cap": { color: "#10b981", subtitle: "251st and below" },
+};
+
 interface ReportViewProps {
   report: EnhancedReport;
 }
@@ -453,8 +486,25 @@ export function ReportView({ report }: ReportViewProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isFetchingNav, setIsFetchingNav] = useState(false);
   const [navFetchStatus, setNavFetchStatus] = useState<Record<string, string>>({});
+  const [stockCapCategories, setStockCapCategories] = useState<Record<string, string>>({});
+  const [stockCapLoading, setStockCapLoading] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const stocks: any[] = analysis.stock_snapshot || [];
+    if (stocks.length === 0) return;
+    setStockCapLoading(true);
+    fetch("/api/stock-cap-lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stocks: stocks.map((s: any) => ({ isin: s.isin, name: s.name })) }),
+    })
+      .then(r => r.json())
+      .then(data => setStockCapCategories(data))
+      .catch(() => {})
+      .finally(() => setStockCapLoading(false));
+  }, [report.id]);
 
   const fetchAllNavs = async () => {
     const schemes = analysis.mf_snapshot || [];
@@ -1246,6 +1296,267 @@ export function ReportView({ report }: ReportViewProps) {
           );
         })()}
       </motion.div>
+
+      {/* Stock Allocation Check */}
+      {(analysis.stock_snapshot || []).length > 0 && (
+        <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          {(() => {
+            const stocks: any[] = analysis.stock_snapshot || [];
+            const idealRaw = STOCK_IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""];
+            const capCategories = ["Large Cap", "Mid Cap", "Small Cap"];
+
+            // Build current allocation map using current_value
+            const actualMap: Record<string, number> = { "Large Cap": 0, "Mid Cap": 0, "Small Cap": 0 };
+            let totalMatchedValue = 0;
+            let totalStockValue = 0;
+            let unmatchedCount = 0;
+
+            for (const s of stocks) {
+              const val = s.current_value || 0;
+              totalStockValue += val;
+              const isin = (s.isin || "").trim().toUpperCase();
+              const name = (s.name || "").trim().toLowerCase();
+              const cat = stockCapCategories[isin] || stockCapCategories[name];
+              if (cat && capCategories.includes(cat)) {
+                actualMap[cat] = (actualMap[cat] || 0) + val;
+                totalMatchedValue += val;
+              } else {
+                unmatchedCount++;
+              }
+            }
+
+            // Convert to percentages of matched portfolio
+            const actualPct: Record<string, number> = {};
+            capCategories.forEach(c => {
+              actualPct[c] = totalMatchedValue > 0 ? (actualMap[c] / totalMatchedValue) * 100 : 0;
+            });
+
+            const idealMap: Record<string, number> = idealRaw
+              ? { "Large Cap": idealRaw.largeCap, "Mid Cap": idealRaw.midCap, "Small Cap": idealRaw.smallCap }
+              : {};
+
+            // Health score
+            let healthScore = 100;
+            if (idealRaw) {
+              capCategories.forEach(c => {
+                const dev = Math.abs((actualPct[c] || 0) - (idealMap[c] || 0));
+                healthScore -= dev * 0.8;
+              });
+            }
+            healthScore = Math.max(0, Math.min(100, Math.round(healthScore)));
+            const healthLabel = healthScore >= 80 ? "Well balanced" : healthScore >= 60 ? "Needs rebalancing" : "Needs attention";
+            const healthColor = healthScore >= 80 ? "#10b981" : healthScore >= 60 ? "#f59e0b" : "#ef4444";
+
+            const getStatus = (actual: number, ideal: number) => {
+              const diff = actual - ideal;
+              if (Math.abs(diff) <= 5) return { label: "Balanced", color: "#10b981" };
+              if (diff > 5) return { label: "Overweight", color: "#ef4444" };
+              return { label: "Underweight", color: "#f59e0b" };
+            };
+
+            const renderPieLabel = ({ cx, cy, midAngle, outerRadius, value }: any) => {
+              if (!value || value < 3) return null;
+              const RADIAN = Math.PI / 180;
+              const radius = outerRadius + 28;
+              const x = cx + radius * Math.cos(-midAngle * RADIAN);
+              const y = cy + radius * Math.sin(-midAngle * RADIAN);
+              return (
+                <text x={x} y={y} fill="#374151" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={11} fontWeight={700}>
+                  {`${Number(value).toFixed(1)}%`}
+                </text>
+              );
+            };
+
+            const idealPieData = capCategories
+              .map(c => ({ name: c, value: idealMap[c] || 0, color: STOCK_CAP_META[c].color }))
+              .filter(d => d.value > 0);
+
+            const actualPieData = capCategories
+              .map(c => ({ name: c, value: parseFloat((actualPct[c] || 0).toFixed(2)), color: STOCK_CAP_META[c].color }))
+              .filter(d => d.value > 0);
+
+            const largeCapPct = actualPct["Large Cap"] || 0;
+            const largeCapIdeal = idealMap["Large Cap"] || 0;
+
+            return (
+              <>
+                {/* Header */}
+                <div className="px-6 pt-5 pb-4 flex items-start justify-between border-b border-slate-100">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">Stock allocation check</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-100">
+                        {report.investorType || "—"}
+                      </span>
+                      <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1 rounded-full">
+                        Age {report.ageGroup || "—"}
+                      </span>
+                      <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-100">
+                        {stocks.length} stocks
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {stockCapLoading ? (
+                      <div className="flex items-center gap-2 text-slate-400 text-sm">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+                      </div>
+                    ) : idealRaw ? (
+                      <>
+                        <div className="text-xs text-slate-400 font-medium mb-0.5">Overall health</div>
+                        <div className="text-3xl font-bold" style={{ color: healthColor }}>
+                          {healthScore}<span className="text-base font-semibold text-slate-400">/100</span>
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${healthColor}18`, color: healthColor }}>
+                          {healthLabel}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-slate-400">No ideal allocation for selected profile</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
+                  <div className="px-6 py-4 border-r border-slate-100">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Large Cap</div>
+                    <div className="text-2xl font-bold text-blue-600">{largeCapPct.toFixed(2)}%</div>
+                    {idealRaw && (
+                      <div className="text-xs mt-0.5" style={{ color: largeCapPct > largeCapIdeal + 5 ? "#ef4444" : largeCapPct < largeCapIdeal - 5 ? "#f59e0b" : "#10b981" }}>
+                        {largeCapPct > largeCapIdeal ? "+" : ""}{(largeCapPct - largeCapIdeal).toFixed(2)}% vs ideal
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-6 py-4 border-r border-slate-100">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Matched Stocks</div>
+                    <div className="text-2xl font-bold text-slate-800">{stocks.length - unmatchedCount}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">of {stocks.length} total</div>
+                  </div>
+                  <div className="px-6 py-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Unmatched</div>
+                    {unmatchedCount === 0 ? (
+                      <div className="text-2xl font-bold text-emerald-500">None</div>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold text-amber-500">{unmatchedCount}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">not in SEBI list</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* No data state */}
+                {totalMatchedValue === 0 && !stockCapLoading && (
+                  <div className="px-6 py-10 text-center text-slate-400 text-sm">
+                    No stocks could be matched to the SEBI market cap database.
+                  </div>
+                )}
+
+                {/* Charts and Table */}
+                {totalMatchedValue > 0 && (
+                  <>
+                    {/* Dual Pie Charts */}
+                    <div className="px-6 pt-6 pb-2">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="flex flex-col items-center">
+                          <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">
+                            Ideal Allocation
+                          </div>
+                          <ResponsiveContainer width="100%" height={240}>
+                            <PieChart>
+                              <Pie data={idealPieData.length > 0 ? idealPieData : [{ name: "No profile", value: 100, color: "#e2e8f0" }]} cx="50%" cy="50%" outerRadius={88} dataKey="value" label={idealPieData.length > 0 ? renderPieLabel : undefined} labelLine={false} strokeWidth={2} stroke="#fff">
+                                {(idealPieData.length > 0 ? idealPieData : [{ name: "No profile", value: 100, color: "#e2e8f0" }]).map((entry) => (
+                                  <Cell key={entry.name} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 text-center">
+                            Current Allocation
+                          </div>
+                          <ResponsiveContainer width="100%" height={240}>
+                            <PieChart>
+                              <Pie data={actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]} cx="50%" cy="50%" outerRadius={88} dataKey="value" label={actualPieData.length > 0 ? renderPieLabel : undefined} labelLine={false} strokeWidth={2} stroke="#fff">
+                                {(actualPieData.length > 0 ? actualPieData : [{ name: "No Data", value: 100, color: "#e2e8f0" }]).map((entry) => (
+                                  <Cell key={entry.name} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e2e8f0" }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      {/* Shared Legend */}
+                      <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-1 mb-5">
+                        {capCategories.map(cat => (
+                          <div key={cat} className="flex items-center gap-1.5">
+                            <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: STOCK_CAP_META[cat].color }} />
+                            <span className="text-xs font-medium text-slate-600">{cat}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Comparison Table */}
+                    <div className="border-t border-slate-100">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-slate-50">
+                            <th className="px-5 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</th>
+                            <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Ideal</th>
+                            <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Current</th>
+                            <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Deviation</th>
+                            <th className="px-5 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {capCategories.map(cat => {
+                            const current = actualPct[cat] || 0;
+                            const ideal = idealMap[cat] || 0;
+                            const diff = current - ideal;
+                            const { label: statusLabel, color: statusColor } = getStatus(current, ideal);
+                            return (
+                              <tr key={cat} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                                <td className="px-5 py-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: STOCK_CAP_META[cat].color }} />
+                                    <div>
+                                      <div className="font-semibold text-slate-700 text-sm">{cat}</div>
+                                      <div className="text-xs text-slate-400">{STOCK_CAP_META[cat].subtitle}</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-5 py-3 text-center text-sm text-slate-500 font-medium">{ideal > 0 ? `${ideal.toFixed(0)}%` : "—"}</td>
+                                <td className="px-5 py-3 text-center text-sm font-bold text-slate-800">{current.toFixed(2)}%</td>
+                                <td className="px-5 py-3 text-center text-sm font-semibold" style={{ color: Math.abs(diff) <= 5 ? "#64748b" : diff > 0 ? "#ef4444" : "#f59e0b" }}>
+                                  {ideal > 0 ? (Math.abs(diff) < 0.01 ? "—" : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`) : "—"}
+                                </td>
+                                <td className="px-5 py-3 text-center">
+                                  {ideal > 0 ? (
+                                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>
+                                      {statusLabel}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[11px] text-slate-400">—</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          })()}
+        </motion.div>
+      )}
 
       {/* Category Wise Distribution Section */}
       <motion.div variants={item} className="bg-[#f5f0e8] rounded-2xl border border-slate-200 overflow-hidden p-6">
