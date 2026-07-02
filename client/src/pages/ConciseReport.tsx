@@ -1850,26 +1850,44 @@ export default function ConciseReport() {
                   <div className="p-3 sm:p-5 space-y-5">
                     {/* ── Total Portfolio Value from CAS ── */}
                     {(() => {
-                      const casTotal = analysis.summary?.net_asset_value;
+                      // Compute from actual raw CAS data to ensure stocks + MF are both included
+                      const mfCasTotal = (analysis.mf_snapshot || []).reduce(
+                        (a: number, m: any) => a + (m.valuation || 0), 0
+                      );
+                      const stockCasTotal = (analysis.stock_snapshot || []).reduce(
+                        (a: number, s: any) => a + (s.current_value || 0), 0
+                      );
+                      const casTotal = mfCasTotal + stockCasTotal;
                       if (!casTotal || casTotal <= 0) return null;
-                      const fmtCas = (v: number) => v >= 100000
-                        ? `₹${(v / 100000).toFixed(2)} L`
-                        : `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+                      const hasStocks = stockCasTotal > 0;
                       return (
-                        <div className="relative overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-indigo-50 to-purple-50 px-5 py-4 flex items-center justify-between gap-4" data-testid="stat-cas-total">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
-                              <IndianRupee className="w-5 h-5 text-violet-600" />
+                        <div className="relative overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-indigo-50 to-purple-50 px-5 py-4" data-testid="stat-cas-total">
+                          <div className="flex items-center justify-between gap-4 flex-wrap">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center shrink-0">
+                                <IndianRupee className="w-5 h-5 text-violet-600" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value (as per CAS)</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5">Mutual Funds + Stocks + Demat</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-xs font-bold text-violet-600 uppercase tracking-wider">Total Portfolio Value(Includes ,mutual fund , stocks , demat , etc)</p>
+                            <div className="text-right shrink-0">
+                              <p className="text-2xl sm:text-3xl font-black text-violet-700 leading-none">
+                                <AnimatedCounter value={casTotal / 100000} prefix="₹" suffix=" L" decimals={2} />
+                              </p>
                             </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-2xl sm:text-3xl font-black text-violet-700 leading-none">
-                              <AnimatedCounter value={casTotal / 100000} prefix="₹" suffix=" L" decimals={2} />
-                            </p>
-                          </div>
+                          {hasStocks && (
+                            <div className="mt-3 pt-3 border-t border-violet-100 flex flex-wrap gap-x-5 gap-y-1">
+                              <span className="text-[11px] text-slate-500">
+                                Mutual Funds: <span className="font-semibold text-slate-700">₹{(mfCasTotal / 100000).toFixed(2)} L</span>
+                              </span>
+                              <span className="text-[11px] text-slate-500">
+                                Stocks / Demat: <span className="font-semibold text-slate-700">₹{(stockCasTotal / 100000).toFixed(2)} L</span>
+                              </span>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
