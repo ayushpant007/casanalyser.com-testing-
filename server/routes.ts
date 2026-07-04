@@ -310,6 +310,16 @@ type StockQualityEntry = {
     industryPe: number | null;
     revenueGrowth5y: number | null;
     promoterHolding: number | null;
+    marketCapCr: number | null;
+    pb: number | null;
+    evEbitda: number | null;
+    divYield: number | null;
+    opMarginTtm: number | null;
+    profitGrowth5y: number | null;
+    epsGrowth5y: number | null;
+    bookValueGrowth5y: number | null;
+    return1y: number | null;
+    return3y: number | null;
   };
 };
 let stockQualityCache: Record<string, StockQualityEntry> | null = null;

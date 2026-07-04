@@ -36,6 +36,12 @@ function toNum(v) {
   return isNaN(n) ? null : n;
 }
 
+function toCr(v) {
+  if (v === undefined || v === null || v === "") return null;
+  const n = parseFloat(String(v).replace(/[,]/g, "").replace(/cr/i, "").trim());
+  return isNaN(n) ? null : n;
+}
+
 const wb = xlsx.readFile(inputPath);
 const sheet = wb.Sheets["Sheet1"];
 if (!sheet) {
@@ -54,8 +60,17 @@ const IDX = {
   roe: col("Z"),
   debtToEquity: col("AG"),
   pe: col("AB"),
+  pb: col("AC"),
+  evEbitda: col("AE"),
+  divYield: col("AF"),
   industryPe: col("AD"),
+  opMarginTtm: col("BH"),
   revenueGrowth5y: col("BO"),
+  profitGrowth5y: col("BR"),
+  epsGrowth5y: col("BU"),
+  bookValueGrowth5y: col("BX"),
+  return1y: col("AR"),
+  return3y: col("AS"),
   promoterCurrent: col("CC"),
   promoterForeign: col("CD"),
   finalScore: col("FV"),
@@ -101,6 +116,16 @@ for (let i = 1; i < rows.length; i++) {
       industryPe: toNum(row[IDX.industryPe]),
       revenueGrowth5y: toNum(row[IDX.revenueGrowth5y]),
       promoterHolding,
+      marketCapCr: toCr(row[IDX.marketCap]),
+      pb: toNum(row[IDX.pb]),
+      evEbitda: toNum(row[IDX.evEbitda]),
+      divYield: toNum(row[IDX.divYield]),
+      opMarginTtm: toNum(row[IDX.opMarginTtm]),
+      profitGrowth5y: toNum(row[IDX.profitGrowth5y]),
+      epsGrowth5y: toNum(row[IDX.epsGrowth5y]),
+      bookValueGrowth5y: toNum(row[IDX.bookValueGrowth5y]),
+      return1y: toNum(row[IDX.return1y]),
+      return3y: toNum(row[IDX.return3y]),
     },
   };
 

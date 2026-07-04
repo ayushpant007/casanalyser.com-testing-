@@ -459,6 +459,16 @@ export default function ConciseReport() {
       industryPe: number | null;
       revenueGrowth5y: number | null;
       promoterHolding: number | null;
+      marketCapCr: number | null;
+      pb: number | null;
+      evEbitda: number | null;
+      divYield: number | null;
+      opMarginTtm: number | null;
+      profitGrowth5y: number | null;
+      epsGrowth5y: number | null;
+      bookValueGrowth5y: number | null;
+      return1y: number | null;
+      return3y: number | null;
     };
   };
   const [stockQuality, setStockQuality] = useState<Record<string, StockQuality>>({});
@@ -3361,6 +3371,11 @@ export default function ConciseReport() {
 
             const fmtPct = (v: number | null) => v === null || v === undefined ? "—" : `${v.toFixed(1)}%`;
             const fmtNum = (v: number | null) => v === null || v === undefined ? "—" : v.toFixed(1);
+            const fmtCr = (v: number | null) => {
+              if (v === null || v === undefined) return "—";
+              if (v >= 100000) return `₹${(v / 100000).toFixed(2)} L Cr`;
+              return `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`;
+            };
 
             return (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -3481,11 +3496,21 @@ export default function ConciseReport() {
                                         </p>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                           {[
+                                            { label: "Market Cap", value: fmtCr(r.quality.fundamentals.marketCapCr) },
                                             { label: "ROCE", value: fmtPct(r.quality.fundamentals.roce) },
                                             { label: "ROE", value: fmtPct(r.quality.fundamentals.roe) },
                                             { label: "Debt/Equity", value: fmtNum(r.quality.fundamentals.debtToEquity) },
+                                            { label: "Operating Margin (TTM)", value: fmtPct(r.quality.fundamentals.opMarginTtm) },
+                                            { label: "Dividend Yield", value: fmtPct(r.quality.fundamentals.divYield) },
                                             { label: "P/E (vs Industry)", value: r.quality.fundamentals.pe !== null ? `${fmtNum(r.quality.fundamentals.pe)} / ${fmtNum(r.quality.fundamentals.industryPe)}` : "—" },
+                                            { label: "P/B Ratio", value: fmtNum(r.quality.fundamentals.pb) },
+                                            { label: "EV/EBITDA", value: fmtNum(r.quality.fundamentals.evEbitda) },
                                             { label: "Revenue Growth (5Y)", value: fmtPct(r.quality.fundamentals.revenueGrowth5y) },
+                                            { label: "Profit Growth (5Y)", value: fmtPct(r.quality.fundamentals.profitGrowth5y) },
+                                            { label: "EPS Growth (5Y)", value: fmtPct(r.quality.fundamentals.epsGrowth5y) },
+                                            { label: "Book Value Growth (5Y)", value: fmtPct(r.quality.fundamentals.bookValueGrowth5y) },
+                                            { label: "1 Year Return", value: fmtPct(r.quality.fundamentals.return1y) },
+                                            { label: "3 Year Return", value: fmtPct(r.quality.fundamentals.return3y) },
                                             { label: "Promoter Holding", value: fmtPct(r.quality.fundamentals.promoterHolding) },
                                           ].map((f) => (
                                             <div key={f.label} className="bg-white rounded-lg border border-slate-100 px-3 py-2">
