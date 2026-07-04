@@ -444,6 +444,40 @@ export default function ConciseReport() {
       .finally(() => setStockCapLoading(false));
   }, [report?.id]);
 
+  // ── Stock quality / rating lookup ─────────────────────────────────────────
+  type StockQuality = {
+    name: string;
+    nseSymbol: string | null;
+    finalScore: number | null;
+    grade: string | null;
+    remark: string | null;
+    fundamentals: {
+      roce: number | null;
+      roe: number | null;
+      debtToEquity: number | null;
+      pe: number | null;
+      industryPe: number | null;
+      revenueGrowth5y: number | null;
+      promoterHolding: number | null;
+    };
+  };
+  const [stockQuality, setStockQuality] = useState<Record<string, StockQuality>>({});
+  const [stockQualityLoading, setStockQualityLoading] = useState(false);
+  useEffect(() => {
+    const stocks: any[] = (analysis.stock_snapshot || []);
+    if (stocks.length === 0) return;
+    setStockQualityLoading(true);
+    fetch("/api/stock-quality-lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stocks: stocks.map((s: any) => ({ name: s.name })) }),
+    })
+      .then(r => r.json())
+      .then(data => setStockQuality(data))
+      .catch(() => {})
+      .finally(() => setStockQualityLoading(false));
+  }, [report?.id]);
+
   // ── Live Nifty 500 benchmark from Supabase ────────────────────────────────
   const [niftyLive, setNiftyLive] = useState<{ return_1y: number; return_3y: number; as_of_date: string | null; source: string } | null>(null);
   useEffect(() => {
@@ -460,6 +494,7 @@ export default function ConciseReport() {
   const [snapshotSearch, setSnapshotSearch] = useState("");
   const [snapshotGrouped, setSnapshotGrouped] = useState(true);
   const [selectedFundIsin, setSelectedFundIsin] = useState<string | null>(null);
+  const [selectedStockName, setSelectedStockName] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
 
   // ── Section refs for tab navigation ──────────────────────────────────────
@@ -3287,6 +3322,202 @@ export default function ConciseReport() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-semibold text-indigo-600 underline underline-offset-2"
+                      >
+                        book a free consultation
+                      </a>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 4b. Stock Quality Check */}
+          {(analysis.stock_snapshot || []).length > 0 && (() => {
+            const stocks: any[] = analysis.stock_snapshot || [];
+
+            const GRADE_STYLE: Record<string, { color: string; bg: string; border: string; pill: string; bar: string }> = {
+              "A+": { color: "#059669", bg: "#ecfdf5", border: "#6ee7b7", pill: "bg-emerald-100 text-emerald-700 border-emerald-200", bar: "#059669" },
+              "A":  { color: "#10b981", bg: "#f0fdf4", border: "#86efac", pill: "bg-green-100 text-green-700 border-green-200",       bar: "#10b981" },
+              "B":  { color: "#3b82f6", bg: "#eff6ff", border: "#93c5fd", pill: "bg-blue-100 text-blue-700 border-blue-200",         bar: "#3b82f6" },
+              "C":  { color: "#f59e0b", bg: "#fffbeb", border: "#fcd34d", pill: "bg-amber-100 text-amber-700 border-amber-200",      bar: "#f59e0b" },
+              "D":  { color: "#ef4444", bg: "#fef2f2", border: "#fca5a5", pill: "bg-rose-100 text-rose-600 border-rose-200",         bar: "#ef4444" },
+            };
+
+            const rows = stocks
+              .map((s: any) => {
+                const q = stockQuality[s.name];
+                return { stock: s, quality: q };
+              })
+              .filter((r: { quality: StockQuality | undefined }) => !!r.quality);
+
+            const gradeCounts: Record<string, number> = { "A+": 0, "A": 0, "B": 0, "C": 0, "D": 0 };
+            rows.forEach((r: { quality: StockQuality | undefined }) => {
+              const g = r.quality?.grade || "";
+              if (g in gradeCounts) gradeCounts[g]++;
+            });
+
+            const unmatchedCount = stocks.length - rows.length;
+
+            const fmtPct = (v: number | null) => v === null || v === undefined ? "—" : `${v.toFixed(1)}%`;
+            const fmtNum = (v: number | null) => v === null || v === undefined ? "—" : v.toFixed(1);
+
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-700 px-6 py-5 text-white">
+                  <h3 className="text-lg font-bold text-white">Stock Quality Check</h3>
+                  <p className="text-blue-100 text-xs mt-0.5">
+                    {rows.length} stock{rows.length !== 1 ? "s" : ""} rated
+                    {unmatchedCount > 0 && ` · ${unmatchedCount} not found in database`}
+                  </p>
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    {[
+                      { label: "A+", color: "#6ee7b7" },
+                      { label: "A", color: "#86efac" },
+                      { label: "B", color: "#93c5fd" },
+                      { label: "C", color: "#fcd34d" },
+                      { label: "D", color: "#fca5a5" },
+                    ].map(b => (
+                      <span key={b.label} className="inline-flex items-center gap-1.5 text-[11px] font-medium" style={{ color: b.color }}>
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: b.color }} />
+                        Grade {b.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grade legend banner */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 divide-x divide-y sm:divide-y-0 divide-slate-100 border-b border-slate-100">
+                  {[
+                    { label: "A+", range: "90–100", color: "#059669", bg: "#ecfdf5", desc: "Elite business — excellent across the board." },
+                    { label: "A",  range: "80–90",  color: "#10b981", bg: "#f0fdf4", desc: "Strong business fundamentals." },
+                    { label: "B",  range: "65–80",  color: "#3b82f6", bg: "#eff6ff", desc: "Average business, some strengths." },
+                    { label: "C",  range: "50–65",  color: "#f59e0b", bg: "#fffbeb", desc: "Weak business, needs caution." },
+                    { label: "D",  range: "< 50",   color: "#ef4444", bg: "#fef2f2", desc: "High risk — fundamentals are poor." },
+                  ].map(item => (
+                    <div key={item.label} className="px-4 py-3" style={{ backgroundColor: item.bg }}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-[11px] font-bold" style={{ color: item.color }}>{item.label}</span>
+                        <span className="text-[10px] text-slate-400 font-medium">· {item.range}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 sm:p-8">
+                  {stockQualityLoading ? (
+                    <div className="flex items-center justify-center gap-2 text-slate-400 text-sm py-10">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Rating your stocks…
+                    </div>
+                  ) : rows.length === 0 ? (
+                    <div className="text-center text-slate-400 text-sm py-10">
+                      None of your stocks could be matched to the quality database.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4">
+                        {(["A+", "A", "B", "C", "D"] as const).map((g) => {
+                          const style = GRADE_STYLE[g];
+                          const count = gradeCounts[g] || 0;
+                          return (
+                            <div
+                              key={g}
+                              className="flex flex-col items-center justify-center rounded-2xl py-4 sm:py-6 px-2"
+                              style={{ backgroundColor: style.bg, border: `2px solid ${style.border}` }}
+                            >
+                              <div
+                                className="w-11 h-11 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-3"
+                                style={{ backgroundColor: style.color + "22", border: `3px solid ${style.color}` }}
+                              >
+                                <span className="text-xl sm:text-3xl font-black" style={{ color: style.color }}>{count}</span>
+                              </div>
+                              <span className="text-xs sm:text-sm font-bold tracking-wide" style={{ color: style.color }}>{g}</span>
+                              <span className="text-[9px] sm:text-[11px] text-slate-400 mt-0.5">{count === 1 ? "stock" : "stocks"}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Ranked stock list */}
+                      <div className="mt-6">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Stock Rankings</p>
+                        <div className="space-y-2">
+                          {[...rows]
+                            .sort((a: any, b: any) => (b.quality.finalScore ?? -1) - (a.quality.finalScore ?? -1))
+                            .map((r: { stock: any; quality: StockQuality }, i: number) => {
+                              const g = r.quality.grade || "";
+                              const style = GRADE_STYLE[g] || GRADE_STYLE["D"];
+                              const pct = r.quality.finalScore ?? 0;
+                              const isOpen = selectedStockName === r.stock.name;
+                              return (
+                                <div key={i} className="rounded-xl border border-transparent hover:border-slate-200 transition-colors">
+                                  <div
+                                    className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 rounded-xl px-3 py-2.5 transition-colors"
+                                    onClick={() => setSelectedStockName(isOpen ? null : r.stock.name)}
+                                    data-testid={`row-quality-stock-${i}`}
+                                  >
+                                    <span className="text-[11px] font-black text-slate-400 w-4 flex-shrink-0">{i + 1}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-semibold text-slate-700 truncate">{r.quality.name || r.stock.name}</p>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, backgroundColor: style.bar }} />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-slate-500">{pct}/100</span>
+                                      </div>
+                                    </div>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex-shrink-0 ${style.pill}`}>{g}</span>
+                                    {isOpen ? <ChevronUp className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />}
+                                  </div>
+
+                                  {isOpen && (
+                                    <div className="px-4 pb-4 pt-1">
+                                      <div className="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3">
+                                          <span className="font-semibold text-slate-800">Analysis: </span>
+                                          {r.quality.remark || "No remark available."}
+                                        </p>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                          {[
+                                            { label: "ROCE", value: fmtPct(r.quality.fundamentals.roce) },
+                                            { label: "ROE", value: fmtPct(r.quality.fundamentals.roe) },
+                                            { label: "Debt/Equity", value: fmtNum(r.quality.fundamentals.debtToEquity) },
+                                            { label: "P/E (vs Industry)", value: r.quality.fundamentals.pe !== null ? `${fmtNum(r.quality.fundamentals.pe)} / ${fmtNum(r.quality.fundamentals.industryPe)}` : "—" },
+                                            { label: "Revenue Growth (5Y)", value: fmtPct(r.quality.fundamentals.revenueGrowth5y) },
+                                            { label: "Promoter Holding", value: fmtPct(r.quality.fundamentals.promoterHolding) },
+                                          ].map((f) => (
+                                            <div key={f.label} className="bg-white rounded-lg border border-slate-100 px-3 py-2">
+                                              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{f.label}</p>
+                                              <p className="text-sm font-bold text-slate-700 mt-0.5">{f.value}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Disclaimer */}
+                  <div
+                    className="mx-0 sm:mx-3 mb-0 mt-6 px-4 py-3 rounded-xl flex items-start gap-2.5"
+                    style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.18)" }}
+                  >
+                    <span className="text-blue-400 mt-0.5 flex-shrink-0 text-base">💡</span>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      This is a quality screen based on business fundamentals, growth, valuation, momentum and ownership — not a buy/sell recommendation. For a detailed analysis,{" "}
+                      <a
+                        href="https://calendly.com/gunjan-financialfriend/30min"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-blue-600 underline underline-offset-2"
                       >
                         book a free consultation
                       </a>.

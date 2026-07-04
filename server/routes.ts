@@ -295,6 +295,44 @@ async function loadStockCapDb(): Promise<Map<string, string>> {
   return map;
 }
 
+// ── Stock Quality / Rating Lookup ─────────────────────────────────────────
+type StockQualityEntry = {
+  name: string;
+  nseSymbol: string | null;
+  finalScore: number | null;
+  grade: string | null;
+  remark: string | null;
+  fundamentals: {
+    roce: number | null;
+    roe: number | null;
+    debtToEquity: number | null;
+    pe: number | null;
+    industryPe: number | null;
+    revenueGrowth5y: number | null;
+    promoterHolding: number | null;
+  };
+};
+let stockQualityCache: Record<string, StockQualityEntry> | null = null;
+
+function normalizeStockName(name: string): string {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/\bltd\b/g, "limited")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function loadStockQualityDb(): Promise<Record<string, StockQualityEntry>> {
+  if (stockQualityCache) return stockQualityCache;
+  const jsonPath = path.join(process.cwd(), "server", "data", "stock-quality-lookup.json");
+  const content = await fs.readFile(jsonPath, "utf-8");
+  stockQualityCache = JSON.parse(content);
+  console.log(`[StockQuality] Loaded ${Object.keys(stockQualityCache!).length} entries from stock quality lookup`);
+  return stockQualityCache!;
+}
+
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   registerChatRoutes(app);
   registerImageRoutes(app);
@@ -1366,6 +1404,40 @@ ${text}`;
     } catch (err: any) {
       console.error("Stock cap lookup error:", err);
       res.status(500).json({ error: "Failed to lookup stock categories" });
+    }
+  });
+
+  // ── Stock Quality / Rating Lookup ────────────────────────────────────────
+  app.post("/api/stock-quality-lookup", async (req, res) => {
+    try {
+      const { stocks } = req.body;
+      if (!Array.isArray(stocks)) return res.status(400).json({ error: "stocks array required" });
+
+      const db = await loadStockQualityDb();
+      const keys = Object.keys(db);
+      const result: Record<string, StockQualityEntry> = {};
+
+      for (const s of stocks) {
+        const rawName = (s.name || "").trim();
+        if (!rawName) continue;
+        const key = normalizeStockName(rawName);
+
+        let entry: StockQualityEntry | undefined = db[key];
+
+        // Fallback: prefix match (handles suffix differences like "Ltd" vs "Limited" edge cases)
+        if (!entry && key.length >= 5) {
+          const prefix = key.substring(0, Math.min(key.length, 15));
+          const match = keys.find((k) => k.startsWith(prefix) || prefix.startsWith(k));
+          if (match) entry = db[match];
+        }
+
+        if (entry) result[rawName] = entry;
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      console.error("Stock quality lookup error:", err);
+      res.status(500).json({ error: "Failed to lookup stock quality" });
     }
   });
 
