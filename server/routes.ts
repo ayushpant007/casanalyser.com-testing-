@@ -295,52 +295,44 @@ async function loadStockCapDb(): Promise<Map<string, string>> {
   return map;
 }
 
-// ── Stock Quality / Rating Lookup ─────────────────────────────────────────
-type StockQualityEntry = {
+// ── Stock Rating V3 Lookup (CSV-based, ISIN-primary) ─────────────────────
+type StockRatingV3Entry = {
   name: string;
+  isin: string | null;
   nseSymbol: string | null;
-  finalScore: number | null;
-  grade: string | null;
-  remark: string | null;
+  bseCode: string | null;
+  v3Score: number | null;
+  v3Rating: string | null;
   fundamentals: {
+    marketCapCr: number | null;
     roce: number | null;
     roe: number | null;
     debtToEquity: number | null;
     pe: number | null;
     industryPe: number | null;
-    revenueGrowth5y: number | null;
-    promoterHolding: number | null;
-    marketCapCr: number | null;
     pb: number | null;
     evEbitda: number | null;
-    divYield: number | null;
     opMarginTtm: number | null;
+    divYield: number | null;
+    revenueGrowth5y: number | null;
     profitGrowth5y: number | null;
-    epsGrowth5y: number | null;
-    bookValueGrowth5y: number | null;
+    epsGrowth: number | null;
     return1y: number | null;
     return3y: number | null;
+    promoterHolding: number | null;
   };
 };
-let stockQualityCache: Record<string, StockQualityEntry> | null = null;
+type StockRatingV3Db = { byIsin: Record<string, StockRatingV3Entry>; bySymbol: Record<string, StockRatingV3Entry> };
+let stockRatingV3Cache: StockRatingV3Db | null = null;
 
-function normalizeStockName(name: string): string {
-  return String(name || "")
-    .toLowerCase()
-    .replace(/\./g, "")
-    .replace(/\bltd\b/g, "limited")
-    .replace(/[^a-z0-9 ]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-async function loadStockQualityDb(): Promise<Record<string, StockQualityEntry>> {
-  if (stockQualityCache) return stockQualityCache;
-  const jsonPath = path.join(process.cwd(), "server", "data", "stock-quality-lookup.json");
+async function loadStockRatingV3Db(): Promise<StockRatingV3Db> {
+  if (stockRatingV3Cache) return stockRatingV3Cache;
+  const jsonPath = path.join(process.cwd(), "server", "data", "stock-rating-v3-lookup.json");
   const content = await fs.readFile(jsonPath, "utf-8");
-  stockQualityCache = JSON.parse(content);
-  console.log(`[StockQuality] Loaded ${Object.keys(stockQualityCache!).length} entries from stock quality lookup`);
-  return stockQualityCache!;
+  stockRatingV3Cache = JSON.parse(content);
+  const { byIsin, bySymbol } = stockRatingV3Cache!;
+  console.log(`[StockRatingV3] Loaded ${Object.keys(byIsin).length} ISIN + ${Object.keys(bySymbol).length} symbol entries`);
+  return stockRatingV3Cache!;
 }
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
@@ -1418,36 +1410,31 @@ ${text}`;
   });
 
   // ── Stock Quality / Rating Lookup ────────────────────────────────────────
-  app.post("/api/stock-quality-lookup", async (req, res) => {
+  app.post("/api/stock-rating-v3-lookup", async (req, res) => {
     try {
       const { stocks } = req.body;
       if (!Array.isArray(stocks)) return res.status(400).json({ error: "stocks array required" });
 
-      const db = await loadStockQualityDb();
-      const keys = Object.keys(db);
-      const result: Record<string, StockQualityEntry> = {};
+      const db = await loadStockRatingV3Db();
+      const result: Record<string, StockRatingV3Entry> = {};
 
       for (const s of stocks) {
-        const rawName = (s.name || "").trim();
-        if (!rawName) continue;
-        const key = normalizeStockName(rawName);
+        const isin = (s.isin || "").trim();
+        const nseSymbol = (s.nseSymbol || "").trim().toUpperCase();
+        const key = isin || nseSymbol;
+        if (!key) continue;
 
-        let entry: StockQualityEntry | undefined = db[key];
+        let entry: StockRatingV3Entry | undefined;
+        if (isin) entry = db.byIsin[isin];
+        if (!entry && nseSymbol) entry = db.bySymbol[nseSymbol];
 
-        // Fallback: prefix match (handles suffix differences like "Ltd" vs "Limited" edge cases)
-        if (!entry && key.length >= 5) {
-          const prefix = key.substring(0, Math.min(key.length, 15));
-          const match = keys.find((k) => k.startsWith(prefix) || prefix.startsWith(k));
-          if (match) entry = db[match];
-        }
-
-        if (entry) result[rawName] = entry;
+        if (entry) result[key] = entry;
       }
 
       res.json(result);
     } catch (err: any) {
-      console.error("Stock quality lookup error:", err);
-      res.status(500).json({ error: "Failed to lookup stock quality" });
+      console.error("Stock rating v3 lookup error:", err);
+      res.status(500).json({ error: "Failed to lookup stock rating" });
     }
   });
 
