@@ -2622,190 +2622,6 @@ export default function ConciseReport() {
             })()}
           </div>
 
-          {/* Stock Allocation Check */}
-          {(analysis.stock_snapshot || []).length > 0 && (() => {
-            const stocks: any[] = analysis.stock_snapshot || [];
-            const idealRaw = STOCK_IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""];
-            const capCategories = ["Large Cap", "Mid Cap", "Small Cap"];
-
-            const actualMap: Record<string, number> = { "Large Cap": 0, "Mid Cap": 0, "Small Cap": 0 };
-            let totalMatchedValue = 0;
-            let unmatchedCount = 0;
-
-            for (const s of stocks) {
-              const val = s.current_value || 0;
-              const isin = (s.isin || "").trim().toUpperCase();
-              const name = (s.name || "").trim().toLowerCase();
-              const cat = stockCapCategories[isin] || stockCapCategories[name];
-              if (cat && capCategories.includes(cat)) {
-                actualMap[cat] = (actualMap[cat] || 0) + val;
-                totalMatchedValue += val;
-              } else {
-                unmatchedCount++;
-              }
-            }
-
-            const actualPct: Record<string, number> = {};
-            capCategories.forEach(c => {
-              actualPct[c] = totalMatchedValue > 0 ? (actualMap[c] / totalMatchedValue) * 100 : 0;
-            });
-
-            const idealMap: Record<string, number> = idealRaw
-              ? { "Large Cap": idealRaw.largeCap, "Mid Cap": idealRaw.midCap, "Small Cap": idealRaw.smallCap }
-              : {};
-
-            let healthScore = 100;
-            if (idealRaw) {
-              capCategories.forEach(c => { healthScore -= Math.abs((actualPct[c] || 0) - (idealMap[c] || 0)) * 0.8; });
-            }
-            healthScore = Math.max(0, Math.min(100, Math.round(healthScore)));
-            const healthLabel = healthScore >= 80 ? "Well balanced" : healthScore >= 60 ? "Needs rebalancing" : "Needs attention";
-            const healthColor = healthScore >= 80 ? "#10b981" : healthScore >= 60 ? "#f59e0b" : "#ef4444";
-
-            const getStatus = (actual: number, ideal: number) => {
-              const diff = actual - ideal;
-              if (Math.abs(diff) <= 5) return { label: "Balanced", color: "#10b981", bg: "rgba(16,185,129,0.1)" };
-              if (diff > 5) return { label: "Overweight", color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
-              return { label: "Underweight", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" };
-            };
-
-            return (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-violet-700 px-4 sm:px-6 py-5 flex items-start justify-between gap-3 flex-wrap text-white">
-                  <div>
-                    <h3 className="text-[20px] text-left text-white font-bold">Stock allocation check</h3>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <span className="text-blue-200 text-xs font-semibold">{report.investorType || "—"}</span>
-                      <span className="text-blue-200 text-xs font-semibold">Age {report.ageGroup || "—"}</span>
-                      <span className="text-blue-200 text-xs font-semibold">{stocks.length} stocks</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    {stockCapLoading ? (
-                      <div className="flex items-center gap-2 text-blue-200 text-sm"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
-                    ) : idealRaw ? (
-                      <>
-                        <div className="text-[11px] text-blue-200 font-medium mb-0.5 uppercase tracking-wider">Overall health</div>
-                        <div className="text-3xl font-bold text-white">{healthScore}<span className="text-base font-semibold text-blue-200">/100</span></div>
-                        <span className="text-xs font-semibold text-white">{healthLabel}</span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-blue-200">No ideal allocation for profile</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Summary cards */}
-                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
-                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Large Cap</div>
-                    <div className="text-xl sm:text-2xl font-bold text-blue-600">{(actualPct["Large Cap"] || 0).toFixed(1)}%</div>
-                    {idealRaw && (
-                      <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: Math.abs((actualPct["Large Cap"] || 0) - idealRaw.largeCap) <= 5 ? "#10b981" : (actualPct["Large Cap"] || 0) > idealRaw.largeCap ? "#ef4444" : "#f59e0b" }}>
-                        {((actualPct["Large Cap"] || 0) > idealRaw.largeCap ? "+" : "")}{((actualPct["Large Cap"] || 0) - idealRaw.largeCap).toFixed(1)}% vs ideal
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Matched</div>
-                    <div className="text-xl sm:text-2xl font-bold text-slate-800">{stocks.length - unmatchedCount}</div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">of {stocks.length} stocks</div>
-                  </div>
-                  <div className="px-3 sm:px-6 py-4">
-                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Unmatched</div>
-                    {unmatchedCount === 0 ? (
-                      <div className="text-xl sm:text-2xl font-bold text-emerald-500">None</div>
-                    ) : (
-                      <>
-                        <div className="text-xl sm:text-2xl font-bold text-amber-500">{unmatchedCount}</div>
-                        <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">not in SEBI list</div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* No data state */}
-                {totalMatchedValue === 0 && !stockCapLoading && (
-                  <div className="px-6 py-8 text-center text-slate-400 text-sm">No stocks could be matched to the SEBI market cap database.</div>
-                )}
-
-                {/* Comparison table */}
-                {totalMatchedValue > 0 && (
-                  <div className="px-3 sm:px-6 pt-4 pb-5">
-                    <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(59,130,246,0.06)" }}>
-                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
-                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Action</div>
-                      </div>
-                      {capCategories.map((cat, idx) => {
-                        const current = actualPct[cat] || 0;
-                        const ideal = idealMap[cat] || 0;
-                        const diff = current - ideal;
-                        const { label: statusLabel, color: statusColor, bg: statusBg } = getStatus(current, ideal);
-                        const actionLabel = ideal === 0 ? "—" : Math.abs(diff) <= 5 ? "✓ Hold" : diff > 0 ? `↓ −${Math.abs(diff).toFixed(1)}%` : `↑ +${Math.abs(diff).toFixed(1)}%`;
-                        const capColor = STOCK_CAP_META[cat].color;
-                        return (
-                          <div key={cat} className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0" style={{ backgroundColor: capColor }}>
-                                {cat === "Large Cap" ? "LC" : cat === "Mid Cap" ? "MC" : "SC"}
-                              </span>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-slate-800 text-xs sm:text-sm truncate">{cat}</div>
-                                <div className="text-[9px] text-slate-400 truncate">{STOCK_CAP_META[cat].subtitle}</div>
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 px-1">
-                              <span className="text-xs sm:text-sm font-bold text-slate-600 tabular-nums">{ideal > 0 ? `${ideal.toFixed(0)}%` : "—"}</span>
-                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
-                                <div className="h-full rounded-full opacity-40" style={{ width: `${Math.min(ideal, 100)}%`, backgroundColor: capColor }} />
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 px-1">
-                              <span className="text-xs sm:text-sm font-bold tabular-nums" style={{ color: current > 0 ? capColor : "#94a3b8" }}>{current > 0 ? `${current.toFixed(1)}%` : "—"}</span>
-                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
-                                <div className="h-full rounded-full" style={{ width: `${Math.min(current, 100)}%`, backgroundColor: capColor }} />
-                              </div>
-                            </div>
-                            <div className="flex justify-center">
-                              {ideal > 0 ? (
-                                <span className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap" style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusColor}33` }}>
-                                  {statusLabel}
-                                </span>
-                              ) : <span className="text-[9px] text-slate-400">—</span>}
-                            </div>
-                            <div className="flex justify-center">
-                              <span className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md whitespace-nowrap tabular-nums" style={{ color: ideal > 0 ? statusColor : "#94a3b8", background: ideal > 0 ? `${statusColor}14` : "transparent", border: ideal > 0 ? `1px solid ${statusColor}33` : "none" }}>
-                                {actionLabel}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {/* Insight line */}
-                    {idealRaw && totalMatchedValue > 0 && (() => {
-                      const dominant = capCategories.reduce((a, b) => (actualPct[a] || 0) > (actualPct[b] || 0) ? a : b);
-                      const underweight = capCategories.filter(c => (actualPct[c] || 0) < (idealMap[c] || 0) - 5);
-                      return (
-                        <div className="mt-3 px-4 py-3 rounded-xl flex items-start gap-2.5" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
-                          <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
-                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Your direct stock holdings are tilted towards <span className="font-semibold text-slate-800">{dominant}</span> stocks.
-                            {underweight.length > 0 && <> Consider increasing exposure to <span className="font-semibold text-slate-800">{underweight.join(" and ")}</span> for a more balanced allocation.</>}
-                          </p>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
 
           {/* overlap anchor */}
           <div ref={overlapRef} />
@@ -3340,6 +3156,191 @@ export default function ConciseReport() {
                     </p>
                   </div>
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* Stock Allocation Check */}
+          {(analysis.stock_snapshot || []).length > 0 && (() => {
+            const stocks: any[] = analysis.stock_snapshot || [];
+            const idealRaw = STOCK_IDEAL_ALLOCATIONS[report.ageGroup || ""]?.[report.investorType || ""];
+            const capCategories = ["Large Cap", "Mid Cap", "Small Cap"];
+
+            const actualMap: Record<string, number> = { "Large Cap": 0, "Mid Cap": 0, "Small Cap": 0 };
+            let totalMatchedValue = 0;
+            let unmatchedCount = 0;
+
+            for (const s of stocks) {
+              const val = s.current_value || 0;
+              const isin = (s.isin || "").trim().toUpperCase();
+              const name = (s.name || "").trim().toLowerCase();
+              const cat = stockCapCategories[isin] || stockCapCategories[name];
+              if (cat && capCategories.includes(cat)) {
+                actualMap[cat] = (actualMap[cat] || 0) + val;
+                totalMatchedValue += val;
+              } else {
+                unmatchedCount++;
+              }
+            }
+
+            const actualPct: Record<string, number> = {};
+            capCategories.forEach(c => {
+              actualPct[c] = totalMatchedValue > 0 ? (actualMap[c] / totalMatchedValue) * 100 : 0;
+            });
+
+            const idealMap: Record<string, number> = idealRaw
+              ? { "Large Cap": idealRaw.largeCap, "Mid Cap": idealRaw.midCap, "Small Cap": idealRaw.smallCap }
+              : {};
+
+            let healthScore = 100;
+            if (idealRaw) {
+              capCategories.forEach(c => { healthScore -= Math.abs((actualPct[c] || 0) - (idealMap[c] || 0)) * 0.8; });
+            }
+            healthScore = Math.max(0, Math.min(100, Math.round(healthScore)));
+            const healthLabel = healthScore >= 80 ? "Well balanced" : healthScore >= 60 ? "Needs rebalancing" : "Needs attention";
+            const healthColor = healthScore >= 80 ? "#10b981" : healthScore >= 60 ? "#f59e0b" : "#ef4444";
+
+            const getStatus = (actual: number, ideal: number) => {
+              const diff = actual - ideal;
+              if (Math.abs(diff) <= 5) return { label: "Balanced", color: "#10b981", bg: "rgba(16,185,129,0.1)" };
+              if (diff > 5) return { label: "Overweight", color: "#ef4444", bg: "rgba(239,68,68,0.1)" };
+              return { label: "Underweight", color: "#f59e0b", bg: "rgba(245,158,11,0.1)" };
+            };
+
+            return (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-600 to-violet-700 px-4 sm:px-6 py-5 flex items-start justify-between gap-3 flex-wrap text-white">
+                  <div>
+                    <h3 className="text-[20px] text-left text-white font-bold">Stock allocation check</h3>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <span className="text-blue-200 text-xs font-semibold">{report.investorType || "—"}</span>
+                      <span className="text-blue-200 text-xs font-semibold">Age {report.ageGroup || "—"}</span>
+                      <span className="text-blue-200 text-xs font-semibold">{stocks.length} stocks</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {stockCapLoading ? (
+                      <div className="flex items-center gap-2 text-blue-200 text-sm"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
+                    ) : idealRaw ? (
+                      <>
+                        <div className="text-[11px] text-blue-200 font-medium mb-0.5 uppercase tracking-wider">Overall health</div>
+                        <div className="text-3xl font-bold text-white">{healthScore}<span className="text-base font-semibold text-blue-200">/100</span></div>
+                        <span className="text-xs font-semibold text-white">{healthLabel}</span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-blue-200">No ideal allocation for profile</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Summary cards */}
+                <div className="grid grid-cols-3 gap-0 border-b border-slate-100">
+                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Large Cap</div>
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">{(actualPct["Large Cap"] || 0).toFixed(1)}%</div>
+                    {idealRaw && (
+                      <div className="text-[10px] sm:text-xs mt-0.5" style={{ color: Math.abs((actualPct["Large Cap"] || 0) - idealRaw.largeCap) <= 5 ? "#10b981" : (actualPct["Large Cap"] || 0) > idealRaw.largeCap ? "#ef4444" : "#f59e0b" }}>
+                        {((actualPct["Large Cap"] || 0) > idealRaw.largeCap ? "+" : "")}{((actualPct["Large Cap"] || 0) - idealRaw.largeCap).toFixed(1)}% vs ideal
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-3 sm:px-6 py-4 border-r border-slate-100">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Matched</div>
+                    <div className="text-xl sm:text-2xl font-bold text-slate-800">{stocks.length - unmatchedCount}</div>
+                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">of {stocks.length} stocks</div>
+                  </div>
+                  <div className="px-3 sm:px-6 py-4">
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Unmatched</div>
+                    {unmatchedCount === 0 ? (
+                      <div className="text-xl sm:text-2xl font-bold text-emerald-500">None</div>
+                    ) : (
+                      <>
+                        <div className="text-xl sm:text-2xl font-bold text-amber-500">{unmatchedCount}</div>
+                        <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">not in SEBI list</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* No data state */}
+                {totalMatchedValue === 0 && !stockCapLoading && (
+                  <div className="px-6 py-8 text-center text-slate-400 text-sm">No stocks could be matched to the SEBI market cap database.</div>
+                )}
+
+                {/* Comparison table */}
+                {totalMatchedValue > 0 && (
+                  <div className="px-3 sm:px-6 pt-4 pb-5">
+                    <div className="overflow-hidden rounded-xl border border-slate-200" style={{ boxShadow: "0 2px 12px 0 rgba(59,130,246,0.06)" }}>
+                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] bg-gradient-to-r from-slate-800 to-slate-700 px-3 sm:px-4 py-2.5">
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300">Category</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Ideal</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Current</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Status</div>
+                        <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-300 text-center">Action</div>
+                      </div>
+                      {capCategories.map((cat, idx) => {
+                        const current = actualPct[cat] || 0;
+                        const ideal = idealMap[cat] || 0;
+                        const diff = current - ideal;
+                        const { label: statusLabel, color: statusColor, bg: statusBg } = getStatus(current, ideal);
+                        const actionLabel = ideal === 0 ? "—" : Math.abs(diff) <= 5 ? "✓ Hold" : diff > 0 ? `↓ −${Math.abs(diff).toFixed(1)}%` : `↑ +${Math.abs(diff).toFixed(1)}%`;
+                        const capColor = STOCK_CAP_META[cat].color;
+                        return (
+                          <div key={cat} className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] px-3 sm:px-4 py-2.5 items-center transition-colors hover:bg-slate-50 ${idx > 0 ? "border-t border-slate-100" : ""}`}>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0" style={{ backgroundColor: capColor }}>
+                                {cat === "Large Cap" ? "LC" : cat === "Mid Cap" ? "MC" : "SC"}
+                              </span>
+                              <div className="min-w-0">
+                                <div className="font-semibold text-slate-800 text-xs sm:text-sm truncate">{cat}</div>
+                                <div className="text-[9px] text-slate-400 truncate">{STOCK_CAP_META[cat].subtitle}</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-center gap-1 px-1">
+                              <span className="text-xs sm:text-sm font-bold text-slate-600 tabular-nums">{ideal > 0 ? `${ideal.toFixed(0)}%` : "—"}</span>
+                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full opacity-40" style={{ width: `${Math.min(ideal, 100)}%`, backgroundColor: capColor }} />
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-center gap-1 px-1">
+                              <span className="text-xs sm:text-sm font-bold tabular-nums" style={{ color: current > 0 ? capColor : "#94a3b8" }}>{current > 0 ? `${current.toFixed(1)}%` : "—"}</span>
+                              <div className="w-full h-1 rounded-full bg-slate-100 overflow-hidden">
+                                <div className="h-full rounded-full" style={{ width: `${Math.min(current, 100)}%`, backgroundColor: capColor }} />
+                              </div>
+                            </div>
+                            <div className="flex justify-center">
+                              {ideal > 0 ? (
+                                <span className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap" style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusColor}33` }}>
+                                  {statusLabel}
+                                </span>
+                              ) : <span className="text-[9px] text-slate-400">—</span>}
+                            </div>
+                            <div className="flex justify-center">
+                              <span className="text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md whitespace-nowrap tabular-nums" style={{ color: ideal > 0 ? statusColor : "#94a3b8", background: ideal > 0 ? `${statusColor}14` : "transparent", border: ideal > 0 ? `1px solid ${statusColor}33` : "none" }}>
+                                {actionLabel}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Insight line */}
+                    {idealRaw && totalMatchedValue > 0 && (() => {
+                      const dominant = capCategories.reduce((a, b) => (actualPct[a] || 0) > (actualPct[b] || 0) ? a : b);
+                      const underweight = capCategories.filter(c => (actualPct[c] || 0) < (idealMap[c] || 0) - 5);
+                      return (
+                        <div className="mt-3 px-4 py-3 rounded-xl flex items-start gap-2.5" style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.18)" }}>
+                          <span className="text-indigo-400 mt-0.5 flex-shrink-0 text-base">💡</span>
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Your direct stock holdings are tilted towards <span className="font-semibold text-slate-800">{dominant}</span> stocks.
+                            {underweight.length > 0 && <> Consider increasing exposure to <span className="font-semibold text-slate-800">{underweight.join(" and ")}</span> for a more balanced allocation.</>}
+                          </p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
             );
           })()}
