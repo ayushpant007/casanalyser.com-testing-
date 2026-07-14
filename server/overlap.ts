@@ -88,8 +88,19 @@ function normalizeFundName(name: string): string {
     .trim();
 }
 
+// Generic tokens that appear across dozens of unrelated funds from the same
+// AMC (e.g. every HDFC fund contains "hdfc" and "fund"/"etf"). They carry no
+// discriminating power and must not be allowed to drive a fuzzy match on
+// their own — otherwise e.g. "HDFC Gold ETF Fund of Fund" (words: hdfc, gold,
+// etf, fund) can score 50%+ against "HDFC NIFTY 50 ETF" (words: hdfc, nifty,
+// 50, etf) purely on the shared "hdfc"/"etf" tokens, despite the two funds
+// having completely unrelated underlying holdings (gold vs. equity).
+const GENERIC_FUND_WORDS = new Set(["fund", "etf", "scheme", "index", "mf"]);
+
 function getFundWords(name: string): Set<string> {
-  const raw = normalizeFundName(name).split(/\s+/).filter(w => w.length > 1);
+  const raw = normalizeFundName(name)
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !GENERIC_FUND_WORDS.has(w));
   const expanded: string[] = [];
   for (const w of raw) {
     expanded.push(w);
@@ -196,7 +207,8 @@ function matchFund(
   schemeName: string,
   schemeISIN: string,
   nameMap: Map<string, FundHoldings>,
-  isinMap: Map<string, string>
+  isinMap: Map<string, string>,
+  allowFuzzy: boolean = true
 ): FundHoldings | null {
 
   // ── Step 1: ISIN match ──────────────────────────────────────────────────
@@ -208,6 +220,14 @@ function matchFund(
       return fund;
     }
   }
+
+  // Funds whose category has no legitimate equity look-through data in our
+  // CSVs (e.g. pure Gold/Silver ETFs and FoFs) must never fall through to
+  // fuzzy name matching — doing so previously matched them to unrelated
+  // equity funds based on generic shared words like the AMC name, producing
+  // nonsensical overlap figures (e.g. a Gold ETF FoF "overlapping" 100% with
+  // a Nifty 50 ETF).
+  if (!allowFuzzy) return null;
 
   // ── Step 2: Fuzzy word-overlap on name ─────────────────────────────────
   const schemeWords = getFundWords(schemeName);
@@ -296,9 +316,18 @@ export function analyzeOverlap(mfSnapshot: any[]): OverlapAnalysisResult {
     const schemeName = (mf.scheme_name || "").trim();
     const schemeISIN = (mf.isin || "").trim();
     const fundCategory = (mf.fund_category || "").toLowerCase().trim();
+    const fundType = (mf.fund_type || "").toLowerCase().trim();
     if (!schemeName) continue;
 
-    const fund = matchFund(schemeName, schemeISIN, nameMap, isinMap);
+    // Gold/Silver/Commodity ETFs and FoFs hold precious metals, not equity —
+    // our CSVs only capture equity look-through holdings, so there is no
+    // legitimate fund to fuzzy-match these against. Restrict them to ISIN
+    // match only (which will correctly fail and mark them unmatched) rather
+    // than letting the fuzzy fallback attribute an unrelated equity fund's
+    // holdings to them.
+    const isCommodityFund = /gold|silver|commodit/.test(fundCategory) || /gold|silver|commodit/.test(fundType);
+
+    const fund = matchFund(schemeName, schemeISIN, nameMap, isinMap, !isCommodityFund);
     if (fund) {
       matched.push({ schemeName, fund, fundCategory });
     } else {
